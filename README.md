@@ -13,8 +13,16 @@ Two samples are included:
 * A UI-focused sample that is essentially a port of the C UI sample in the main orca repo
 
 ### Build and run
-Zig version `0.11.0` is required for the samples. Newer versions are not guaranteed to work. To build and run a given sample, `cd` into its' directory and simply run:
+First you must have built the orca runtime and installed it via the dev scripts from a local checkout of the main orca repo:
+```cmd
+git clone https://github.com/orca-app/orca.git
+cd orca
+orca dev build-runtime
+orca dev install
 ```
+
+Zig version `0.11.0` is required to build the samples. To build and run a given sample, `cd` into its' directory and simply run:
+```cmd
 zig build run
 ```
 
@@ -29,4 +37,3 @@ To build and bundle without running the app, use `zig build bundle`.
 
 ### Notes on build.zig
 The `build.zig` is set up such that `orca.zig` is the root file, and the sample's `main.zig` is a module. This is because `orca.zig` exports the C bindings based on handlers exposed in `main.zig`, which allows the zig handlers defined in user code to return errors if they wish. See the bottom of `orca.zig` for a full list of all supported handlers and their signatures. Unless you make modifications to `orca.zig` to find your handlers in a different way, or manually export functions to match the orca function handlers yourself, it's recommended to follow the same pattern.
-

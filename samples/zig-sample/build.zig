@@ -1,12 +1,31 @@
 const std = @import("std");
 const builtin = @import("builtin");
 
-fn addSourceString(str: []const u8, strings: *std.ArrayList(u8), sources: *std.ArrayList([]const u8)) !void {
-    var begin = strings.items.len;
-    try strings.appendSlice(str);
-    var realstring = strings.items[begin..];
-    try sources.append(realstring);
-}
+const OrcaDir = struct {
+    arena: std.mem.Allocator,
+    dir: []u8,
+
+    fn init(arena_allocator: *std.heap.ArenaAllocator) !OrcaDir {
+        var arena = arena_allocator.allocator();
+        var dir = try std.fs.getAppDataDir(arena, "orca");
+        return .{
+            .arena = arena,
+            .dir = dir,
+        };
+    }
+
+    fn subpath(self: *OrcaDir, path: []const u8) ![]const u8 {
+        return try std.fs.path.join(self.arena, &[_][]const u8{ self.dir, path });
+    }
+
+    fn argpath(self: *OrcaDir, prefix: []const u8, path: []const u8) ![]const u8 {
+        var joined_path = try self.subpath(path);
+        var buf = try self.arena.alloc(u8, prefix.len + joined_path.len);
+        @memcpy(buf[0..prefix.len], prefix);
+        @memcpy(buf[prefix.len..], joined_path);
+        return buf;
+    }
+};
 
 pub fn build(b: *std.Build) !void {
     const optimize = b.standardOptimizeOption(.{});
@@ -16,24 +35,27 @@ pub fn build(b: *std.Build) !void {
     };
     wasm_target.cpu_features_add.addFeature(@intFromEnum(std.Target.wasm.Feature.bulk_memory));
 
-    var orca_source_strings = try std.ArrayList(u8).initCapacity(b.allocator, 1024 * 4);
+    var arena_allocator = std.heap.ArenaAllocator.init(b.allocator);
+    defer arena_allocator.deinit();
+
+    var orca_dir = try OrcaDir.init(&arena_allocator);
+
     var orca_sources = try std.ArrayList([]const u8).initCapacity(b.allocator, 128);
-    defer orca_source_strings.deinit();
     defer orca_sources.deinit();
 
     {
-        try addSourceString("../../src/orca.c", &orca_source_strings, &orca_sources);
+        try orca_sources.append(try orca_dir.subpath("src/orca.c"));
 
-        var libc_shim_dir = try std.fs.cwd().openIterableDir("../../src/libc-shim/src", .{});
+        const libc_shim_path = try orca_dir.subpath("src/libc-shim/src");
+        var libc_shim_dir = try std.fs.cwd().openIterableDir(libc_shim_path, .{});
         var walker = try libc_shim_dir.walk(b.allocator);
         defer walker.deinit();
 
         while (try walker.next()) |entry| {
             const extension = std.fs.path.extension(entry.path);
             if (std.mem.eql(u8, extension, ".c")) {
-                var path_buffer: [std.fs.MAX_PATH_BYTES]u8 = undefined;
-                var abs_path = try libc_shim_dir.dir.realpath(entry.path, &path_buffer);
-                try addSourceString(abs_path, &orca_source_strings, &orca_sources);
+                var abs_path = try libc_shim_dir.dir.realpathAlloc(orca_dir.arena, entry.path);
+                try orca_sources.append(abs_path);
             }
         }
     }
@@ -46,9 +68,9 @@ pub fn build(b: *std.Build) !void {
         "-O2",
         "-mexec-model=reactor",
         "-fno-sanitize=undefined",
-        "-isystem ../../src/libc-shim/include",
-        "-I../../src",
-        "-I../../src/ext",
+        try orca_dir.argpath("-isystem ", "src/libc-shim/include"), // space at end of -isystem is intentional
+        try orca_dir.argpath("-I", "src"),
+        try orca_dir.argpath("-I", "src/ext"),
         "-Wl,--export-dynamic",
     };
 
@@ -58,9 +80,9 @@ pub fn build(b: *std.Build) !void {
         .optimize = optimize,
     });
     orca_lib.rdynamic = true;
-    orca_lib.addIncludePath(.{ .path = "../../src" });
-    orca_lib.addIncludePath(.{ .path = "../../src/libc-shim/include" });
-    orca_lib.addIncludePath(.{ .path = "../../src/ext" });
+    orca_lib.addIncludePath(.{ .path = try orca_dir.subpath("src") });
+    orca_lib.addIncludePath(.{ .path = try orca_dir.subpath("src/libc-shim/include") });
+    orca_lib.addIncludePath(.{ .path = try orca_dir.subpath("src/ext") });
     orca_lib.addCSourceFiles(orca_sources.items, &orca_compile_opts);
 
     // builds the wasm module out of the orca C sources and main.zig
@@ -74,9 +96,9 @@ pub fn build(b: *std.Build) !void {
         .optimize = optimize,
     });
     wasm_lib.rdynamic = true;
-    wasm_lib.addIncludePath(.{ .path = "../../src" });
-    wasm_lib.addIncludePath(.{ .path = "../../src/libc-shim/include" });
-    wasm_lib.addIncludePath(.{ .path = "../../ext" });
+    wasm_lib.addIncludePath(.{ .path = try orca_dir.subpath("src") });
+    wasm_lib.addIncludePath(.{ .path = try orca_dir.subpath("src/libc-shim/include") });
+    wasm_lib.addIncludePath(.{ .path = try orca_dir.subpath("ext") });
     wasm_lib.addModule("app", app_module);
     wasm_lib.linkLibrary(orca_lib);
 
@@ -84,7 +106,7 @@ pub fn build(b: *std.Build) !void {
     b.installArtifact(wasm_lib);
 
     // Runs the orca build command
-    const bundle_cmd_str = [_][]const u8{ "orca", "bundle", "--orca-dir", "../..", "--name", "Sample", "--icon", "icon.png", "--resource-dir", "data", "zig-out/lib/module.wasm" };
+    const bundle_cmd_str = [_][]const u8{ "orca", "bundle", "--orca-dir", orca_dir.dir, "--name", "Sample", "--icon", "icon.png", "--resource-dir", "data", "zig-out/lib/module.wasm" };
     var bundle_cmd = b.addSystemCommand(&bundle_cmd_str);
     bundle_cmd.step.dependOn(b.getInstallStep());
 
