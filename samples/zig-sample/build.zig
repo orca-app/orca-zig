@@ -7,7 +7,18 @@ const OrcaDir = struct {
 
     fn init(arena_allocator: *std.heap.ArenaAllocator) !OrcaDir {
         var arena = arena_allocator.allocator();
-        var dir = try std.fs.getAppDataDir(arena, "orca");
+        var dir = switch (builtin.os.tag) {
+            .windows => try std.fs.getappdatadir(arena, "orca"),
+            else => blk: {
+                if (std.os.getenv("HOME")) |home_z| {
+                    var home_path = std.mem.sliceTo(home_z, 0);
+                    var joined = try std.fs.path.join(arena, &[_][]const u8{ home_path, ".orca" });
+                    break :blk joined;
+                }
+                return error.InvalidHomePath;
+            },
+        };
+
         return .{
             .arena = arena,
             .dir = dir,
