@@ -1,3 +1,11 @@
+///////////////////////////////////////////////////////////////////////////////
+//
+//  Orca
+//  Copyright 2023 Martin Fouilleul and the Orca project contributors
+//  See LICENSE.txt for licensing information
+//
+///////////////////////////////////////////////////////////////////////////////
+
 const std = @import("std");
 const builtin = @import("builtin");
 
@@ -2076,6 +2084,12 @@ pub const Canvas = extern struct {
     pub const circleStroke = oc_circle_stroke;
     pub const arc = oc_arc;
 };
+
+//------------------------------------------------------------------------------------------
+// [GRAPHICS] OpenGLES
+//------------------------------------------------------------------------------------------
+
+const gles = @import("gles.zig");
 
 //------------------------------------------------------------------------------------------
 // [UI]: input state
