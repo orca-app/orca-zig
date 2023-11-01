@@ -166,10 +166,12 @@ class ZigOutputGenerator(OutputGenerator):
 			param_name = last_token.tag
 
 			paramdecl += param_name + ": "
+			prevTokenType = -1
 			for i, token in enumerate(tokens):
-				if token.tok == TokenType.STRING and i > 0:
+				if token.tok == TokenType.STRING and i > 0 and prevTokenType != TokenType.POINTER:
 					paramdecl += ' '
 				paramdecl += token.tag
+				prevTokenType = token.tok
 
 		paramdecl += ') ';
 		return '\textern fn ' + func_name + paramdecl + zig_return_type + ";\n";
@@ -213,7 +215,7 @@ class ZigOutputGenerator(OutputGenerator):
 	def endFeature(self):
 		if (self.emit):
 			# open gles version struct
-			write('const', self.featureNameZig, '= struct {', file=self.outFile)
+			write('pub const', self.featureNameZig, '= struct {', file=self.outFile)
 			for f in self.features:
 				write('\tusingnamespace ' + f + ';', file=self.outFile)
 			if len(self.features) > 0:

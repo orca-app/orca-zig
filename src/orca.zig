@@ -2089,7 +2089,7 @@ pub const Canvas = extern struct {
 // [GRAPHICS] OpenGLES
 //------------------------------------------------------------------------------------------
 
-const gles = @import("gles.zig");
+pub const gles = @import("gles.zig");
 
 //------------------------------------------------------------------------------------------
 // [UI]: input state
