@@ -7,6 +7,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 const std = @import("std");
+const debug = @import("debug.zig");
 
 pub const Api = enum {
     V2_0,
@@ -20,6 +21,20 @@ pub const Api = enum {
 
 pub fn getApi(comptime api: Api) type {
     return struct {
+        const Helpers = struct {
+            fn zigStringsToCStrings(strings: []const [:0]const u8, allocator: std.mem.Allocator) []const [*:0]const GLchar {
+                var c_strings: [][*:0]const GLchar = allocator.alloc([*:0]const GLchar, strings.len) catch {
+                    debug.abort("Out of memory allocating memory for converting {} zig string pointers to C string pointers.", .{strings.len}, @src());
+                };
+
+                for (strings, c_strings) |source, *dest| {
+                    dest.* = @ptrCast(source.ptr);
+                }
+
+                return c_strings;
+            }
+        };
+
         const Externs = struct {
             // v2.0
             extern fn glActiveTexture(texture: GLenum) void;
@@ -120,7 +135,7 @@ pub fn getApi(comptime api: Api) type {
             extern fn glSampleCoverage(value: GLfloat, invert: GLboolean) void;
             extern fn glScissor(x: GLint, y: GLint, width: GLsizei, height: GLsizei) void;
             extern fn glShaderBinary(count: GLsizei, shaders: *const GLuint, binaryFormat: GLenum, binary: *const void, length: GLsizei) void;
-            extern fn glShaderSource(shader: GLuint, count: GLsizei, string: [*]const [*]const GLchar, length: ?[*]const GLint) void;
+            extern fn glShaderSource(shader: GLuint, count: GLsizei, string: [*]const [*:0]const GLchar, length: ?[*]const GLint) void;
             extern fn glStencilFunc(func: GLenum, ref: GLint, mask: GLuint) void;
             extern fn glStencilFuncSeparate(face: GLenum, func: GLenum, ref: GLint, mask: GLuint) void;
             extern fn glStencilMask(mask: GLuint) void;
@@ -167,105 +182,105 @@ pub fn getApi(comptime api: Api) type {
 
             // v3.0
             extern fn glReadBuffer(src: GLenum) void;
-            extern fn glDrawRangeElements(mode: GLenum, start: GLuint, end: GLuint, count: GLsizei, type: GLenum, indices: *const void) void;
-            extern fn glTexImage3D(target: GLenum, level: GLint, internalformat: GLint, width: GLsizei, height: GLsizei, depth: GLsizei, border: GLint, format: GLenum, type: GLenum, pixels: *const void) void;
-            extern fn glTexSubImage3D(target: GLenum, level: GLint, xoffset: GLint, yoffset: GLint, zoffset: GLint, width: GLsizei, height: GLsizei, depth: GLsizei, format: GLenum, type: GLenum, pixels: *const void) void;
+            extern fn glDrawRangeElements(mode: GLenum, start: GLuint, end: GLuint, count: GLsizei, type: GLenum, indices: *const anyopaque) void;
+            extern fn glTexImage3D(target: GLenum, level: GLint, internalformat: GLint, width: GLsizei, height: GLsizei, depth: GLsizei, border: GLint, format: GLenum, type: GLenum, pixels: *const anyopaque) void;
+            extern fn glTexSubImage3D(target: GLenum, level: GLint, xoffset: GLint, yoffset: GLint, zoffset: GLint, width: GLsizei, height: GLsizei, depth: GLsizei, format: GLenum, type: GLenum, pixels: *const anyopaque) void;
             extern fn glCopyTexSubImage3D(target: GLenum, level: GLint, xoffset: GLint, yoffset: GLint, zoffset: GLint, x: GLint, y: GLint, width: GLsizei, height: GLsizei) void;
-            extern fn glCompressedTexImage3D(target: GLenum, level: GLint, internalformat: GLenum, width: GLsizei, height: GLsizei, depth: GLsizei, border: GLint, imageSize: GLsizei, data: *const void) void;
-            extern fn glCompressedTexSubImage3D(target: GLenum, level: GLint, xoffset: GLint, yoffset: GLint, zoffset: GLint, width: GLsizei, height: GLsizei, depth: GLsizei, format: GLenum, imageSize: GLsizei, data: *const void) void;
-            extern fn glGenQueries(n: GLsizei, ids: *GLuint) void;
-            extern fn glDeleteQueries(n: GLsizei, ids: *const GLuint) void;
+            extern fn glCompressedTexImage3D(target: GLenum, level: GLint, internalformat: GLenum, width: GLsizei, height: GLsizei, depth: GLsizei, border: GLint, imageSize: GLsizei, data: *const anyopaque) void;
+            extern fn glCompressedTexSubImage3D(target: GLenum, level: GLint, xoffset: GLint, yoffset: GLint, zoffset: GLint, width: GLsizei, height: GLsizei, depth: GLsizei, format: GLenum, imageSize: GLsizei, data: *const anyopaque) void;
+            extern fn glGenQueries(n: GLsizei, ids: [*]GLuint) void;
+            extern fn glDeleteQueries(n: GLsizei, ids: [*]const GLuint) void;
             extern fn glIsQuery(id: GLuint) GLboolean;
             extern fn glBeginQuery(target: GLenum, id: GLuint) void;
             extern fn glEndQuery(target: GLenum) void;
-            extern fn glGetQueryiv(target: GLenum, pname: GLenum, params: *GLint) void;
-            extern fn glGetQueryObjectuiv(id: GLuint, pname: GLenum, params: *GLuint) void;
-            extern fn glDrawBuffers(n: GLsizei, bufs: *const GLenum) void;
-            extern fn glUniformMatrix2x3fv(location: GLint, count: GLsizei, transpose: GLboolean, value: *const GLfloat) void;
-            extern fn glUniformMatrix3x2fv(location: GLint, count: GLsizei, transpose: GLboolean, value: *const GLfloat) void;
-            extern fn glUniformMatrix2x4fv(location: GLint, count: GLsizei, transpose: GLboolean, value: *const GLfloat) void;
-            extern fn glUniformMatrix4x2fv(location: GLint, count: GLsizei, transpose: GLboolean, value: *const GLfloat) void;
-            extern fn glUniformMatrix3x4fv(location: GLint, count: GLsizei, transpose: GLboolean, value: *const GLfloat) void;
-            extern fn glUniformMatrix4x3fv(location: GLint, count: GLsizei, transpose: GLboolean, value: *const GLfloat) void;
+            extern fn glGetQueryiv(target: GLenum, pname: GLenum, params: [*]GLint) void;
+            extern fn glGetQueryObjectuiv(id: GLuint, pname: GLenum, params: [*]GLuint) void;
+            extern fn glDrawBuffers(n: GLsizei, bufs: [*]const GLenum) void;
+            extern fn glUniformMatrix2x3fv(location: GLint, count: GLsizei, transpose: GLboolean, value: [*]const GLfloat) void;
+            extern fn glUniformMatrix3x2fv(location: GLint, count: GLsizei, transpose: GLboolean, value: [*]const GLfloat) void;
+            extern fn glUniformMatrix2x4fv(location: GLint, count: GLsizei, transpose: GLboolean, value: [*]const GLfloat) void;
+            extern fn glUniformMatrix4x2fv(location: GLint, count: GLsizei, transpose: GLboolean, value: [*]const GLfloat) void;
+            extern fn glUniformMatrix3x4fv(location: GLint, count: GLsizei, transpose: GLboolean, value: [*]const GLfloat) void;
+            extern fn glUniformMatrix4x3fv(location: GLint, count: GLsizei, transpose: GLboolean, value: [*]const GLfloat) void;
             extern fn glBlitFramebuffer(srcX0: GLint, srcY0: GLint, srcX1: GLint, srcY1: GLint, dstX0: GLint, dstY0: GLint, dstX1: GLint, dstY1: GLint, mask: GLbitfield, filter: GLenum) void;
             extern fn glRenderbufferStorageMultisample(target: GLenum, samples: GLsizei, internalformat: GLenum, width: GLsizei, height: GLsizei) void;
             extern fn glFramebufferTextureLayer(target: GLenum, attachment: GLenum, texture: GLuint, level: GLint, layer: GLint) void;
             extern fn glBindVertexArray(array: GLuint) void;
-            extern fn glDeleteVertexArrays(n: GLsizei, arrays: *const GLuint) void;
-            extern fn glGenVertexArrays(n: GLsizei, arrays: *GLuint) void;
+            extern fn glDeleteVertexArrays(n: GLsizei, arrays: [*]const GLuint) void;
+            extern fn glGenVertexArrays(n: GLsizei, arrays: [*]GLuint) void;
             extern fn glIsVertexArray(array: GLuint) GLboolean;
-            extern fn glGetIntegeri_v(target: GLenum, index: GLuint, data: *GLint) void;
+            extern fn glGetIntegeri_v(target: GLenum, index: GLuint, data: [*]GLint) void;
             extern fn glBeginTransformFeedback(primitiveMode: GLenum) void;
             extern fn glEndTransformFeedback() void;
             extern fn glBindBufferRange(target: GLenum, index: GLuint, buffer: GLuint, offset: GLintptr, size: GLsizeiptr) void;
             extern fn glBindBufferBase(target: GLenum, index: GLuint, buffer: GLuint) void;
-            extern fn glTransformFeedbackVaryings(program: GLuint, count: GLsizei, varyings: *const *const GLchar, bufferMode: GLenum) void;
-            extern fn glGetTransformFeedbackVarying(program: GLuint, index: GLuint, bufSize: GLsizei, length: *GLsizei, size: *GLsizei, type: *GLenum, name: *GLchar) void;
-            extern fn glVertexAttribIPointer(index: GLuint, size: GLint, type: GLenum, stride: GLsizei, pointer: *const void) void;
-            extern fn glGetVertexAttribIiv(index: GLuint, pname: GLenum, params: *GLint) void;
-            extern fn glGetVertexAttribIuiv(index: GLuint, pname: GLenum, params: *GLuint) void;
+            extern fn glTransformFeedbackVaryings(program: GLuint, count: GLsizei, varyings: [*]const [*:0]const GLchar, bufferMode: GLenum) void;
+            extern fn glGetTransformFeedbackVarying(program: GLuint, index: GLuint, bufSize: GLsizei, length: *GLsizei, size: *GLsizei, type: *GLenum, name: [*]GLchar) void;
+            extern fn glVertexAttribIPointer(index: GLuint, size: GLint, type: GLenum, stride: GLsizei, pointer: ?*const anyopaque) void;
+            extern fn glGetVertexAttribIiv(index: GLuint, pname: GLenum, params: [*]GLint) void;
+            extern fn glGetVertexAttribIuiv(index: GLuint, pname: GLenum, params: [*]GLuint) void;
             extern fn glVertexAttribI4i(index: GLuint, x: GLint, y: GLint, z: GLint, w: GLint) void;
             extern fn glVertexAttribI4ui(index: GLuint, x: GLuint, y: GLuint, z: GLuint, w: GLuint) void;
-            extern fn glVertexAttribI4iv(index: GLuint, v: *const GLint) void;
-            extern fn glVertexAttribI4uiv(index: GLuint, v: *const GLuint) void;
-            extern fn glGetUniformuiv(program: GLuint, location: GLint, params: *GLuint) void;
-            extern fn glGetFragDataLocation(program: GLuint, name: *const GLchar) GLint;
+            extern fn glVertexAttribI4iv(index: GLuint, v: [*]const GLint) void;
+            extern fn glVertexAttribI4uiv(index: GLuint, v: [*]const GLuint) void;
+            extern fn glGetUniformuiv(program: GLuint, location: GLint, params: [*]GLuint) void;
+            extern fn glGetFragDataLocation(program: GLuint, name: [*]const GLchar) GLint;
             extern fn glUniform1ui(location: GLint, v0: GLuint) void;
             extern fn glUniform2ui(location: GLint, v0: GLuint, v1: GLuint) void;
             extern fn glUniform3ui(location: GLint, v0: GLuint, v1: GLuint, v2: GLuint) void;
             extern fn glUniform4ui(location: GLint, v0: GLuint, v1: GLuint, v2: GLuint, v3: GLuint) void;
-            extern fn glUniform1uiv(location: GLint, count: GLsizei, value: *const GLuint) void;
-            extern fn glUniform2uiv(location: GLint, count: GLsizei, value: *const GLuint) void;
-            extern fn glUniform3uiv(location: GLint, count: GLsizei, value: *const GLuint) void;
-            extern fn glUniform4uiv(location: GLint, count: GLsizei, value: *const GLuint) void;
-            extern fn glClearBufferiv(buffer: GLenum, drawbuffer: GLint, value: *const GLint) void;
-            extern fn glClearBufferuiv(buffer: GLenum, drawbuffer: GLint, value: *const GLuint) void;
-            extern fn glClearBufferfv(buffer: GLenum, drawbuffer: GLint, value: *const GLfloat) void;
+            extern fn glUniform1uiv(location: GLint, count: GLsizei, value: [*]const GLuint) void;
+            extern fn glUniform2uiv(location: GLint, count: GLsizei, value: [*]const GLuint) void;
+            extern fn glUniform3uiv(location: GLint, count: GLsizei, value: [*]const GLuint) void;
+            extern fn glUniform4uiv(location: GLint, count: GLsizei, value: [*]const GLuint) void;
+            extern fn glClearBufferiv(buffer: GLenum, drawbuffer: GLint, value: [*]const GLint) void;
+            extern fn glClearBufferuiv(buffer: GLenum, drawbuffer: GLint, value: [*]const GLuint) void;
+            extern fn glClearBufferfv(buffer: GLenum, drawbuffer: GLint, value: [*]const GLfloat) void;
             extern fn glClearBufferfi(buffer: GLenum, drawbuffer: GLint, depth: GLfloat, stencil: GLint) void;
             extern fn glGetStringi(name: GLenum, index: GLuint) [*:0]const GLubyte;
             extern fn glCopyBufferSubData(readTarget: GLenum, writeTarget: GLenum, readOffset: GLintptr, writeOffset: GLintptr, size: GLsizeiptr) void;
-            extern fn glGetUniformIndices(program: GLuint, uniformCount: GLsizei, uniformNames: *const *const GLchar, uniformIndices: *GLuint) void;
-            extern fn glGetActiveUniformsiv(program: GLuint, uniformCount: GLsizei, uniformIndices: *const GLuint, pname: GLenum, params: *GLint) void;
-            extern fn glGetUniformBlockIndex(program: GLuint, uniformBlockName: *const GLchar) GLuint;
-            extern fn glGetActiveUniformBlockiv(program: GLuint, uniformBlockIndex: GLuint, pname: GLenum, params: *GLint) void;
-            extern fn glGetActiveUniformBlockName(program: GLuint, uniformBlockIndex: GLuint, bufSize: GLsizei, length: *GLsizei, uniformBlockName: *GLchar) void;
+            extern fn glGetUniformIndices(program: GLuint, uniformCount: GLsizei, uniformNames: [*]const [*:0]const GLchar, uniformIndices: [*]GLuint) void;
+            extern fn glGetActiveUniformsiv(program: GLuint, uniformCount: GLsizei, uniformIndices: [*]const GLuint, pname: GLenum, params: [*]GLint) void;
+            extern fn glGetUniformBlockIndex(program: GLuint, uniformBlockName: [*]const GLchar) GLuint;
+            extern fn glGetActiveUniformBlockiv(program: GLuint, uniformBlockIndex: GLuint, pname: GLenum, params: [*]GLint) void;
+            extern fn glGetActiveUniformBlockName(program: GLuint, uniformBlockIndex: GLuint, bufSize: GLsizei, length: *GLsizei, uniformBlockName: [*]GLchar) void;
             extern fn glUniformBlockBinding(program: GLuint, uniformBlockIndex: GLuint, uniformBlockBinding: GLuint) void;
             extern fn glDrawArraysInstanced(mode: GLenum, first: GLint, count: GLsizei, instancecount: GLsizei) void;
-            extern fn glDrawElementsInstanced(mode: GLenum, count: GLsizei, type: GLenum, indices: *const void, instancecount: GLsizei) void;
+            extern fn glDrawElementsInstanced(mode: GLenum, count: GLsizei, type: GLenum, indices: *const anyopaque, instancecount: GLsizei) void;
             extern fn glFenceSync(condition: GLenum, flags: GLbitfield) GLsync;
             extern fn glIsSync(sync: GLsync) GLboolean;
             extern fn glDeleteSync(sync: GLsync) void;
             extern fn glClientWaitSync(sync: GLsync, flags: GLbitfield, timeout: GLuint64) GLenum;
             extern fn glWaitSync(sync: GLsync, flags: GLbitfield, timeout: GLuint64) void;
-            extern fn glGetInteger64v(pname: GLenum, data: *GLint64) void;
-            extern fn glGetSynciv(sync: GLsync, pname: GLenum, count: GLsizei, length: *GLsizei, values: *GLint) void;
-            extern fn glGetInteger64i_v(target: GLenum, index: GLuint, data: *GLint64) void;
-            extern fn glGetBufferParameteri64v(target: GLenum, pname: GLenum, params: *GLint64) void;
-            extern fn glGenSamplers(count: GLsizei, samplers: *GLuint) void;
-            extern fn glDeleteSamplers(count: GLsizei, samplers: *const GLuint) void;
+            extern fn glGetInteger64v(pname: GLenum, data: [*]GLint64) void;
+            extern fn glGetSynciv(sync: GLsync, pname: GLenum, count: GLsizei, length: *GLsizei, values: [*]GLint) void;
+            extern fn glGetInteger64i_v(target: GLenum, index: GLuint, data: [*]GLint64) void;
+            extern fn glGetBufferParameteri64v(target: GLenum, pname: GLenum, params: [*]GLint64) void;
+            extern fn glGenSamplers(count: GLsizei, samplers: [*]GLuint) void;
+            extern fn glDeleteSamplers(count: GLsizei, samplers: [*]const GLuint) void;
             extern fn glIsSampler(sampler: GLuint) GLboolean;
             extern fn glBindSampler(unit: GLuint, sampler: GLuint) void;
             extern fn glSamplerParameteri(sampler: GLuint, pname: GLenum, param: GLint) void;
-            extern fn glSamplerParameteriv(sampler: GLuint, pname: GLenum, param: *const GLint) void;
+            extern fn glSamplerParameteriv(sampler: GLuint, pname: GLenum, params: [*]const GLint) void;
             extern fn glSamplerParameterf(sampler: GLuint, pname: GLenum, param: GLfloat) void;
-            extern fn glSamplerParameterfv(sampler: GLuint, pname: GLenum, param: *const GLfloat) void;
-            extern fn glGetSamplerParameteriv(sampler: GLuint, pname: GLenum, params: *GLint) void;
-            extern fn glGetSamplerParameterfv(sampler: GLuint, pname: GLenum, params: *GLfloat) void;
+            extern fn glSamplerParameterfv(sampler: GLuint, pname: GLenum, params: [*]const GLfloat) void;
+            extern fn glGetSamplerParameteriv(sampler: GLuint, pname: GLenum, params: [*]GLint) void;
+            extern fn glGetSamplerParameterfv(sampler: GLuint, pname: GLenum, params: [*]GLfloat) void;
             extern fn glVertexAttribDivisor(index: GLuint, divisor: GLuint) void;
             extern fn glBindTransformFeedback(target: GLenum, id: GLuint) void;
-            extern fn glDeleteTransformFeedbacks(n: GLsizei, ids: *const GLuint) void;
-            extern fn glGenTransformFeedbacks(n: GLsizei, ids: *GLuint) void;
+            extern fn glDeleteTransformFeedbacks(n: GLsizei, ids: [*]const GLuint) void;
+            extern fn glGenTransformFeedbacks(n: GLsizei, ids: [*]GLuint) void;
             extern fn glIsTransformFeedback(id: GLuint) GLboolean;
             extern fn glPauseTransformFeedback() void;
             extern fn glResumeTransformFeedback() void;
-            extern fn glGetProgramBinary(program: GLuint, bufSize: GLsizei, length: *GLsizei, binaryFormat: *GLenum, binary: *void) void;
-            extern fn glProgramBinary(program: GLuint, binaryFormat: GLenum, binary: *const void, length: GLsizei) void;
+            extern fn glGetProgramBinary(program: GLuint, bufSize: GLsizei, length: *GLsizei, binaryFormat: *GLenum, binary: *anyopaque) void;
+            extern fn glProgramBinary(program: GLuint, binaryFormat: GLenum, binary: *const anyopaque, length: GLsizei) void;
             extern fn glProgramParameteri(program: GLuint, pname: GLenum, value: GLint) void;
-            extern fn glInvalidateFramebuffer(target: GLenum, numAttachments: GLsizei, attachments: *const GLenum) void;
-            extern fn glInvalidateSubFramebuffer(target: GLenum, numAttachments: GLsizei, attachments: *const GLenum, x: GLint, y: GLint, width: GLsizei, height: GLsizei) void;
+            extern fn glInvalidateFramebuffer(target: GLenum, numAttachments: GLsizei, attachments: [*]const GLenum) void;
+            extern fn glInvalidateSubFramebuffer(target: GLenum, numAttachments: GLsizei, attachments: [*]const GLenum, x: GLint, y: GLint, width: GLsizei, height: GLsizei) void;
             extern fn glTexStorage2D(target: GLenum, levels: GLsizei, internalformat: GLenum, width: GLsizei, height: GLsizei) void;
             extern fn glTexStorage3D(target: GLenum, levels: GLsizei, internalformat: GLenum, width: GLsizei, height: GLsizei, depth: GLsizei) void;
-            extern fn glGetInternalformativ(target: GLenum, internalformat: GLenum, pname: GLenum, count: GLsizei, params: *GLint) void;
+            extern fn glGetInternalformativ(target: GLenum, internalformat: GLenum, pname: GLenum, count: GLsizei, params: [*]GLint) void;
 
             // v3.1
             extern fn glDispatchCompute(num_groups_x: GLuint, num_groups_y: GLuint, num_groups_z: GLuint) void;
@@ -339,6 +354,7 @@ pub fn getApi(comptime api: Api) type {
         };
 
         const Bindings = struct {
+            // V2.0
             fn glBindAttribLocation(program: GLuint, index: GLuint, name: [:0]const u8) void {
                 const c_name: [*]GLchar = @ptrCast(name.ptr);
                 Externs.glBindAttribLocation(program, index, c_name);
@@ -392,15 +408,15 @@ pub fn getApi(comptime api: Api) type {
                 Externs.glGenTextures(textures.len, textures.ptr);
             }
 
-            fn glGetActiveAttrib(program: GLuint, index: GLuint, size: *GLint, out_type: *GLenum, name: []GLchar) []u8 {
+            fn glGetActiveAttrib(program: GLuint, index: GLuint, size: *GLint, out_type: *GLenum, name: []u8) []u8 {
                 var written: GLsizei = 0;
-                Externs.glGetActiveAttrib(program, index, name.len, &written, size, out_type);
+                Externs.glGetActiveAttrib(program, index, name.len, &written, size, out_type, @ptrCast(name.ptr));
                 return name[0..written];
             }
 
-            fn glGetActiveUniform(program: GLuint, index: GLuint, size: *GLint, out_type: *GLenum, name: []GLchar) []GLchar {
+            fn glGetActiveUniform(program: GLuint, index: GLuint, size: *GLint, out_type: *GLenum, name: []u8) []u8 {
                 var written: GLsizei = 0;
-                Externs.glGetActiveUniform(program, index, name.len, &written, size, out_type, name.ptr);
+                Externs.glGetActiveUniform(program, index, name.len, &written, size, out_type, @ptrCast(name.ptr));
                 return name[0..written];
             }
 
@@ -410,8 +426,8 @@ pub fn getApi(comptime api: Api) type {
                 return shaders[0..written];
             }
 
-            fn glGetAttribLocation(program: GLuint, name: [:0]const GLchar) GLint {
-                return Externs.glGetAttribLocation(program, name.ptr);
+            fn glGetAttribLocation(program: GLuint, name: [:0]const u8) GLint {
+                return Externs.glGetAttribLocation(program, @ptrCast(name.ptr));
             }
 
             fn glGetError() ?GLenum {
@@ -422,21 +438,21 @@ pub fn getApi(comptime api: Api) type {
                 return err;
             }
 
-            fn glGetProgramInfoLog(program: GLuint, info_log: []GLchar) []GLchar {
+            fn glGetProgramInfoLog(program: GLuint, info_log: []u8) []u8 {
                 var written: GLsizei = 0;
-                Externs.glGetProgramInfoLog(program, info_log.len, &written, info_log.ptr);
+                Externs.glGetProgramInfoLog(program, info_log.len, &written, @ptrCast(info_log.ptr));
                 return info_log[0..written];
             }
 
-            fn glGetShaderInfoLog(shader: GLuint, info_log: []GLchar) []GLchar {
+            fn glGetShaderInfoLog(shader: GLuint, info_log: []u8) []u8 {
                 var written: GLsizei = 0;
-                Externs.glGetShaderInfoLog(shader, info_log.len, &written, info_log.ptr);
+                Externs.glGetShaderInfoLog(shader, info_log.len, &written, @ptrCast(info_log.ptr));
                 return info_log[0..written];
             }
 
-            fn glGetShaderSource(shader: GLuint, source: []GLchar) []GLchar {
+            fn glGetShaderSource(shader: GLuint, source: []u8) []u8 {
                 var written: GLsizei = 0;
-                Externs.glGetShaderSource(shader, source.len, &written, source.ptr);
+                Externs.glGetShaderSource(shader, source.len, &written, @ptrCast(source.ptr));
                 return source[0..written];
             }
 
@@ -444,19 +460,15 @@ pub fn getApi(comptime api: Api) type {
                 return std.mem.span(Externs.glGetString(name));
             }
 
-            fn glGetUniformLocation(program: GLuint, name: []const GLchar) GLint {
-                return Externs.glGetUniformLocation(program, name.ptr);
+            fn glGetUniformLocation(program: GLuint, name: []const u8) GLint {
+                return Externs.glGetUniformLocation(program, @ptrCast(name.ptr));
             }
 
-            fn glShaderSource(shader: GLuint, strings: [][:0]const u8) void {
+            fn glShaderSource(shader: GLuint, strings: []const [:0]const u8) void {
                 var mem: [4096]u8 = undefined;
                 var fba = std.heap.FixedBufferAllocator.init(&mem);
-                var allocator = fba.allocator();
-                var c_strings = allocator.alloc([*]const GLchar, strings.len) catch unreachable;
 
-                for (strings, c_strings) |source, *dest| {
-                    dest.* = @ptrCast(source.ptr);
-                }
+                var c_strings: []const [*:0]const GLchar = Helpers.zigStringsToCStrings(strings, fba.allocator());
 
                 Externs.glShaderSource(shader, @intCast(c_strings.len), c_strings.ptr, null);
             }
@@ -508,8 +520,256 @@ pub fn getApi(comptime api: Api) type {
                 Externs.glUniformMatrix4fv(location, uniform_count, gl_transpose, value.ptr);
             }
 
+            // V3.0
+
+            fn glDrawRangeElements(mode: GLenum, start: GLuint, end: GLuint, count: GLsizei, index_type: GLenum, indices: []const u8) void {
+                Externs.glDrawRangeElements(mode, start, end, count, index_type, indices.ptr);
+            }
+
+            fn glTexImage3D(target: GLenum, level: GLint, internalformat: GLint, width: GLsizei, height: GLsizei, depth: GLsizei, border: GLint, format: GLenum, pixel_type: GLenum, pixels: []const u8) void {
+                Externs.glTexImage3D(target, level, internalformat, width, height, depth, border, format, pixel_type, pixels.ptr);
+            }
+
+            fn glTexSubImage3D(target: GLenum, level: GLint, xoffset: GLint, yoffset: GLint, zoffset: GLint, width: GLsizei, height: GLsizei, depth: GLsizei, format: GLenum, pixel_type: GLenum, pixels: []const u8) void {
+                Externs.glTexSubImage3D(target, level, xoffset, yoffset, zoffset, width, height, depth, format, pixel_type, pixels.ptr);
+            }
+
+            fn glCompressedTexImage3D(target: GLenum, level: GLint, internalformat: GLenum, width: GLsizei, height: GLsizei, depth: GLsizei, border: GLint, data: []const u8) void {
+                Externs.glCompressedTexImage3D(target, level, internalformat, width, height, depth, border, data.len, data.ptr);
+            }
+
+            fn glCompressedTexSubImage3D(target: GLenum, level: GLint, xoffset: GLint, yoffset: GLint, zoffset: GLint, width: GLsizei, height: GLsizei, depth: GLsizei, format: GLenum, data: []const u8) void {
+                Externs.glCompressedTexSubImage3D(target, level, xoffset, yoffset, zoffset, width, height, depth, format, data.len, data.ptr);
+            }
+
+            fn glGenQueries(ids: []GLuint) void {
+                Externs.glGenQueries(ids.len, ids.ptr);
+            }
+
+            fn glDeleteQueries(ids: []const GLuint) void {
+                Externs.glDeleteQueries(ids.len, ids.ptr);
+            }
+
+            fn glGetQueryiv(target: GLenum, pname: GLenum, params: []GLint) void {
+                Externs.glGetQueryiv(target, pname, params.ptr);
+            }
+
+            fn glGetQueryObjectuiv(id: GLuint, pname: GLenum, params: []GLuint) void {
+                Externs.glGetQueryObjectuiv(id, pname, params.ptr);
+            }
+
+            fn glDrawBuffers(bufs: []const GLenum) void {
+                Externs.glDrawBuffers(bufs.len, bufs.ptr);
+            }
+
+            fn glUniformMatrix2x3fv(location: GLint, count: GLsizei, transpose: bool, value: []const GLfloat) void {
+                const c_transpose = if (transpose) GL_TRUE else GL_FALSE;
+                Externs.glUniformMatrix2x3fv(location, count, c_transpose, value.ptr);
+            }
+
+            fn glUniformMatrix3x2fv(location: GLint, count: GLsizei, transpose: bool, value: []const GLfloat) void {
+                const c_transpose = if (transpose) GL_TRUE else GL_FALSE;
+                Externs.glUniformMatrix3x2fv(location, count, c_transpose, value.ptr);
+            }
+
+            fn glUniformMatrix2x4fv(location: GLint, count: GLsizei, transpose: bool, value: []const GLfloat) void {
+                const c_transpose = if (transpose) GL_TRUE else GL_FALSE;
+                Externs.glUniformMatrix2x4fv(location, count, c_transpose, value.ptr);
+            }
+
+            fn glUniformMatrix4x2fv(location: GLint, count: GLsizei, transpose: bool, value: []const GLfloat) void {
+                const c_transpose = if (transpose) GL_TRUE else GL_FALSE;
+                Externs.glUniformMatrix4x2fv(location, count, c_transpose, value.ptr);
+            }
+
+            fn glUniformMatrix3x4fv(location: GLint, count: GLsizei, transpose: bool, value: []const GLfloat) void {
+                const c_transpose = if (transpose) GL_TRUE else GL_FALSE;
+                Externs.glUniformMatrix3x4fv(location, count, c_transpose, value.ptr);
+            }
+
+            fn glUniformMatrix4x3fv(location: GLint, count: GLsizei, transpose: bool, value: []const GLfloat) void {
+                const c_transpose = if (transpose) GL_TRUE else GL_FALSE;
+                Externs.glUniformMatrix4x3fv(location, count, c_transpose, value.ptr);
+            }
+
+            fn glDeleteVertexArrays(arrays: []const GLuint) void {
+                Externs.glDeleteVertexArrays(arrays.len, arrays.ptr);
+            }
+
+            fn glGenVertexArrays(arrays: []GLuint) void {
+                Externs.glGenVertexArrays(arrays.len, arrays.ptr);
+            }
+
+            fn glGetIntegeri_v(target: GLenum, index: GLuint, data: []GLint) void {
+                Externs.glGetIntegeri_v(target, index, data.ptr);
+            }
+
+            fn glTransformFeedbackVaryings(program: GLuint, varyings: []const [:0]const u8, buffer_mode: GLenum) void {
+                var mem: [4096]u8 = undefined;
+                var fba = std.heap.FixedBufferAllocator.init(&mem);
+
+                const c_varyings: []const [*:0]const GLchar = Helpers.zigStringsToCStrings(varyings, fba.allocator());
+
+                Externs.glTransformFeedbackVaryings(program, c_varyings.len, c_varyings.ptr, buffer_mode);
+            }
+
+            fn glGetTransformFeedbackVarying(program: GLuint, index: GLuint, size: *GLsizei, varying_type: *GLenum, name: []u8) []u8 {
+                var written: GLsizei = 0;
+                Externs.glGetTransformFeedbackVarying(program, index, name.len, size, varying_type, @ptrCast(name.ptr));
+                return name[0..written];
+            }
+
+            fn glGetVertexAttribIiv(index: GLuint, pname: GLenum, params: []GLint) void {
+                Externs.glGetVertexAttribIiv(index, pname, params.ptr);
+            }
+
+            fn glGetVertexAttribIuiv(index: GLuint, pname: GLenum, params: []GLuint) void {
+                Externs.glGetVertexAttribIuiv(index, pname, params.ptr);
+            }
+
+            fn glVertexAttribI4iv(index: GLuint, v: []const GLint) void {
+                Externs.glVertexAttribI4iv(index, v.ptr);
+            }
+
+            fn glVertexAttribI4uiv(index: GLuint, v: []const GLuint) void {
+                Externs.glVertexAttribI4uiv(index, v.ptr);
+            }
+
+            fn glUniform1uiv(location: GLint, count: GLsizei, value: []const GLuint) void {
+                Externs.glUniform1uiv(location, count, value.ptr);
+            }
+
+            fn glUniform2uiv(location: GLint, count: GLsizei, value: []const GLuint) void {
+                Externs.glUniform2uiv(location, count, value.ptr);
+            }
+
+            fn glUniform3uiv(location: GLint, count: GLsizei, value: []const GLuint) void {
+                Externs.glUniform3uiv(location, count, value.ptr);
+            }
+
+            fn glUniform4uiv(location: GLint, count: GLsizei, value: []const GLuint) void {
+                Externs.glUniform4uiv(location, count, value.ptr);
+            }
+
+            fn glClearBufferiv(buffer: GLenum, drawbuffer: GLint, value: []const GLint) void {
+                Externs.glClearBufferiv(buffer, drawbuffer, value.ptr);
+            }
+
+            fn glClearBufferuiv(buffer: GLenum, drawbuffer: GLint, value: []const GLuint) void {
+                Externs.glClearBufferuiv(buffer, drawbuffer, value.ptr);
+            }
+
+            fn glClearBufferfv(buffer: GLenum, drawbuffer: GLint, value: []const GLfloat) void {
+                Externs.glClearBufferfv(buffer, drawbuffer, value.ptr);
+            }
+
             fn glGetStringi(name: GLenum, index: GLuint) []const u8 {
                 return std.mem.span(Externs.glGetStringi(name, index));
+            }
+
+            fn glGetUniformIndices(program: GLuint, uniform_names: []const [:0]const u8, uniform_indices: []GLuint) void {
+                debug.assert(uniform_names.len == uniform_indices.len);
+
+                var mem: [4096]u8 = undefined;
+                var fba = std.heap.FixedBufferAllocator.init(&mem);
+
+                const c_names: []const [*:0]const GLchar = Helpers.zigStringsToCStrings(uniform_names, fba.allocator());
+
+                Externs.glGetUniformIndices(program, c_names.len, c_names, uniform_indices.ptr);
+            }
+
+            fn glGetActiveUniformsiv(program: GLuint, uniform_indices: []const GLuint, pname: GLenum, params: []GLint) void {
+                Externs.glGetActiveUniformsiv(program, program, uniform_indices.len, uniform_indices.len, pname, params.ptr);
+            }
+
+            fn glGetUniformBlockIndex(program: GLuint, uniform_block_name: [:0]const u8) GLuint {
+                Externs.glGetUniformBlockIndex(program, @ptrCast(uniform_block_name.ptr));
+            }
+
+            fn glGetActiveUniformBlockiv(program: GLuint, uniform_block_index: GLuint, pname: GLenum, params: []GLint) void {
+                Externs.glGetActiveUniformBlockiv(program, uniform_block_index, pname, params.ptr);
+            }
+
+            fn glGetActiveUniformBlockName(program: GLuint, uniform_block_index: GLuint, uniform_block_name: [*]u8) []const u8 {
+                var written: GLsizei = 0;
+                Externs.glGetActiveUniformBlockName(program, uniform_block_index, uniform_block_name.len, &written, @ptrCast(uniform_block_name.ptr));
+                return uniform_block_name[0..written];
+            }
+
+            fn glDrawElementsInstanced(mode: GLenum, count: GLsizei, index_type: GLenum, indices: []const u8, instancecount: GLsizei) void {
+                Externs.glDrawElementsInstanced(mode, count, index_type, indices.ptr, instancecount);
+            }
+
+            fn glGetInteger64v(pname: GLenum, data: []GLint64) void {
+                Externs.glGetInteger64v(pname, data.ptr);
+            }
+
+            fn glGetSynciv(sync: GLsync, pname: GLenum, values: []GLint) []GLint {
+                var written: GLsizei = 0;
+                Externs.glGetSynciv(sync, pname, values.len, &written, values.ptr);
+                return values[0..written];
+            }
+
+            fn glGetInteger64i_v(target: GLenum, index: GLuint, data: []GLint64) void {
+                Externs.glGetInteger64i_v(target, index, data.ptr);
+            }
+
+            fn glGetBufferParameteri64v(target: GLenum, pname: GLenum, params: []GLint64) void {
+                Externs.glGetBufferParameteri64v(target, pname, params.ptr);
+            }
+
+            fn glGenSamplers(samplers: []GLuint) void {
+                Externs.glGenSamplers(samplers.len, samplers.ptr);
+            }
+
+            fn glDeleteSamplers(samplers: []const GLuint) void {
+                Externs.glDeleteSamplers(samplers.len, samplers.ptr);
+            }
+
+            fn glSamplerParameteriv(sampler: GLuint, pname: GLenum, params: []const GLint) void {
+                Externs.glSamplerParameteriv(sampler, pname, params.ptr);
+            }
+
+            fn glSamplerParameterfv(sampler: GLuint, pname: GLenum, params: []const GLfloat) void {
+                Externs.glSamplerParameterfv(sampler, pname, params.ptr);
+            }
+
+            fn glGetSamplerParameteriv(sampler: GLuint, pname: GLenum, params: []GLint) void {
+                Externs.glGetSamplerParameteriv(sampler, pname, params.ptr);
+            }
+
+            fn glGetSamplerParameterfv(sampler: GLuint, pname: GLenum, params: []GLfloat) void {
+                Externs.glGetSamplerParameterfv(sampler, pname, params.ptr);
+            }
+
+            fn glDeleteTransformFeedbacks(ids: []const GLuint) void {
+                Externs.glDeleteTransformFeedbacks(ids.len, ids.ptr);
+            }
+
+            fn glGenTransformFeedbacks(ids: []GLuint) void {
+                Externs.glGenTransformFeedbacks(ids.len, ids.ptr);
+            }
+
+            fn glGetProgramBinary(program: GLuint, binary_format: *GLenum, binary: []u8) void {
+                var written: GLsizei = 0;
+                Externs.glGetProgramBinary(program, binary.len, &written, binary_format, binary.ptr);
+                return binary[0..written];
+            }
+
+            fn glProgramBinary(program: GLuint, binary_format: GLenum, binary: []const u8) void {
+                Externs.glProgramBinary(program, binary_format, binary.ptr, binary.len);
+            }
+
+            fn glInvalidateFramebuffer(target: GLenum, attachments: []const GLenum) void {
+                Externs.glInvalidateFramebuffer(target, attachments.len, attachments.ptr);
+            }
+
+            fn glInvalidateSubFramebuffer(target: GLenum, attachments: []const GLenum, x: GLint, y: GLint, width: GLsizei, height: GLsizei) void {
+                Externs.glInvalidateSubFramebuffer(target, attachments.len, attachments.ptr, x, y, width, height);
+            }
+
+            fn glGetInternalformativ(target: GLenum, internal_format: GLenum, pname: GLenum, params: []GLint) void {
+                Externs.glGetInternalformativ(target, internal_format, pname, params.len, params.ptr);
             }
         };
 
@@ -840,145 +1100,145 @@ pub fn getApi(comptime api: Api) type {
         pub const glActiveTexture = Externs.glActiveTexture;
         pub const glAttachShader = Externs.glAttachShader;
         pub const glBindAttribLocation = Bindings.glBindAttribLocation;
-        pub const glBindBuffer = Externs.glBindBuffer; //(target: GLenum, buffer: GLuint) void;
-        pub const glBindFramebuffer = Externs.glBindFramebuffer; //(target: GLenum, framebuffer: GLuint) void;
-        pub const glBindRenderbuffer = Externs.glBindRenderbuffer; //(target: GLenum, renderbuffer: GLuint) void;
-        pub const glBindTexture = Externs.glBindTexture; //(target: GLenum, texture: GLuint) void;
-        pub const glBlendColor = Externs.glBlendColor; //(red: GLfloat, green: GLfloat, blue: GLfloat, alpha: GLfloat) void;
-        pub const glBlendEquation = Externs.glBlendEquation; //(mode: GLenum) void;
-        pub const glBlendEquationSeparate = Externs.glBlendEquationSeparate; //(modeRGB: GLenum, modeAlpha: GLenum) void;
-        pub const glBlendFunc = Externs.glBlendFunc; //(sfactor: GLenum, dfactor: GLenum) void;
-        pub const glBlendFuncSeparate = Externs.glBlendFuncSeparate; //(sfactorRGB: GLenum, dfactorRGB: GLenum, sfactorAlpha: GLenum, dfactorAlpha: GLenum) void;
-        pub const glBufferData = Bindings.glBufferData; //(target: GLenum, size: GLsizeiptr, data: *const void, usage: GLenum) void;
-        pub const glBufferSubData = Bindings.glBufferSubData; //(target: GLenum, offset: GLintptr, size: GLsizeiptr, data: *const void) void;
-        pub const glCheckFramebufferStatus = Externs.glCheckFramebufferStatus; //(target: GLenum) GLenum;
-        pub const glClear = Externs.glClear; //(mask: GLbitfield) void;
-        pub const glClearColor = Externs.glClearColor; //(red: GLfloat, green: GLfloat, blue: GLfloat, alpha: GLfloat) void;
-        pub const glClearDepthf = Externs.glClearDepthf; //(d: GLfloat) void;
-        pub const glClearStencil = Externs.glClearStencil; //(s: GLint) void;
-        pub const glColorMask = Externs.glColorMask; //(red: GLboolean, green: GLboolean, blue: GLboolean, alpha: GLboolean) void;
-        pub const glCompileShader = Externs.glCompileShader; //(shader: GLuint) void;
-        pub const glCompressedTexImage2D = Bindings.glCompressedTexImage2D; //(target: GLenum, level: GLint, internalformat: GLenum, width: GLsizei, height: GLsizei, border: GLint, imageSize: GLsizei, data: *const void) void;
-        pub const glCompressedTexSubImage2D = Bindings.glCompressedTexSubImage2D; //(target: GLenum, level: GLint, xoffset: GLint, yoffset: GLint, width: GLsizei, height: GLsizei, format: GLenum, imageSize: GLsizei, data: *const void) void;
-        pub const glCopyTexImage2D = Externs.glCopyTexImage2D; //(target: GLenum, level: GLint, internalformat: GLenum, x: GLint, y: GLint, width: GLsizei, height: GLsizei, border: GLint) void;
-        pub const glCopyTexSubImage2D = Externs.glCopyTexSubImage2D; //(target: GLenum, level: GLint, xoffset: GLint, yoffset: GLint, x: GLint, y: GLint, width: GLsizei, height: GLsizei) void;
-        pub const glCreateProgram = Externs.glCreateProgram; //() GLuint;
-        pub const glCreateShader = Externs.glCreateShader; //(type: GLenum) GLuint;
-        pub const glCullFace = Externs.glCullFace; //(mode: GLenum) void;
-        pub const glDeleteBuffers = Bindings.glDeleteBuffers; //(n: GLsizei, buffers: *const GLuint) void;
-        pub const glDeleteFramebuffers = Bindings.glDeleteFramebuffers; //(n: GLsizei, framebuffers: *const GLuint) void;
-        pub const glDeleteProgram = Externs.glDeleteProgram; //(program: GLuint) void;
-        pub const glDeleteRenderbuffers = Bindings.glDeleteRenderbuffers; //(n: GLsizei, renderbuffers: *const GLuint) void;
-        pub const glDeleteShader = Externs.glDeleteShader; //(shader: GLuint) void;
-        pub const glDeleteTextures = Bindings.glDeleteTextures; //(n: GLsizei, textures: *const GLuint) void;
-        pub const glDepthFunc = Externs.glDepthFunc; //(func: GLenum) void;
-        pub const glDepthMask = Externs.glDepthMask; //(flag: GLboolean) void;
-        pub const glDepthRangef = Externs.glDepthRangef; //(n: GLfloat, f: GLfloat) void;
-        pub const glDetachShader = Externs.glDetachShader; //(program: GLuint, shader: GLuint) void;
-        pub const glDisable = Externs.glDisable; //(cap: GLenum) void;
-        pub const glDisableVertexAttribArray = Externs.glDisableVertexAttribArray; //(index: GLuint) void;
-        pub const glDrawArrays = Externs.glDrawArrays; //(mode: GLenum, first: GLint, count: GLsizei) void;
-        pub const glDrawElements = Externs.glDrawElements; //(mode: GLenum, count: GLsizei, type: GLenum, indices: *const void) void;
-        pub const glEnable = Externs.glEnable; //(cap: GLenum) void;
-        pub const glEnableVertexAttribArray = Externs.glEnableVertexAttribArray; //(index: GLuint) void;
-        pub const glFinish = Externs.glFinish; //() void;
-        pub const glFlush = Externs.glFlush; //() void;
-        pub const glFramebufferRenderbuffer = Externs.glFramebufferRenderbuffer; //(target: GLenum, attachment: GLenum, renderbuffertarget: GLenum, renderbuffer: GLuint) void;
-        pub const glFramebufferTexture2D = Externs.glFramebufferTexture2D; //(target: GLenum, attachment: GLenum, textarget: GLenum, texture: GLuint, level: GLint) void;
-        pub const glFrontFace = Externs.glFrontFace; //(mode: GLenum) void;
-        pub const glGenBuffers = Bindings.glGenBuffers; //(n: GLsizei, buffers: *GLuint) void;
-        pub const glGenerateMipmap = Externs.glGenerateMipmap; //(target: GLenum) void;
-        pub const glGenFramebuffers = Bindings.glGenFramebuffers; //(n: GLsizei, framebuffers: *GLuint) void;
-        pub const glGenRenderbuffers = Bindings.glGenRenderbuffers; //(n: GLsizei, renderbuffers: *GLuint) void;
-        pub const glGenTextures = Bindings.glGenTextures; //(n: GLsizei, textures: *GLuint) void;
-        pub const glGetActiveAttrib = Bindings.glGetActiveAttrib; //(program: GLuint, index: GLuint, bufSize: GLsizei, length: *GLsizei, size: *GLint, type: *GLenum, name: *GLchar) void;
-        pub const glGetActiveUniform = Bindings.glGetActiveUniform; //(program: GLuint, index: GLuint, bufSize: GLsizei, length: *GLsizei, size: *GLint, type: *GLenum, name: *GLchar) void;
-        pub const glGetAttachedShaders = Bindings.glGetAttachedShaders; //(program: GLuint, maxCount: GLsizei, count: *GLsizei, shaders: *GLuint) void;
-        pub const glGetAttribLocation = Bindings.glGetAttribLocation; //(program: GLuint, name: *const GLchar) GLint;
-        pub const glGetBooleanv = Externs.glGetBooleanv; //(pname: GLenum, data: *GLboolean) void;
-        pub const glGetBufferParameteriv = Externs.glGetBufferParameteriv; //(target: GLenum, pname: GLenum, params: *GLint) void;
-        pub const glGetError = Bindings.glGetError; //() GLenum;
-        pub const glGetFloatv = Externs.glGetFloatv; //(pname: GLenum, data: *GLfloat) void;
-        pub const glGetFramebufferAttachmentParameteriv = Externs.glGetFramebufferAttachmentParameteriv; //(target: GLenum, attachment: GLenum, pname: GLenum, params: *GLint) void;
-        pub const glGetIntegerv = Externs.glGetIntegerv; //(pname: GLenum, data: *GLint) void;
-        pub const glGetProgramiv = Externs.glGetProgramiv; //(program: GLuint, pname: GLenum, params: *GLint) void;
-        pub const glGetProgramInfoLog = Bindings.glGetProgramInfoLog; //(program: GLuint, bufSize: GLsizei, length: *GLsizei, infoLog: *GLchar) void;
-        pub const glGetRenderbufferParameteriv = Externs.glGetRenderbufferParameteriv; //(target: GLenum, pname: GLenum, params: *GLint) void;
-        pub const glGetShaderiv = Externs.glGetShaderiv; //(shader: GLuint, pname: GLenum, params: *GLint) void;
-        pub const glGetShaderInfoLog = Bindings.glGetShaderInfoLog; //(shader: GLuint, bufSize: GLsizei, length: *GLsizei, infoLog: *GLchar) void;
-        pub const glGetShaderPrecisionFormat = Externs.glGetShaderPrecisionFormat; //(shadertype: GLenum, precisiontype: GLenum, range: *GLint, precision: *GLint) void;
-        pub const glGetShaderSource = Bindings.glGetShaderSource; //(shader: GLuint, bufSize: GLsizei, length: *GLsizei, source: *GLchar) void;
+        pub const glBindBuffer = Externs.glBindBuffer;
+        pub const glBindFramebuffer = Externs.glBindFramebuffer;
+        pub const glBindRenderbuffer = Externs.glBindRenderbuffer;
+        pub const glBindTexture = Externs.glBindTexture;
+        pub const glBlendColor = Externs.glBlendColor;
+        pub const glBlendEquation = Externs.glBlendEquation;
+        pub const glBlendEquationSeparate = Externs.glBlendEquationSeparate;
+        pub const glBlendFunc = Externs.glBlendFunc;
+        pub const glBlendFuncSeparate = Externs.glBlendFuncSeparate;
+        pub const glBufferData = Bindings.glBufferData;
+        pub const glBufferSubData = Bindings.glBufferSubData;
+        pub const glCheckFramebufferStatus = Externs.glCheckFramebufferStatus;
+        pub const glClear = Externs.glClear;
+        pub const glClearColor = Externs.glClearColor;
+        pub const glClearDepthf = Externs.glClearDepthf;
+        pub const glClearStencil = Externs.glClearStencil;
+        pub const glColorMask = Externs.glColorMask;
+        pub const glCompileShader = Externs.glCompileShader;
+        pub const glCompressedTexImage2D = Bindings.glCompressedTexImage2D;
+        pub const glCompressedTexSubImage2D = Bindings.glCompressedTexSubImage2D;
+        pub const glCopyTexImage2D = Externs.glCopyTexImage2D;
+        pub const glCopyTexSubImage2D = Externs.glCopyTexSubImage2D;
+        pub const glCreateProgram = Externs.glCreateProgram;
+        pub const glCreateShader = Externs.glCreateShader;
+        pub const glCullFace = Externs.glCullFace;
+        pub const glDeleteBuffers = Bindings.glDeleteBuffers;
+        pub const glDeleteFramebuffers = Bindings.glDeleteFramebuffers;
+        pub const glDeleteProgram = Externs.glDeleteProgram;
+        pub const glDeleteRenderbuffers = Bindings.glDeleteRenderbuffers;
+        pub const glDeleteShader = Externs.glDeleteShader;
+        pub const glDeleteTextures = Bindings.glDeleteTextures;
+        pub const glDepthFunc = Externs.glDepthFunc;
+        pub const glDepthMask = Externs.glDepthMask;
+        pub const glDepthRangef = Externs.glDepthRangef;
+        pub const glDetachShader = Externs.glDetachShader;
+        pub const glDisable = Externs.glDisable;
+        pub const glDisableVertexAttribArray = Externs.glDisableVertexAttribArray;
+        pub const glDrawArrays = Externs.glDrawArrays;
+        pub const glDrawElements = Externs.glDrawElements;
+        pub const glEnable = Externs.glEnable;
+        pub const glEnableVertexAttribArray = Externs.glEnableVertexAttribArray;
+        pub const glFinish = Externs.glFinish;
+        pub const glFlush = Externs.glFlush;
+        pub const glFramebufferRenderbuffer = Externs.glFramebufferRenderbuffer;
+        pub const glFramebufferTexture2D = Externs.glFramebufferTexture2D;
+        pub const glFrontFace = Externs.glFrontFace;
+        pub const glGenBuffers = Bindings.glGenBuffers;
+        pub const glGenerateMipmap = Externs.glGenerateMipmap;
+        pub const glGenFramebuffers = Bindings.glGenFramebuffers;
+        pub const glGenRenderbuffers = Bindings.glGenRenderbuffers;
+        pub const glGenTextures = Bindings.glGenTextures;
+        pub const glGetActiveAttrib = Bindings.glGetActiveAttrib;
+        pub const glGetActiveUniform = Bindings.glGetActiveUniform;
+        pub const glGetAttachedShaders = Bindings.glGetAttachedShaders;
+        pub const glGetAttribLocation = Bindings.glGetAttribLocation;
+        pub const glGetBooleanv = Externs.glGetBooleanv;
+        pub const glGetBufferParameteriv = Externs.glGetBufferParameteriv;
+        pub const glGetError = Bindings.glGetError;
+        pub const glGetFloatv = Externs.glGetFloatv;
+        pub const glGetFramebufferAttachmentParameteriv = Externs.glGetFramebufferAttachmentParameteriv;
+        pub const glGetIntegerv = Externs.glGetIntegerv;
+        pub const glGetProgramiv = Externs.glGetProgramiv;
+        pub const glGetProgramInfoLog = Bindings.glGetProgramInfoLog;
+        pub const glGetRenderbufferParameteriv = Externs.glGetRenderbufferParameteriv;
+        pub const glGetShaderiv = Externs.glGetShaderiv;
+        pub const glGetShaderInfoLog = Bindings.glGetShaderInfoLog;
+        pub const glGetShaderPrecisionFormat = Externs.glGetShaderPrecisionFormat;
+        pub const glGetShaderSource = Bindings.glGetShaderSource;
         pub const glGetString = Bindings.glGetString;
-        pub const glGetTexParameterfv = Externs.glGetTexParameterfv; //(target: GLenum, pname: GLenum, params: *GLfloat) void;
-        pub const glGetTexParameteriv = Externs.glGetTexParameteriv; //(target: GLenum, pname: GLenum, params: *GLint) void;
-        pub const glGetUniformfv = Externs.glGetUniformfv; //(program: GLuint, location: GLint, params: *GLfloat) void;
-        pub const glGetUniformiv = Externs.glGetUniformiv; //(program: GLuint, location: GLint, params: *GLint) void;
-        pub const glGetUniformLocation = Bindings.glGetUniformLocation; //(program: GLuint, name: *const GLchar) GLint;
-        pub const glGetVertexAttribfv = Externs.glGetVertexAttribfv; //(index: GLuint, pname: GLenum, params: *GLfloat) void;
-        pub const glGetVertexAttribiv = Externs.glGetVertexAttribiv; //(index: GLuint, pname: GLenum, params: *GLint) void;
-        pub const glGetVertexAttribPointerv = Externs.glGetVertexAttribPointerv; //(index: GLuint, pname: GLenum, pointer: **void) void;
-        pub const glHint = Externs.glHint; //(target: GLenum, mode: GLenum) void;
-        pub const glIsBuffer = Externs.glIsBuffer; //(buffer: GLuint) GLboolean;
-        pub const glIsEnabled = Externs.glIsEnabled; //(cap: GLenum) GLboolean;
-        pub const glIsFramebuffer = Externs.glIsFramebuffer; //(framebuffer: GLuint) GLboolean;
-        pub const glIsProgram = Externs.glIsProgram; //(program: GLuint) GLboolean;
-        pub const glIsRenderbuffer = Externs.glIsRenderbuffer; //(renderbuffer: GLuint) GLboolean;
-        pub const glIsShader = Externs.glIsShader; //(shader: GLuint) GLboolean;
-        pub const glIsTexture = Externs.glIsTexture; //(texture: GLuint) GLboolean;
-        pub const glLineWidth = Externs.glLineWidth; //(width: GLfloat) void;
-        pub const glLinkProgram = Externs.glLinkProgram; //(program: GLuint) void;
-        pub const glPixelStorei = Externs.glPixelStorei; //(pname: GLenum, param: GLint) void;
-        pub const glPolygonOffset = Externs.glPolygonOffset; //(factor: GLfloat, units: GLfloat) void;
-        pub const glReadPixels = Externs.glReadPixels; //(x: GLint, y: GLint, width: GLsizei, height: GLsizei, format: GLenum, type: GLenum, pixels: *void) void;
-        pub const glReleaseShaderCompiler = Externs.glReleaseShaderCompiler; //() void;
-        pub const glRenderbufferStorage = Externs.glRenderbufferStorage; //(target: GLenum, internalformat: GLenum, width: GLsizei, height: GLsizei) void;
-        pub const glSampleCoverage = Externs.glSampleCoverage; //(value: GLfloat, invert: GLboolean) void;
-        pub const glScissor = Externs.glScissor; //(x: GLint, y: GLint, width: GLsizei, height: GLsizei) void;
-        pub const glShaderBinary = Externs.glShaderBinary; //(count: GLsizei, shaders: *const GLuint, binaryFormat: GLenum, binary: *const void, length: GLsizei) void;
+        pub const glGetTexParameterfv = Externs.glGetTexParameterfv;
+        pub const glGetTexParameteriv = Externs.glGetTexParameteriv;
+        pub const glGetUniformfv = Externs.glGetUniformfv;
+        pub const glGetUniformiv = Externs.glGetUniformiv;
+        pub const glGetUniformLocation = Bindings.glGetUniformLocation;
+        pub const glGetVertexAttribfv = Externs.glGetVertexAttribfv;
+        pub const glGetVertexAttribiv = Externs.glGetVertexAttribiv;
+        pub const glGetVertexAttribPointerv = Externs.glGetVertexAttribPointerv;
+        pub const glHint = Externs.glHint;
+        pub const glIsBuffer = Externs.glIsBuffer;
+        pub const glIsEnabled = Externs.glIsEnabled;
+        pub const glIsFramebuffer = Externs.glIsFramebuffer;
+        pub const glIsProgram = Externs.glIsProgram;
+        pub const glIsRenderbuffer = Externs.glIsRenderbuffer;
+        pub const glIsShader = Externs.glIsShader;
+        pub const glIsTexture = Externs.glIsTexture;
+        pub const glLineWidth = Externs.glLineWidth;
+        pub const glLinkProgram = Externs.glLinkProgram;
+        pub const glPixelStorei = Externs.glPixelStorei;
+        pub const glPolygonOffset = Externs.glPolygonOffset;
+        pub const glReadPixels = Externs.glReadPixels;
+        pub const glReleaseShaderCompiler = Externs.glReleaseShaderCompiler;
+        pub const glRenderbufferStorage = Externs.glRenderbufferStorage;
+        pub const glSampleCoverage = Externs.glSampleCoverage;
+        pub const glScissor = Externs.glScissor;
+        pub const glShaderBinary = Externs.glShaderBinary;
         pub const glShaderSource = Bindings.glShaderSource;
-        pub const glStencilFunc = Externs.glStencilFunc; //(func: GLenum, ref: GLint, mask: GLuint) void;
-        pub const glStencilFuncSeparate = Externs.glStencilFuncSeparate; //(face: GLenum, func: GLenum, ref: GLint, mask: GLuint) void;
-        pub const glStencilMask = Externs.glStencilMask; //(mask: GLuint) void;
-        pub const glStencilMaskSeparate = Externs.glStencilMaskSeparate; //(face: GLenum, mask: GLuint) void;
-        pub const glStencilOp = Externs.glStencilOp; //(fail: GLenum, zfail: GLenum, zpass: GLenum) void;
-        pub const glStencilOpSeparate = Externs.glStencilOpSeparate; //(face: GLenum, sfail: GLenum, dpfail: GLenum, dppass: GLenum) void;
-        pub const glTexImage2D = Externs.glTexImage2D; //(target: GLenum, level: GLint, internalformat: GLint, width: GLsizei, height: GLsizei, border: GLint, format: GLenum, type: GLenum, pixels: *const void) void;
-        pub const glTexParameterf = Externs.glTexParameterf; //(target: GLenum, pname: GLenum, param: GLfloat) void;
-        pub const glTexParameterfv = Externs.glTexParameterfv; //(target: GLenum, pname: GLenum, params: *const GLfloat) void;
-        pub const glTexParameteri = Externs.glTexParameteri; //(target: GLenum, pname: GLenum, param: GLint) void;
-        pub const glTexParameteriv = Externs.glTexParameteriv; //(target: GLenum, pname: GLenum, params: *const GLint) void;
-        pub const glTexSubImage2D = Externs.glTexSubImage2D; //(target: GLenum, level: GLint, xoffset: GLint, yoffset: GLint, width: GLsizei, height: GLsizei, format: GLenum, type: GLenum, pixels: *const void) void;
-        pub const glUniform1f = Externs.glUniform1f; //(location: GLint, v0: GLfloat) void;
-        pub const glUniform1fv = Bindings.glUniform1fv; //(location: GLint, count: GLsizei, value: *const GLfloat) void;
-        pub const glUniform1i = Externs.glUniform1i; //(location: GLint, v0: GLint) void;
-        pub const glUniform1iv = Bindings.glUniform1iv; //(location: GLint, count: GLsizei, value: *const GLint) void;
-        pub const glUniform2f = Externs.glUniform2f; //(location: GLint, v0: GLfloat, v1: GLfloat) void;
-        pub const glUniform2fv = Bindings.glUniform2fv; //(location: GLint, count: GLsizei, value: *const GLfloat) void;
-        pub const glUniform2i = Externs.glUniform2i; //(location: GLint, v0: GLint, v1: GLint) void;
-        pub const glUniform2iv = Bindings.glUniform2iv; //(location: GLint, count: GLsizei, value: *const GLint) void;
-        pub const glUniform3f = Externs.glUniform3f; //(location: GLint, v0: GLfloat, v1: GLfloat, v2: GLfloat) void;
-        pub const glUniform3fv = Bindings.glUniform3fv; //(location: GLint, count: GLsizei, value: *const GLfloat) void;
-        pub const glUniform3i = Externs.glUniform3i; //(location: GLint, v0: GLint, v1: GLint, v2: GLint) void;
-        pub const glUniform3iv = Bindings.glUniform3iv; //(location: GLint, count: GLsizei, value: *const GLint) void;
-        pub const glUniform4f = Externs.glUniform4f; //(location: GLint, v0: GLfloat, v1: GLfloat, v2: GLfloat, v3: GLfloat) void;
-        pub const glUniform4fv = Bindings.glUniform4fv; //(location: GLint, count: GLsizei, value: *const GLfloat) void;
-        pub const glUniform4i = Externs.glUniform4i; //(location: GLint, v0: GLint, v1: GLint, v2: GLint, v3: GLint) void;
-        pub const glUniform4iv = Bindings.glUniform4iv; //(location: GLint, count: GLsizei, value: *const GLint) void;
-        pub const glUniformMatrix2fv = Bindings.glUniformMatrix2fv; //(location: GLint, count: GLsizei, transpose: GLboolean, value: *const GLfloat) void;
-        pub const glUniformMatrix3fv = Bindings.glUniformMatrix3fv; //(location: GLint, count: GLsizei, transpose: GLboolean, value: *const GLfloat) void;
-        pub const glUniformMatrix4fv = Bindings.glUniformMatrix4fv; //(location: GLint, count: GLsizei, transpose: GLboolean, value: *const GLfloat) void;
-        pub const glUseProgram = Externs.glUseProgram; //(program: GLuint) void;
-        pub const glValidateProgram = Externs.glValidateProgram; //(program: GLuint) void;
-        pub const glVertexAttrib1f = Externs.glVertexAttrib1f; //(index: GLuint, x: GLfloat) void;
-        pub const glVertexAttrib1fv = Externs.glVertexAttrib1fv; //(index: GLuint, v: *const GLfloat) void;
-        pub const glVertexAttrib2f = Externs.glVertexAttrib2f; //(index: GLuint, x: GLfloat, y: GLfloat) void;
-        pub const glVertexAttrib2fv = Externs.glVertexAttrib2fv; //(index: GLuint, v: *const GLfloat) void;
-        pub const glVertexAttrib3f = Externs.glVertexAttrib3f; //(index: GLuint, x: GLfloat, y: GLfloat, z: GLfloat) void;
-        pub const glVertexAttrib3fv = Externs.glVertexAttrib3fv; //(index: GLuint, v: *const GLfloat) void;
-        pub const glVertexAttrib4f = Externs.glVertexAttrib4f; //(index: GLuint, x: GLfloat, y: GLfloat, z: GLfloat, w: GLfloat) void;
-        pub const glVertexAttrib4fv = Externs.glVertexAttrib4fv; //(index: GLuint, v: *const GLfloat) void;
-        pub const glVertexAttribPointer = Externs.glVertexAttribPointer; //(index: GLuint, size: GLint, type: GLenum, normalized: GLboolean, stride: GLsizei, pointer: *const void) void;
-        pub const glViewport = Externs.glViewport; //(x: GLint, y: GLint, width: GLsizei, height: GLsizei) void;
+        pub const glStencilFunc = Externs.glStencilFunc;
+        pub const glStencilFuncSeparate = Externs.glStencilFuncSeparate;
+        pub const glStencilMask = Externs.glStencilMask;
+        pub const glStencilMaskSeparate = Externs.glStencilMaskSeparate;
+        pub const glStencilOp = Externs.glStencilOp;
+        pub const glStencilOpSeparate = Externs.glStencilOpSeparate;
+        pub const glTexImage2D = Externs.glTexImage2D;
+        pub const glTexParameterf = Externs.glTexParameterf;
+        pub const glTexParameterfv = Externs.glTexParameterfv;
+        pub const glTexParameteri = Externs.glTexParameteri;
+        pub const glTexParameteriv = Externs.glTexParameteriv;
+        pub const glTexSubImage2D = Externs.glTexSubImage2D;
+        pub const glUniform1f = Externs.glUniform1f;
+        pub const glUniform1fv = Bindings.glUniform1fv;
+        pub const glUniform1i = Externs.glUniform1i;
+        pub const glUniform1iv = Bindings.glUniform1iv;
+        pub const glUniform2f = Externs.glUniform2f;
+        pub const glUniform2fv = Bindings.glUniform2fv;
+        pub const glUniform2i = Externs.glUniform2i;
+        pub const glUniform2iv = Bindings.glUniform2iv;
+        pub const glUniform3f = Externs.glUniform3f;
+        pub const glUniform3fv = Bindings.glUniform3fv;
+        pub const glUniform3i = Externs.glUniform3i;
+        pub const glUniform3iv = Bindings.glUniform3iv;
+        pub const glUniform4f = Externs.glUniform4f;
+        pub const glUniform4fv = Bindings.glUniform4fv;
+        pub const glUniform4i = Externs.glUniform4i;
+        pub const glUniform4iv = Bindings.glUniform4iv;
+        pub const glUniformMatrix2fv = Bindings.glUniformMatrix2fv;
+        pub const glUniformMatrix3fv = Bindings.glUniformMatrix3fv;
+        pub const glUniformMatrix4fv = Bindings.glUniformMatrix4fv;
+        pub const glUseProgram = Externs.glUseProgram;
+        pub const glValidateProgram = Externs.glValidateProgram;
+        pub const glVertexAttrib1f = Externs.glVertexAttrib1f;
+        pub const glVertexAttrib1fv = Externs.glVertexAttrib1fv;
+        pub const glVertexAttrib2f = Externs.glVertexAttrib2f;
+        pub const glVertexAttrib2fv = Externs.glVertexAttrib2fv;
+        pub const glVertexAttrib3f = Externs.glVertexAttrib3f;
+        pub const glVertexAttrib3fv = Externs.glVertexAttrib3fv;
+        pub const glVertexAttrib4f = Externs.glVertexAttrib4f;
+        pub const glVertexAttrib4fv = Externs.glVertexAttrib4fv;
+        pub const glVertexAttribPointer = Externs.glVertexAttribPointer;
+        pub const glViewport = Externs.glViewport;
 
         // v3.0
         pub const GLhalf = if (api.hasCompat(.V3_0)) u16 else @compileError("GLHalf only available with GLES 3.0+");
@@ -1305,280 +1565,280 @@ pub fn getApi(comptime api: Api) type {
         pub const GL_NUM_SAMPLE_COUNTS: GLenum = if (api.hasCompat(.V3_0)) 0x9380 else @compileError("GL_NUM_SAMPLE_COUNTS only available with GLES 3.0+");
         pub const GL_TEXTURE_IMMUTABLE_LEVELS: GLenum = if (api.hasCompat(.V3_0)) 0x82DF else @compileError("GL_TEXTURE_IMMUTABLE_LEVELS only available with GLES 3.0+");
 
-        pub const glReadBuffer = if (api.hasCompat(.V3_0)) Externs.glReadBuffer else @compileError("glReadBuffer on available with GLES 3.0+"); //(src: GLenum) void;
-        pub const glDrawRangeElements = if (api.hasCompat(.V3_0)) Externs.glDrawRangeElements else @compileError("glDrawRangeElements on available with GLES 3.0+"); //(mode: GLenum, start: GLuint, end: GLuint, count: GLsizei, type: GLenum, indices: *const void) void;
-        pub const glTexImage3D = if (api.hasCompat(.V3_0)) Externs.glTexImage3D else @compileError("glTexImage3D on available with GLES 3.0+"); //(target: GLenum, level: GLint, internalformat: GLint, width: GLsizei, height: GLsizei, depth: GLsizei, border: GLint, format: GLenum, type: GLenum, pixels: *const void) void;
-        pub const glTexSubImage3D = if (api.hasCompat(.V3_0)) Externs.glTexSubImage3D else @compileError("glTexSubImage3D on available with GLES 3.0+"); //(target: GLenum, level: GLint, xoffset: GLint, yoffset: GLint, zoffset: GLint, width: GLsizei, height: GLsizei, depth: GLsizei, format: GLenum, type: GLenum, pixels: *const void) void;
-        pub const glCopyTexSubImage3D = if (api.hasCompat(.V3_0)) Externs.glCopyTexSubImage3D else @compileError("glCopyTexSubImage3D on available with GLES 3.0+"); //(target: GLenum, level: GLint, xoffset: GLint, yoffset: GLint, zoffset: GLint, x: GLint, y: GLint, width: GLsizei, height: GLsizei) void;
-        pub const glCompressedTexImage3D = if (api.hasCompat(.V3_0)) Externs.glCompressedTexImage3D else @compileError("glCompressedTexImage3D on available with GLES 3.0+"); //(target: GLenum, level: GLint, internalformat: GLenum, width: GLsizei, height: GLsizei, depth: GLsizei, border: GLint, imageSize: GLsizei, data: *const void) void;
-        pub const glCompressedTexSubImage3D = if (api.hasCompat(.V3_0)) Externs.glCompressedTexSubImage3D else @compileError("glCompressedTexSubImage3D on available with GLES 3.0+"); //(target: GLenum, level: GLint, xoffset: GLint, yoffset: GLint, zoffset: GLint, width: GLsizei, height: GLsizei, depth: GLsizei, format: GLenum, imageSize: GLsizei, data: *const void) void;
-        pub const glGenQueries = if (api.hasCompat(.V3_0)) Externs.glGenQueries else @compileError("glGenQueries on available with GLES 3.0+"); //(n: GLsizei, ids: *GLuint) void;
-        pub const glDeleteQueries = if (api.hasCompat(.V3_0)) Externs.glDeleteQueries else @compileError("glDeleteQueries on available with GLES 3.0+"); //(n: GLsizei, ids: *const GLuint) void;
-        pub const glIsQuery = if (api.hasCompat(.V3_0)) Externs.glIsQuery else @compileError("glIsQuery on available with GLES 3.0+"); //(id: GLuint) GLboolean;
-        pub const glBeginQuery = if (api.hasCompat(.V3_0)) Externs.glBeginQuery else @compileError("glBeginQuery on available with GLES 3.0+"); //(target: GLenum, id: GLuint) void;
-        pub const glEndQuery = if (api.hasCompat(.V3_0)) Externs.glEndQuery else @compileError("glEndQuery on available with GLES 3.0+"); //(target: GLenum) void;
-        pub const glGetQueryiv = if (api.hasCompat(.V3_0)) Externs.glGetQueryiv else @compileError("glGetQueryiv on available with GLES 3.0+"); //(target: GLenum, pname: GLenum, params: *GLint) void;
-        pub const glGetQueryObjectuiv = if (api.hasCompat(.V3_0)) Externs.glGetQueryObjectuiv else @compileError("glGetQueryObjectuiv on available with GLES 3.0+"); //(id: GLuint, pname: GLenum, params: *GLuint) void;
-        pub const glDrawBuffers = if (api.hasCompat(.V3_0)) Externs.glDrawBuffers else @compileError("glDrawBuffers on available with GLES 3.0+"); //(n: GLsizei, bufs: *const GLenum) void;
-        pub const glUniformMatrix2x3fv = if (api.hasCompat(.V3_0)) Externs.glUniformMatrix2x3fv else @compileError("glUniformMatrix2x3fv on available with GLES 3.0+"); //(location: GLint, count: GLsizei, transpose: GLboolean, value: *const GLfloat) void;
-        pub const glUniformMatrix3x2fv = if (api.hasCompat(.V3_0)) Externs.glUniformMatrix3x2fv else @compileError("glUniformMatrix3x2fv on available with GLES 3.0+"); //(location: GLint, count: GLsizei, transpose: GLboolean, value: *const GLfloat) void;
-        pub const glUniformMatrix2x4fv = if (api.hasCompat(.V3_0)) Externs.glUniformMatrix2x4fv else @compileError("glUniformMatrix2x4fv on available with GLES 3.0+"); //(location: GLint, count: GLsizei, transpose: GLboolean, value: *const GLfloat) void;
-        pub const glUniformMatrix4x2fv = if (api.hasCompat(.V3_0)) Externs.glUniformMatrix4x2fv else @compileError("glUniformMatrix4x2fv on available with GLES 3.0+"); //(location: GLint, count: GLsizei, transpose: GLboolean, value: *const GLfloat) void;
-        pub const glUniformMatrix3x4fv = if (api.hasCompat(.V3_0)) Externs.glUniformMatrix3x4fv else @compileError("glUniformMatrix3x4fv on available with GLES 3.0+"); //(location: GLint, count: GLsizei, transpose: GLboolean, value: *const GLfloat) void;
-        pub const glUniformMatrix4x3fv = if (api.hasCompat(.V3_0)) Externs.glUniformMatrix4x3fv else @compileError("glUniformMatrix4x3fv on available with GLES 3.0+"); //(location: GLint, count: GLsizei, transpose: GLboolean, value: *const GLfloat) void;
-        pub const glBlitFramebuffer = if (api.hasCompat(.V3_0)) Externs.glBlitFramebuffer else @compileError("glBlitFramebuffer on available with GLES 3.0+"); //(srcX0: GLint, srcY0: GLint, srcX1: GLint, srcY1: GLint, dstX0: GLint, dstY0: GLint, dstX1: GLint, dstY1: GLint, mask: GLbitfield, filter: GLenum) void;
-        pub const glRenderbufferStorageMultisample = if (api.hasCompat(.V3_0)) Externs.glRenderbufferStorageMultisample else @compileError("glRenderbufferStorageMultisample on available with GLES 3.0+"); //(target: GLenum, samples: GLsizei, internalformat: GLenum, width: GLsizei, height: GLsizei) void;
-        pub const glFramebufferTextureLayer = if (api.hasCompat(.V3_0)) Externs.glFramebufferTextureLayer else @compileError("glFramebufferTextureLayer on available with GLES 3.0+"); //(target: GLenum, attachment: GLenum, texture: GLuint, level: GLint, layer: GLint) void;
-        pub const glBindVertexArray = if (api.hasCompat(.V3_0)) Externs.glBindVertexArray else @compileError("glBindVertexArray on available with GLES 3.0+"); //(array: GLuint) void;
-        pub const glDeleteVertexArrays = if (api.hasCompat(.V3_0)) Externs.glDeleteVertexArrays else @compileError("glDeleteVertexArrays on available with GLES 3.0+"); //(n: GLsizei, arrays: *const GLuint) void;
-        pub const glGenVertexArrays = if (api.hasCompat(.V3_0)) Externs.glGenVertexArrays else @compileError("glGenVertexArrays on available with GLES 3.0+"); //(n: GLsizei, arrays: *GLuint) void;
-        pub const glIsVertexArray = if (api.hasCompat(.V3_0)) Externs.glIsVertexArray else @compileError("glIsVertexArray on available with GLES 3.0+"); //(array: GLuint) GLboolean;
-        pub const glGetIntegeri_v = if (api.hasCompat(.V3_0)) Externs.glGetIntegeri_v else @compileError("glGetIntegeri_v on available with GLES 3.0+"); //(target: GLenum, index: GLuint, data: *GLint) void;
-        pub const glBeginTransformFeedback = if (api.hasCompat(.V3_0)) Externs.glBeginTransformFeedback else @compileError("glBeginTransformFeedback on available with GLES 3.0+"); //(primitiveMode: GLenum) void;
-        pub const glEndTransformFeedback = if (api.hasCompat(.V3_0)) Externs.glEndTransformFeedback else @compileError("glEndTransformFeedback on available with GLES 3.0+"); //() void;
-        pub const glBindBufferRange = if (api.hasCompat(.V3_0)) Externs.glBindBufferRange else @compileError("glBindBufferRange on available with GLES 3.0+"); //(target: GLenum, index: GLuint, buffer: GLuint, offset: GLintptr, size: GLsizeiptr) void;
-        pub const glBindBufferBase = if (api.hasCompat(.V3_0)) Externs.glBindBufferBase else @compileError("glBindBufferBase on available with GLES 3.0+"); //(target: GLenum, index: GLuint, buffer: GLuint) void;
-        pub const glTransformFeedbackVaryings = if (api.hasCompat(.V3_0)) Externs.glTransformFeedbackVaryings else @compileError("glTransformFeedbackVaryings on available with GLES 3.0+"); //(program: GLuint, count: GLsizei, varyings: *const *const GLchar, bufferMode: GLenum) void;
-        pub const glGetTransformFeedbackVarying = if (api.hasCompat(.V3_0)) Externs.glGetTransformFeedbackVarying else @compileError("glGetTransformFeedbackVarying on available with GLES 3.0+"); //(program: GLuint, index: GLuint, bufSize: GLsizei, length: *GLsizei, size: *GLsizei, type: *GLenum, name: *GLchar) void;
-        pub const glVertexAttribIPointer = if (api.hasCompat(.V3_0)) Externs.glVertexAttribIPointer else @compileError("glVertexAttribIPointer on available with GLES 3.0+"); //(index: GLuint, size: GLint, type: GLenum, stride: GLsizei, pointer: *const void) void;
-        pub const glGetVertexAttribIiv = if (api.hasCompat(.V3_0)) Externs.glGetVertexAttribIiv else @compileError("glGetVertexAttribIiv on available with GLES 3.0+"); //(index: GLuint, pname: GLenum, params: *GLint) void;
-        pub const glGetVertexAttribIuiv = if (api.hasCompat(.V3_0)) Externs.glGetVertexAttribIuiv else @compileError("glGetVertexAttribIuiv on available with GLES 3.0+"); //(index: GLuint, pname: GLenum, params: *GLuint) void;
-        pub const glVertexAttribI4i = if (api.hasCompat(.V3_0)) Externs.glVertexAttribI4i else @compileError("glVertexAttribI4i on available with GLES 3.0+"); //(index: GLuint, x: GLint, y: GLint, z: GLint, w: GLint) void;
-        pub const glVertexAttribI4ui = if (api.hasCompat(.V3_0)) Externs.glVertexAttribI4ui else @compileError("glVertexAttribI4ui on available with GLES 3.0+"); //(index: GLuint, x: GLuint, y: GLuint, z: GLuint, w: GLuint) void;
-        pub const glVertexAttribI4iv = if (api.hasCompat(.V3_0)) Externs.glVertexAttribI4iv else @compileError("glVertexAttribI4iv on available with GLES 3.0+"); //(index: GLuint, v: *const GLint) void;
-        pub const glVertexAttribI4uiv = if (api.hasCompat(.V3_0)) Externs.glVertexAttribI4uiv else @compileError("glVertexAttribI4uiv on available with GLES 3.0+"); //(index: GLuint, v: *const GLuint) void;
-        pub const glGetUniformuiv = if (api.hasCompat(.V3_0)) Externs.glGetUniformuiv else @compileError("glGetUniformuiv on available with GLES 3.0+"); //(program: GLuint, location: GLint, params: *GLuint) void;
-        pub const glGetFragDataLocation = if (api.hasCompat(.V3_0)) Externs.glGetFragDataLocation else @compileError("glGetFragDataLocation on available with GLES 3.0+"); //(program: GLuint, name: *const GLchar) GLint;
-        pub const glUniform1ui = if (api.hasCompat(.V3_0)) Externs.glUniform1ui else @compileError("glUniform1ui on available with GLES 3.0+"); //(location: GLint, v0: GLuint) void;
-        pub const glUniform2ui = if (api.hasCompat(.V3_0)) Externs.glUniform2ui else @compileError("glUniform2ui on available with GLES 3.0+"); //(location: GLint, v0: GLuint, v1: GLuint) void;
-        pub const glUniform3ui = if (api.hasCompat(.V3_0)) Externs.glUniform3ui else @compileError("glUniform3ui on available with GLES 3.0+"); //(location: GLint, v0: GLuint, v1: GLuint, v2: GLuint) void;
-        pub const glUniform4ui = if (api.hasCompat(.V3_0)) Externs.glUniform4ui else @compileError("glUniform4ui on available with GLES 3.0+"); //(location: GLint, v0: GLuint, v1: GLuint, v2: GLuint, v3: GLuint) void;
-        pub const glUniform1uiv = if (api.hasCompat(.V3_0)) Externs.glUniform1uiv else @compileError("glUniform1uiv on available with GLES 3.0+"); //(location: GLint, count: GLsizei, value: *const GLuint) void;
-        pub const glUniform2uiv = if (api.hasCompat(.V3_0)) Externs.glUniform2uiv else @compileError("glUniform2uiv on available with GLES 3.0+"); //(location: GLint, count: GLsizei, value: *const GLuint) void;
-        pub const glUniform3uiv = if (api.hasCompat(.V3_0)) Externs.glUniform3uiv else @compileError("glUniform3uiv on available with GLES 3.0+"); //(location: GLint, count: GLsizei, value: *const GLuint) void;
-        pub const glUniform4uiv = if (api.hasCompat(.V3_0)) Externs.glUniform4uiv else @compileError("glUniform4uiv on available with GLES 3.0+"); //(location: GLint, count: GLsizei, value: *const GLuint) void;
-        pub const glClearBufferiv = if (api.hasCompat(.V3_0)) Externs.glClearBufferiv else @compileError("glClearBufferiv on available with GLES 3.0+"); //(buffer: GLenum, drawbuffer: GLint, value: *const GLint) void;
-        pub const glClearBufferuiv = if (api.hasCompat(.V3_0)) Externs.glClearBufferuiv else @compileError("glClearBufferuiv on available with GLES 3.0+"); //(buffer: GLenum, drawbuffer: GLint, value: *const GLuint) void;
-        pub const glClearBufferfv = if (api.hasCompat(.V3_0)) Externs.glClearBufferfv else @compileError("glClearBufferfv on available with GLES 3.0+"); //(buffer: GLenum, drawbuffer: GLint, value: *const GLfloat) void;
-        pub const glClearBufferfi = if (api.hasCompat(.V3_0)) Externs.glClearBufferfi else @compileError("glClearBufferfi on available with GLES 3.0+"); //(buffer: GLenum, drawbuffer: GLint, depth: GLfloat, stencil: GLint) void;
-        pub const glGetStringi = if (api.hasCompat(.V3_0)) Bindings.glGetStringi else @compileError("glGetStringi on available with GLES 3.0+"); //(name: GLenum, index: GLuint) [*]const GLubyte;
-        pub const glCopyBufferSubData = if (api.hasCompat(.V3_0)) Externs.glCopyBufferSubData else @compileError("glCopyBufferSubData on available with GLES 3.0+"); //(readTarget: GLenum, writeTarget: GLenum, readOffset: GLintptr, writeOffset: GLintptr, size: GLsizeiptr) void;
-        pub const glGetUniformIndices = if (api.hasCompat(.V3_0)) Externs.glGetUniformIndices else @compileError("glGetUniformIndices on available with GLES 3.0+"); //(program: GLuint, uniformCount: GLsizei, uniformNames: *const *const GLchar, uniformIndices: *GLuint) void;
-        pub const glGetActiveUniformsiv = if (api.hasCompat(.V3_0)) Externs.glGetActiveUniformsiv else @compileError("glGetActiveUniformsiv on available with GLES 3.0+"); //(program: GLuint, uniformCount: GLsizei, uniformIndices: *const GLuint, pname: GLenum, params: *GLint) void;
-        pub const glGetUniformBlockIndex = if (api.hasCompat(.V3_0)) Externs.glGetUniformBlockIndex else @compileError("glGetUniformBlockIndex on available with GLES 3.0+"); //(program: GLuint, uniformBlockName: *const GLchar) GLuint;
-        pub const glGetActiveUniformBlockiv = if (api.hasCompat(.V3_0)) Externs.glGetActiveUniformBlockiv else @compileError("glGetActiveUniformBlockiv on available with GLES 3.0+"); //(program: GLuint, uniformBlockIndex: GLuint, pname: GLenum, params: *GLint) void;
-        pub const glGetActiveUniformBlockName = if (api.hasCompat(.V3_0)) Externs.glGetActiveUniformBlockName else @compileError("glGetActiveUniformBlockName on available with GLES 3.0+"); //(program: GLuint, uniformBlockIndex: GLuint, bufSize: GLsizei, length: *GLsizei, uniformBlockName: *GLchar) void;
-        pub const glUniformBlockBinding = if (api.hasCompat(.V3_0)) Externs.glUniformBlockBinding else @compileError("glUniformBlockBinding on available with GLES 3.0+"); //(program: GLuint, uniformBlockIndex: GLuint, uniformBlockBinding: GLuint) void;
-        pub const glDrawArraysInstanced = if (api.hasCompat(.V3_0)) Externs.glDrawArraysInstanced else @compileError("glDrawArraysInstanced on available with GLES 3.0+"); //(mode: GLenum, first: GLint, count: GLsizei, instancecount: GLsizei) void;
-        pub const glDrawElementsInstanced = if (api.hasCompat(.V3_0)) Externs.glDrawElementsInstanced else @compileError("glDrawElementsInstanced on available with GLES 3.0+"); //(mode: GLenum, count: GLsizei, type: GLenum, indices: *const void, instancecount: GLsizei) void;
-        pub const glFenceSync = if (api.hasCompat(.V3_0)) Externs.glFenceSync else @compileError("glFenceSync on available with GLES 3.0+"); //(condition: GLenum, flags: GLbitfield) GLsync;
-        pub const glIsSync = if (api.hasCompat(.V3_0)) Externs.glIsSync else @compileError("glIsSync on available with GLES 3.0+"); //(sync: GLsync) GLboolean;
-        pub const glDeleteSync = if (api.hasCompat(.V3_0)) Externs.glDeleteSync else @compileError("glDeleteSync on available with GLES 3.0+"); //(sync: GLsync) void;
-        pub const glClientWaitSync = if (api.hasCompat(.V3_0)) Externs.glClientWaitSync else @compileError("glClientWaitSync on available with GLES 3.0+"); //(sync: GLsync, flags: GLbitfield, timeout: GLuint64) GLenum;
-        pub const glWaitSync = if (api.hasCompat(.V3_0)) Externs.glWaitSync else @compileError("glWaitSync on available with GLES 3.0+"); //(sync: GLsync, flags: GLbitfield, timeout: GLuint64) void;
-        pub const glGetInteger64v = if (api.hasCompat(.V3_0)) Externs.glGetInteger64v else @compileError("glGetInteger64v on available with GLES 3.0+"); //(pname: GLenum, data: *GLint64) void;
-        pub const glGetSynciv = if (api.hasCompat(.V3_0)) Externs.glGetSynciv else @compileError("glGetSynciv on available with GLES 3.0+"); //(sync: GLsync, pname: GLenum, count: GLsizei, length: *GLsizei, values: *GLint) void;
-        pub const glGetInteger64i_v = if (api.hasCompat(.V3_0)) Externs.glGetInteger64i_v else @compileError("glGetInteger64i_v on available with GLES 3.0+"); //(target: GLenum, index: GLuint, data: *GLint64) void;
-        pub const glGetBufferParameteri64v = if (api.hasCompat(.V3_0)) Externs.glGetBufferParameteri64v else @compileError("glGetBufferParameteri64v on available with GLES 3.0+"); //(target: GLenum, pname: GLenum, params: *GLint64) void;
-        pub const glGenSamplers = if (api.hasCompat(.V3_0)) Externs.glGenSamplers else @compileError("glGenSamplers on available with GLES 3.0+"); //(count: GLsizei, samplers: *GLuint) void;
-        pub const glDeleteSamplers = if (api.hasCompat(.V3_0)) Externs.glDeleteSamplers else @compileError("glDeleteSamplers on available with GLES 3.0+"); //(count: GLsizei, samplers: *const GLuint) void;
-        pub const glIsSampler = if (api.hasCompat(.V3_0)) Externs.glIsSampler else @compileError("glIsSampler on available with GLES 3.0+"); //(sampler: GLuint) GLboolean;
-        pub const glBindSampler = if (api.hasCompat(.V3_0)) Externs.glBindSampler else @compileError("glBindSampler on available with GLES 3.0+"); //(unit: GLuint, sampler: GLuint) void;
-        pub const glSamplerParameteri = if (api.hasCompat(.V3_0)) Externs.glSamplerParameteri else @compileError("glSamplerParameteri on available with GLES 3.0+"); //(sampler: GLuint, pname: GLenum, param: GLint) void;
-        pub const glSamplerParameteriv = if (api.hasCompat(.V3_0)) Externs.glSamplerParameteriv else @compileError("glSamplerParameteriv on available with GLES 3.0+"); //(sampler: GLuint, pname: GLenum, param: *const GLint) void;
-        pub const glSamplerParameterf = if (api.hasCompat(.V3_0)) Externs.glSamplerParameterf else @compileError("glSamplerParameterf on available with GLES 3.0+"); //(sampler: GLuint, pname: GLenum, param: GLfloat) void;
-        pub const glSamplerParameterfv = if (api.hasCompat(.V3_0)) Externs.glSamplerParameterfv else @compileError("glSamplerParameterfv on available with GLES 3.0+"); //(sampler: GLuint, pname: GLenum, param: *const GLfloat) void;
-        pub const glGetSamplerParameteriv = if (api.hasCompat(.V3_0)) Externs.glGetSamplerParameteriv else @compileError("glGetSamplerParameteriv on available with GLES 3.0+"); //(sampler: GLuint, pname: GLenum, params: *GLint) void;
-        pub const glGetSamplerParameterfv = if (api.hasCompat(.V3_0)) Externs.glGetSamplerParameterfv else @compileError("glGetSamplerParameterfv on available with GLES 3.0+"); //(sampler: GLuint, pname: GLenum, params: *GLfloat) void;
-        pub const glVertexAttribDivisor = if (api.hasCompat(.V3_0)) Externs.glVertexAttribDivisor else @compileError("glVertexAttribDivisor on available with GLES 3.0+"); //(index: GLuint, divisor: GLuint) void;
-        pub const glBindTransformFeedback = if (api.hasCompat(.V3_0)) Externs.glBindTransformFeedback else @compileError("glBindTransformFeedback on available with GLES 3.0+"); //(target: GLenum, id: GLuint) void;
-        pub const glDeleteTransformFeedbacks = if (api.hasCompat(.V3_0)) Externs.glDeleteTransformFeedbacks else @compileError("glDeleteTransformFeedbacks on available with GLES 3.0+"); //(n: GLsizei, ids: *const GLuint) void;
-        pub const glGenTransformFeedbacks = if (api.hasCompat(.V3_0)) Externs.glGenTransformFeedbacks else @compileError("glGenTransformFeedbacks on available with GLES 3.0+"); //(n: GLsizei, ids: *GLuint) void;
-        pub const glIsTransformFeedback = if (api.hasCompat(.V3_0)) Externs.glIsTransformFeedback else @compileError("glIsTransformFeedback on available with GLES 3.0+"); //(id: GLuint) GLboolean;
-        pub const glPauseTransformFeedback = if (api.hasCompat(.V3_0)) Externs.glPauseTransformFeedback else @compileError("glPauseTransformFeedback on available with GLES 3.0+"); //() void;
-        pub const glResumeTransformFeedback = if (api.hasCompat(.V3_0)) Externs.glResumeTransformFeedback else @compileError("glResumeTransformFeedback on available with GLES 3.0+"); //() void;
-        pub const glGetProgramBinary = if (api.hasCompat(.V3_0)) Externs.glGetProgramBinary else @compileError("glGetProgramBinary on available with GLES 3.0+"); //(program: GLuint, bufSize: GLsizei, length: *GLsizei, binaryFormat: *GLenum, binary: *void) void;
-        pub const glProgramBinary = if (api.hasCompat(.V3_0)) Externs.glProgramBinary else @compileError("glProgramBinary on available with GLES 3.0+"); //(program: GLuint, binaryFormat: GLenum, binary: *const void, length: GLsizei) void;
-        pub const glProgramParameteri = if (api.hasCompat(.V3_0)) Externs.glProgramParameteri else @compileError("glProgramParameteri on available with GLES 3.0+"); //(program: GLuint, pname: GLenum, value: GLint) void;
-        pub const glInvalidateFramebuffer = if (api.hasCompat(.V3_0)) Externs.glInvalidateFramebuffer else @compileError("glInvalidateFramebuffer on available with GLES 3.0+"); //(target: GLenum, numAttachments: GLsizei, attachments: *const GLenum) void;
-        pub const glInvalidateSubFramebuffer = if (api.hasCompat(.V3_0)) Externs.glInvalidateSubFramebuffer else @compileError("glInvalidateSubFramebuffer on available with GLES 3.0+"); //(target: GLenum, numAttachments: GLsizei, attachments: *const GLenum, x: GLint, y: GLint, width: GLsizei, height: GLsizei) void;
-        pub const glTexStorage2D = if (api.hasCompat(.V3_0)) Externs.glTexStorage2D else @compileError("glTexStorage2D on available with GLES 3.0+"); //(target: GLenum, levels: GLsizei, internalformat: GLenum, width: GLsizei, height: GLsizei) void;
-        pub const glTexStorage3D = if (api.hasCompat(.V3_0)) Externs.glTexStorage3D else @compileError("glTexStorage3D on available with GLES 3.0+"); //(target: GLenum, levels: GLsizei, internalformat: GLenum, width: GLsizei, height: GLsizei, depth: GLsizei) void;
-        pub const glGetInternalformativ = if (api.hasCompat(.V3_0)) Externs.glGetInternalformativ else @compileError("glGetInternalformativ on available with GLES 3.0+"); //(target: GLenum, internalformat: GLenum, pname: GLenum, count: GLsizei, params: *GLint) void;
+        pub const glReadBuffer = if (api.hasCompat(.V3_0)) Externs.glReadBuffer else @compileError("glReadBuffer on available with GLES 3.0+");
+        pub const glDrawRangeElements = if (api.hasCompat(.V3_0)) Bindings.glDrawRangeElements else @compileError("glDrawRangeElements on available with GLES 3.0+");
+        pub const glTexImage3D = if (api.hasCompat(.V3_0)) Bindings.glTexImage3D else @compileError("glTexImage3D on available with GLES 3.0+");
+        pub const glTexSubImage3D = if (api.hasCompat(.V3_0)) Bindings.glTexSubImage3D else @compileError("glTexSubImage3D on available with GLES 3.0+");
+        pub const glCopyTexSubImage3D = if (api.hasCompat(.V3_0)) Externs.glCopyTexSubImage3D else @compileError("glCopyTexSubImage3D on available with GLES 3.0+");
+        pub const glCompressedTexImage3D = if (api.hasCompat(.V3_0)) Bindings.glCompressedTexImage3D else @compileError("glCompressedTexImage3D on available with GLES 3.0+");
+        pub const glCompressedTexSubImage3D = if (api.hasCompat(.V3_0)) Bindings.glCompressedTexSubImage3D else @compileError("glCompressedTexSubImage3D on available with GLES 3.0+");
+        pub const glGenQueries = if (api.hasCompat(.V3_0)) Bindings.glGenQueries else @compileError("glGenQueries on available with GLES 3.0+");
+        pub const glDeleteQueries = if (api.hasCompat(.V3_0)) Bindings.glDeleteQueries else @compileError("glDeleteQueries on available with GLES 3.0+");
+        pub const glIsQuery = if (api.hasCompat(.V3_0)) Externs.glIsQuery else @compileError("glIsQuery on available with GLES 3.0+");
+        pub const glBeginQuery = if (api.hasCompat(.V3_0)) Externs.glBeginQuery else @compileError("glBeginQuery on available with GLES 3.0+");
+        pub const glEndQuery = if (api.hasCompat(.V3_0)) Externs.glEndQuery else @compileError("glEndQuery on available with GLES 3.0+");
+        pub const glGetQueryiv = if (api.hasCompat(.V3_0)) Bindings.glGetQueryiv else @compileError("glGetQueryiv on available with GLES 3.0+");
+        pub const glGetQueryObjectuiv = if (api.hasCompat(.V3_0)) Bindings.glGetQueryObjectuiv else @compileError("glGetQueryObjectuiv on available with GLES 3.0+");
+        pub const glDrawBuffers = if (api.hasCompat(.V3_0)) Bindings.glDrawBuffers else @compileError("glDrawBuffers on available with GLES 3.0+");
+        pub const glUniformMatrix2x3fv = if (api.hasCompat(.V3_0)) Bindings.glUniformMatrix2x3fv else @compileError("glUniformMatrix2x3fv on available with GLES 3.0+");
+        pub const glUniformMatrix3x2fv = if (api.hasCompat(.V3_0)) Bindings.glUniformMatrix3x2fv else @compileError("glUniformMatrix3x2fv on available with GLES 3.0+");
+        pub const glUniformMatrix2x4fv = if (api.hasCompat(.V3_0)) Bindings.glUniformMatrix2x4fv else @compileError("glUniformMatrix2x4fv on available with GLES 3.0+");
+        pub const glUniformMatrix4x2fv = if (api.hasCompat(.V3_0)) Bindings.glUniformMatrix4x2fv else @compileError("glUniformMatrix4x2fv on available with GLES 3.0+");
+        pub const glUniformMatrix3x4fv = if (api.hasCompat(.V3_0)) Bindings.glUniformMatrix3x4fv else @compileError("glUniformMatrix3x4fv on available with GLES 3.0+");
+        pub const glUniformMatrix4x3fv = if (api.hasCompat(.V3_0)) Bindings.glUniformMatrix4x3fv else @compileError("glUniformMatrix4x3fv on available with GLES 3.0+");
+        pub const glBlitFramebuffer = if (api.hasCompat(.V3_0)) Externs.glBlitFramebuffer else @compileError("glBlitFramebuffer on available with GLES 3.0+");
+        pub const glRenderbufferStorageMultisample = if (api.hasCompat(.V3_0)) Externs.glRenderbufferStorageMultisample else @compileError("glRenderbufferStorageMultisample on available with GLES 3.0+");
+        pub const glFramebufferTextureLayer = if (api.hasCompat(.V3_0)) Externs.glFramebufferTextureLayer else @compileError("glFramebufferTextureLayer on available with GLES 3.0+");
+        pub const glBindVertexArray = if (api.hasCompat(.V3_0)) Externs.glBindVertexArray else @compileError("glBindVertexArray on available with GLES 3.0+");
+        pub const glDeleteVertexArrays = if (api.hasCompat(.V3_0)) Bindings.glDeleteVertexArrays else @compileError("glDeleteVertexArrays on available with GLES 3.0+");
+        pub const glGenVertexArrays = if (api.hasCompat(.V3_0)) Bindings.glGenVertexArrays else @compileError("glGenVertexArrays on available with GLES 3.0+");
+        pub const glIsVertexArray = if (api.hasCompat(.V3_0)) Externs.glIsVertexArray else @compileError("glIsVertexArray on available with GLES 3.0+");
+        pub const glGetIntegeri_v = if (api.hasCompat(.V3_0)) Bindings.glGetIntegeri_v else @compileError("glGetIntegeri_v on available with GLES 3.0+");
+        pub const glBeginTransformFeedback = if (api.hasCompat(.V3_0)) Externs.glBeginTransformFeedback else @compileError("glBeginTransformFeedback on available with GLES 3.0+");
+        pub const glEndTransformFeedback = if (api.hasCompat(.V3_0)) Externs.glEndTransformFeedback else @compileError("glEndTransformFeedback on available with GLES 3.0+");
+        pub const glBindBufferRange = if (api.hasCompat(.V3_0)) Externs.glBindBufferRange else @compileError("glBindBufferRange on available with GLES 3.0+");
+        pub const glBindBufferBase = if (api.hasCompat(.V3_0)) Externs.glBindBufferBase else @compileError("glBindBufferBase on available with GLES 3.0+");
+        pub const glTransformFeedbackVaryings = if (api.hasCompat(.V3_0)) Bindings.glTransformFeedbackVaryings else @compileError("glTransformFeedbackVaryings on available with GLES 3.0+");
+        pub const glGetTransformFeedbackVarying = if (api.hasCompat(.V3_0)) Bindings.glGetTransformFeedbackVarying else @compileError("glGetTransformFeedbackVarying on available with GLES 3.0+");
+        pub const glVertexAttribIPointer = if (api.hasCompat(.V3_0)) Externs.glVertexAttribIPointer else @compileError("glVertexAttribIPointer on available with GLES 3.0+");
+        pub const glGetVertexAttribIiv = if (api.hasCompat(.V3_0)) Bindings.glGetVertexAttribIiv else @compileError("glGetVertexAttribIiv on available with GLES 3.0+");
+        pub const glGetVertexAttribIuiv = if (api.hasCompat(.V3_0)) Bindings.glGetVertexAttribIuiv else @compileError("glGetVertexAttribIuiv on available with GLES 3.0+");
+        pub const glVertexAttribI4i = if (api.hasCompat(.V3_0)) Externs.glVertexAttribI4i else @compileError("glVertexAttribI4i on available with GLES 3.0+");
+        pub const glVertexAttribI4ui = if (api.hasCompat(.V3_0)) Externs.glVertexAttribI4ui else @compileError("glVertexAttribI4ui on available with GLES 3.0+");
+        pub const glVertexAttribI4iv = if (api.hasCompat(.V3_0)) Bindings.glVertexAttribI4iv else @compileError("glVertexAttribI4iv on available with GLES 3.0+");
+        pub const glVertexAttribI4uiv = if (api.hasCompat(.V3_0)) Bindings.glVertexAttribI4uiv else @compileError("glVertexAttribI4uiv on available with GLES 3.0+");
+        pub const glGetUniformuiv = if (api.hasCompat(.V3_0)) Externs.glGetUniformuiv else @compileError("glGetUniformuiv on available with GLES 3.0+");
+        pub const glGetFragDataLocation = if (api.hasCompat(.V3_0)) Externs.glGetFragDataLocation else @compileError("glGetFragDataLocation on available with GLES 3.0+");
+        pub const glUniform1ui = if (api.hasCompat(.V3_0)) Externs.glUniform1ui else @compileError("glUniform1ui on available with GLES 3.0+");
+        pub const glUniform2ui = if (api.hasCompat(.V3_0)) Externs.glUniform2ui else @compileError("glUniform2ui on available with GLES 3.0+");
+        pub const glUniform3ui = if (api.hasCompat(.V3_0)) Externs.glUniform3ui else @compileError("glUniform3ui on available with GLES 3.0+");
+        pub const glUniform4ui = if (api.hasCompat(.V3_0)) Externs.glUniform4ui else @compileError("glUniform4ui on available with GLES 3.0+");
+        pub const glUniform1uiv = if (api.hasCompat(.V3_0)) Bindings.glUniform1uiv else @compileError("glUniform1uiv on available with GLES 3.0+");
+        pub const glUniform2uiv = if (api.hasCompat(.V3_0)) Bindings.glUniform2uiv else @compileError("glUniform2uiv on available with GLES 3.0+");
+        pub const glUniform3uiv = if (api.hasCompat(.V3_0)) Bindings.glUniform3uiv else @compileError("glUniform3uiv on available with GLES 3.0+");
+        pub const glUniform4uiv = if (api.hasCompat(.V3_0)) Bindings.glUniform4uiv else @compileError("glUniform4uiv on available with GLES 3.0+");
+        pub const glClearBufferiv = if (api.hasCompat(.V3_0)) Bindings.glClearBufferiv else @compileError("glClearBufferiv on available with GLES 3.0+");
+        pub const glClearBufferuiv = if (api.hasCompat(.V3_0)) Bindings.glClearBufferuiv else @compileError("glClearBufferuiv on available with GLES 3.0+");
+        pub const glClearBufferfv = if (api.hasCompat(.V3_0)) Bindings.glClearBufferfv else @compileError("glClearBufferfv on available with GLES 3.0+");
+        pub const glClearBufferfi = if (api.hasCompat(.V3_0)) Externs.glClearBufferfi else @compileError("glClearBufferfi on available with GLES 3.0+");
+        pub const glGetStringi = if (api.hasCompat(.V3_0)) Bindings.glGetStringi else @compileError("glGetStringi on available with GLES 3.0+");
+        pub const glCopyBufferSubData = if (api.hasCompat(.V3_0)) Externs.glCopyBufferSubData else @compileError("glCopyBufferSubData on available with GLES 3.0+");
+        pub const glGetUniformIndices = if (api.hasCompat(.V3_0)) Bindings.glGetUniformIndices else @compileError("glGetUniformIndices on available with GLES 3.0+");
+        pub const glGetActiveUniformsiv = if (api.hasCompat(.V3_0)) Bindings.glGetActiveUniformsiv else @compileError("glGetActiveUniformsiv on available with GLES 3.0+");
+        pub const glGetUniformBlockIndex = if (api.hasCompat(.V3_0)) Bindings.glGetUniformBlockIndex else @compileError("glGetUniformBlockIndex on available with GLES 3.0+");
+        pub const glGetActiveUniformBlockiv = if (api.hasCompat(.V3_0)) Bindings.glGetActiveUniformBlockiv else @compileError("glGetActiveUniformBlockiv on available with GLES 3.0+");
+        pub const glGetActiveUniformBlockName = if (api.hasCompat(.V3_0)) Bindings.glGetActiveUniformBlockName else @compileError("glGetActiveUniformBlockName on available with GLES 3.0+");
+        pub const glUniformBlockBinding = if (api.hasCompat(.V3_0)) Externs.glUniformBlockBinding else @compileError("glUniformBlockBinding on available with GLES 3.0+");
+        pub const glDrawArraysInstanced = if (api.hasCompat(.V3_0)) Externs.glDrawArraysInstanced else @compileError("glDrawArraysInstanced on available with GLES 3.0+");
+        pub const glDrawElementsInstanced = if (api.hasCompat(.V3_0)) Bindings.glDrawElementsInstanced else @compileError("glDrawElementsInstanced on available with GLES 3.0+");
+        pub const glFenceSync = if (api.hasCompat(.V3_0)) Externs.glFenceSync else @compileError("glFenceSync on available with GLES 3.0+");
+        pub const glIsSync = if (api.hasCompat(.V3_0)) Externs.glIsSync else @compileError("glIsSync on available with GLES 3.0+");
+        pub const glDeleteSync = if (api.hasCompat(.V3_0)) Externs.glDeleteSync else @compileError("glDeleteSync on available with GLES 3.0+");
+        pub const glClientWaitSync = if (api.hasCompat(.V3_0)) Externs.glClientWaitSync else @compileError("glClientWaitSync on available with GLES 3.0+");
+        pub const glWaitSync = if (api.hasCompat(.V3_0)) Externs.glWaitSync else @compileError("glWaitSync on available with GLES 3.0+");
+        pub const glGetInteger64v = if (api.hasCompat(.V3_0)) Bindings.glGetInteger64v else @compileError("glGetInteger64v on available with GLES 3.0+");
+        pub const glGetSynciv = if (api.hasCompat(.V3_0)) Bindings.glGetSynciv else @compileError("glGetSynciv on available with GLES 3.0+");
+        pub const glGetInteger64i_v = if (api.hasCompat(.V3_0)) Bindings.glGetInteger64i_v else @compileError("glGetInteger64i_v on available with GLES 3.0+");
+        pub const glGetBufferParameteri64v = if (api.hasCompat(.V3_0)) Bindings.glGetBufferParameteri64v else @compileError("glGetBufferParameteri64v on available with GLES 3.0+");
+        pub const glGenSamplers = if (api.hasCompat(.V3_0)) Bindings.glGenSamplers else @compileError("glGenSamplers on available with GLES 3.0+");
+        pub const glDeleteSamplers = if (api.hasCompat(.V3_0)) Bindings.glDeleteSamplers else @compileError("glDeleteSamplers on available with GLES 3.0+");
+        pub const glIsSampler = if (api.hasCompat(.V3_0)) Externs.glIsSampler else @compileError("glIsSampler on available with GLES 3.0+");
+        pub const glBindSampler = if (api.hasCompat(.V3_0)) Externs.glBindSampler else @compileError("glBindSampler on available with GLES 3.0+");
+        pub const glSamplerParameteri = if (api.hasCompat(.V3_0)) Externs.glSamplerParameteri else @compileError("glSamplerParameteri on available with GLES 3.0+");
+        pub const glSamplerParameteriv = if (api.hasCompat(.V3_0)) Bindings.glSamplerParameteriv else @compileError("glSamplerParameteriv on available with GLES 3.0+");
+        pub const glSamplerParameterf = if (api.hasCompat(.V3_0)) Externs.glSamplerParameterf else @compileError("glSamplerParameterf on available with GLES 3.0+");
+        pub const glSamplerParameterfv = if (api.hasCompat(.V3_0)) Bindings.glSamplerParameterfv else @compileError("glSamplerParameterfv on available with GLES 3.0+");
+        pub const glGetSamplerParameteriv = if (api.hasCompat(.V3_0)) Bindings.glGetSamplerParameteriv else @compileError("glGetSamplerParameteriv on available with GLES 3.0+");
+        pub const glGetSamplerParameterfv = if (api.hasCompat(.V3_0)) Bindings.glGetSamplerParameterfv else @compileError("glGetSamplerParameterfv on available with GLES 3.0+");
+        pub const glVertexAttribDivisor = if (api.hasCompat(.V3_0)) Externs.glVertexAttribDivisor else @compileError("glVertexAttribDivisor on available with GLES 3.0+");
+        pub const glBindTransformFeedback = if (api.hasCompat(.V3_0)) Externs.glBindTransformFeedback else @compileError("glBindTransformFeedback on available with GLES 3.0+");
+        pub const glDeleteTransformFeedbacks = if (api.hasCompat(.V3_0)) Bindings.glDeleteTransformFeedbacks else @compileError("glDeleteTransformFeedbacks on available with GLES 3.0+");
+        pub const glGenTransformFeedbacks = if (api.hasCompat(.V3_0)) Bindings.glGenTransformFeedbacks else @compileError("glGenTransformFeedbacks on available with GLES 3.0+");
+        pub const glIsTransformFeedback = if (api.hasCompat(.V3_0)) Externs.glIsTransformFeedback else @compileError("glIsTransformFeedback on available with GLES 3.0+");
+        pub const glPauseTransformFeedback = if (api.hasCompat(.V3_0)) Externs.glPauseTransformFeedback else @compileError("glPauseTransformFeedback on available with GLES 3.0+");
+        pub const glResumeTransformFeedback = if (api.hasCompat(.V3_0)) Externs.glResumeTransformFeedback else @compileError("glResumeTransformFeedback on available with GLES 3.0+");
+        pub const glGetProgramBinary = if (api.hasCompat(.V3_0)) Bindings.glGetProgramBinary else @compileError("glGetProgramBinary on available with GLES 3.0+");
+        pub const glProgramBinary = if (api.hasCompat(.V3_0)) Bindings.glProgramBinary else @compileError("glProgramBinary on available with GLES 3.0+");
+        pub const glProgramParameteri = if (api.hasCompat(.V3_0)) Externs.glProgramParameteri else @compileError("glProgramParameteri on available with GLES 3.0+");
+        pub const glInvalidateFramebuffer = if (api.hasCompat(.V3_0)) Bindings.glInvalidateFramebuffer else @compileError("glInvalidateFramebuffer on available with GLES 3.0+");
+        pub const glInvalidateSubFramebuffer = if (api.hasCompat(.V3_0)) Bindings.glInvalidateSubFramebuffer else @compileError("glInvalidateSubFramebuffer on available with GLES 3.0+");
+        pub const glTexStorage2D = if (api.hasCompat(.V3_0)) Externs.glTexStorage2D else @compileError("glTexStorage2D on available with GLES 3.0+");
+        pub const glTexStorage3D = if (api.hasCompat(.V3_0)) Externs.glTexStorage3D else @compileError("glTexStorage3D on available with GLES 3.0+");
+        pub const glGetInternalformativ = if (api.hasCompat(.V3_0)) Bindings.glGetInternalformativ else @compileError("glGetInternalformativ on available with GLES 3.0+");
 
         // v3.1
-        const GL_COMPUTE_SHADER: GLenum = 0x91B9;
-        const GL_MAX_COMPUTE_UNIFORM_BLOCKS: GLenum = 0x91BB;
-        const GL_MAX_COMPUTE_TEXTURE_IMAGE_UNITS: GLenum = 0x91BC;
-        const GL_MAX_COMPUTE_IMAGE_UNIFORMS: GLenum = 0x91BD;
-        const GL_MAX_COMPUTE_SHARED_MEMORY_SIZE: GLenum = 0x8262;
-        const GL_MAX_COMPUTE_UNIFORM_COMPONENTS: GLenum = 0x8263;
-        const GL_MAX_COMPUTE_ATOMIC_COUNTER_BUFFERS: GLenum = 0x8264;
-        const GL_MAX_COMPUTE_ATOMIC_COUNTERS: GLenum = 0x8265;
-        const GL_MAX_COMBINED_COMPUTE_UNIFORM_COMPONENTS: GLenum = 0x8266;
-        const GL_MAX_COMPUTE_WORK_GROUP_INVOCATIONS: GLenum = 0x90EB;
-        const GL_MAX_COMPUTE_WORK_GROUP_COUNT: GLenum = 0x91BE;
-        const GL_MAX_COMPUTE_WORK_GROUP_SIZE: GLenum = 0x91BF;
-        const GL_COMPUTE_WORK_GROUP_SIZE: GLenum = 0x8267;
-        const GL_DISPATCH_INDIRECT_BUFFER: GLenum = 0x90EE;
-        const GL_DISPATCH_INDIRECT_BUFFER_BINDING: GLenum = 0x90EF;
-        const GL_COMPUTE_SHADER_BIT: GLenum = 0x00000020;
-        const GL_DRAW_INDIRECT_BUFFER: GLenum = 0x8F3F;
-        const GL_DRAW_INDIRECT_BUFFER_BINDING: GLenum = 0x8F43;
-        const GL_MAX_UNIFORM_LOCATIONS: GLenum = 0x826E;
-        const GL_FRAMEBUFFER_DEFAULT_WIDTH: GLenum = 0x9310;
-        const GL_FRAMEBUFFER_DEFAULT_HEIGHT: GLenum = 0x9311;
-        const GL_FRAMEBUFFER_DEFAULT_SAMPLES: GLenum = 0x9313;
-        const GL_FRAMEBUFFER_DEFAULT_FIXED_SAMPLE_LOCATIONS: GLenum = 0x9314;
-        const GL_MAX_FRAMEBUFFER_WIDTH: GLenum = 0x9315;
-        const GL_MAX_FRAMEBUFFER_HEIGHT: GLenum = 0x9316;
-        const GL_MAX_FRAMEBUFFER_SAMPLES: GLenum = 0x9318;
-        const GL_UNIFORM: GLenum = 0x92E1;
-        const GL_UNIFORM_BLOCK: GLenum = 0x92E2;
-        const GL_PROGRAM_INPUT: GLenum = 0x92E3;
-        const GL_PROGRAM_OUTPUT: GLenum = 0x92E4;
-        const GL_BUFFER_VARIABLE: GLenum = 0x92E5;
-        const GL_SHADER_STORAGE_BLOCK: GLenum = 0x92E6;
-        const GL_ATOMIC_COUNTER_BUFFER: GLenum = 0x92C0;
-        const GL_TRANSFORM_FEEDBACK_VARYING: GLenum = 0x92F4;
-        const GL_ACTIVE_RESOURCES: GLenum = 0x92F5;
-        const GL_MAX_NAME_LENGTH: GLenum = 0x92F6;
-        const GL_MAX_NUM_ACTIVE_VARIABLES: GLenum = 0x92F7;
-        const GL_NAME_LENGTH: GLenum = 0x92F9;
-        const GL_TYPE: GLenum = 0x92FA;
-        const GL_ARRAY_SIZE: GLenum = 0x92FB;
-        const GL_OFFSET: GLenum = 0x92FC;
-        const GL_BLOCK_INDEX: GLenum = 0x92FD;
-        const GL_ARRAY_STRIDE: GLenum = 0x92FE;
-        const GL_MATRIX_STRIDE: GLenum = 0x92FF;
-        const GL_IS_ROW_MAJOR: GLenum = 0x9300;
-        const GL_ATOMIC_COUNTER_BUFFER_INDEX: GLenum = 0x9301;
-        const GL_BUFFER_BINDING: GLenum = 0x9302;
-        const GL_BUFFER_DATA_SIZE: GLenum = 0x9303;
-        const GL_NUM_ACTIVE_VARIABLES: GLenum = 0x9304;
-        const GL_ACTIVE_VARIABLES: GLenum = 0x9305;
-        const GL_REFERENCED_BY_VERTEX_SHADER: GLenum = 0x9306;
-        const GL_REFERENCED_BY_FRAGMENT_SHADER: GLenum = 0x930A;
-        const GL_REFERENCED_BY_COMPUTE_SHADER: GLenum = 0x930B;
-        const GL_TOP_LEVEL_ARRAY_SIZE: GLenum = 0x930C;
-        const GL_TOP_LEVEL_ARRAY_STRIDE: GLenum = 0x930D;
-        const GL_LOCATION: GLenum = 0x930E;
-        const GL_VERTEX_SHADER_BIT: GLenum = 0x00000001;
-        const GL_FRAGMENT_SHADER_BIT: GLenum = 0x00000002;
-        const GL_ALL_SHADER_BITS: GLenum = 0xFFFFFFFF;
-        const GL_PROGRAM_SEPARABLE: GLenum = 0x8258;
-        const GL_ACTIVE_PROGRAM: GLenum = 0x8259;
-        const GL_PROGRAM_PIPELINE_BINDING: GLenum = 0x825A;
-        const GL_ATOMIC_COUNTER_BUFFER_BINDING: GLenum = 0x92C1;
-        const GL_ATOMIC_COUNTER_BUFFER_START: GLenum = 0x92C2;
-        const GL_ATOMIC_COUNTER_BUFFER_SIZE: GLenum = 0x92C3;
-        const GL_MAX_VERTEX_ATOMIC_COUNTER_BUFFERS: GLenum = 0x92CC;
-        const GL_MAX_FRAGMENT_ATOMIC_COUNTER_BUFFERS: GLenum = 0x92D0;
-        const GL_MAX_COMBINED_ATOMIC_COUNTER_BUFFERS: GLenum = 0x92D1;
-        const GL_MAX_VERTEX_ATOMIC_COUNTERS: GLenum = 0x92D2;
-        const GL_MAX_FRAGMENT_ATOMIC_COUNTERS: GLenum = 0x92D6;
-        const GL_MAX_COMBINED_ATOMIC_COUNTERS: GLenum = 0x92D7;
-        const GL_MAX_ATOMIC_COUNTER_BUFFER_SIZE: GLenum = 0x92D8;
-        const GL_MAX_ATOMIC_COUNTER_BUFFER_BINDINGS: GLenum = 0x92DC;
-        const GL_ACTIVE_ATOMIC_COUNTER_BUFFERS: GLenum = 0x92D9;
-        const GL_UNSIGNED_INT_ATOMIC_COUNTER: GLenum = 0x92DB;
-        const GL_MAX_IMAGE_UNITS: GLenum = 0x8F38;
-        const GL_MAX_VERTEX_IMAGE_UNIFORMS: GLenum = 0x90CA;
-        const GL_MAX_FRAGMENT_IMAGE_UNIFORMS: GLenum = 0x90CE;
-        const GL_MAX_COMBINED_IMAGE_UNIFORMS: GLenum = 0x90CF;
-        const GL_IMAGE_BINDING_NAME: GLenum = 0x8F3A;
-        const GL_IMAGE_BINDING_LEVEL: GLenum = 0x8F3B;
-        const GL_IMAGE_BINDING_LAYERED: GLenum = 0x8F3C;
-        const GL_IMAGE_BINDING_LAYER: GLenum = 0x8F3D;
-        const GL_IMAGE_BINDING_ACCESS: GLenum = 0x8F3E;
-        const GL_IMAGE_BINDING_FORMAT: GLenum = 0x906E;
-        const GL_VERTEX_ATTRIB_ARRAY_BARRIER_BIT: GLenum = 0x00000001;
-        const GL_ELEMENT_ARRAY_BARRIER_BIT: GLenum = 0x00000002;
-        const GL_UNIFORM_BARRIER_BIT: GLenum = 0x00000004;
-        const GL_TEXTURE_FETCH_BARRIER_BIT: GLenum = 0x00000008;
-        const GL_SHADER_IMAGE_ACCESS_BARRIER_BIT: GLenum = 0x00000020;
-        const GL_COMMAND_BARRIER_BIT: GLenum = 0x00000040;
-        const GL_PIXEL_BUFFER_BARRIER_BIT: GLenum = 0x00000080;
-        const GL_TEXTURE_UPDATE_BARRIER_BIT: GLenum = 0x00000100;
-        const GL_BUFFER_UPDATE_BARRIER_BIT: GLenum = 0x00000200;
-        const GL_FRAMEBUFFER_BARRIER_BIT: GLenum = 0x00000400;
-        const GL_TRANSFORM_FEEDBACK_BARRIER_BIT: GLenum = 0x00000800;
-        const GL_ATOMIC_COUNTER_BARRIER_BIT: GLenum = 0x00001000;
-        const GL_ALL_BARRIER_BITS: GLenum = 0xFFFFFFFF;
-        const GL_IMAGE_2D: GLenum = 0x904D;
-        const GL_IMAGE_3D: GLenum = 0x904E;
-        const GL_IMAGE_CUBE: GLenum = 0x9050;
-        const GL_IMAGE_2D_ARRAY: GLenum = 0x9053;
-        const GL_INT_IMAGE_2D: GLenum = 0x9058;
-        const GL_INT_IMAGE_3D: GLenum = 0x9059;
-        const GL_INT_IMAGE_CUBE: GLenum = 0x905B;
-        const GL_INT_IMAGE_2D_ARRAY: GLenum = 0x905E;
-        const GL_UNSIGNED_INT_IMAGE_2D: GLenum = 0x9063;
-        const GL_UNSIGNED_INT_IMAGE_3D: GLenum = 0x9064;
-        const GL_UNSIGNED_INT_IMAGE_CUBE: GLenum = 0x9066;
-        const GL_UNSIGNED_INT_IMAGE_2D_ARRAY: GLenum = 0x9069;
-        const GL_IMAGE_FORMAT_COMPATIBILITY_TYPE: GLenum = 0x90C7;
-        const GL_IMAGE_FORMAT_COMPATIBILITY_BY_SIZE: GLenum = 0x90C8;
-        const GL_IMAGE_FORMAT_COMPATIBILITY_BY_CLASS: GLenum = 0x90C9;
-        const GL_READ_ONLY: GLenum = 0x88B8;
-        const GL_WRITE_ONLY: GLenum = 0x88B9;
-        const GL_READ_WRITE: GLenum = 0x88BA;
-        const GL_SHADER_STORAGE_BUFFER: GLenum = 0x90D2;
-        const GL_SHADER_STORAGE_BUFFER_BINDING: GLenum = 0x90D3;
-        const GL_SHADER_STORAGE_BUFFER_START: GLenum = 0x90D4;
-        const GL_SHADER_STORAGE_BUFFER_SIZE: GLenum = 0x90D5;
-        const GL_MAX_VERTEX_SHADER_STORAGE_BLOCKS: GLenum = 0x90D6;
-        const GL_MAX_FRAGMENT_SHADER_STORAGE_BLOCKS: GLenum = 0x90DA;
-        const GL_MAX_COMPUTE_SHADER_STORAGE_BLOCKS: GLenum = 0x90DB;
-        const GL_MAX_COMBINED_SHADER_STORAGE_BLOCKS: GLenum = 0x90DC;
-        const GL_MAX_SHADER_STORAGE_BUFFER_BINDINGS: GLenum = 0x90DD;
-        const GL_MAX_SHADER_STORAGE_BLOCK_SIZE: GLenum = 0x90DE;
-        const GL_SHADER_STORAGE_BUFFER_OFFSET_ALIGNMENT: GLenum = 0x90DF;
-        const GL_SHADER_STORAGE_BARRIER_BIT: GLenum = 0x00002000;
-        const GL_MAX_COMBINED_SHADER_OUTPUT_RESOURCES: GLenum = 0x8F39;
-        const GL_DEPTH_STENCIL_TEXTURE_MODE: GLenum = 0x90EA;
-        const GL_STENCIL_INDEX: GLenum = 0x1901;
-        const GL_MIN_PROGRAM_TEXTURE_GATHER_OFFSET: GLenum = 0x8E5E;
-        const GL_MAX_PROGRAM_TEXTURE_GATHER_OFFSET: GLenum = 0x8E5F;
-        const GL_SAMPLE_POSITION: GLenum = 0x8E50;
-        const GL_SAMPLE_MASK: GLenum = 0x8E51;
-        const GL_SAMPLE_MASK_VALUE: GLenum = 0x8E52;
-        const GL_TEXTURE_2D_MULTISAMPLE: GLenum = 0x9100;
-        const GL_MAX_SAMPLE_MASK_WORDS: GLenum = 0x8E59;
-        const GL_MAX_COLOR_TEXTURE_SAMPLES: GLenum = 0x910E;
-        const GL_MAX_DEPTH_TEXTURE_SAMPLES: GLenum = 0x910F;
-        const GL_MAX_INTEGER_SAMPLES: GLenum = 0x9110;
-        const GL_TEXTURE_BINDING_2D_MULTISAMPLE: GLenum = 0x9104;
-        const GL_TEXTURE_SAMPLES: GLenum = 0x9106;
-        const GL_TEXTURE_FIXED_SAMPLE_LOCATIONS: GLenum = 0x9107;
-        const GL_TEXTURE_WIDTH: GLenum = 0x1000;
-        const GL_TEXTURE_HEIGHT: GLenum = 0x1001;
-        const GL_TEXTURE_DEPTH: GLenum = 0x8071;
-        const GL_TEXTURE_INTERNAL_FORMAT: GLenum = 0x1003;
-        const GL_TEXTURE_RED_SIZE: GLenum = 0x805C;
-        const GL_TEXTURE_GREEN_SIZE: GLenum = 0x805D;
-        const GL_TEXTURE_BLUE_SIZE: GLenum = 0x805E;
-        const GL_TEXTURE_ALPHA_SIZE: GLenum = 0x805F;
-        const GL_TEXTURE_DEPTH_SIZE: GLenum = 0x884A;
-        const GL_TEXTURE_STENCIL_SIZE: GLenum = 0x88F1;
-        const GL_TEXTURE_SHARED_SIZE: GLenum = 0x8C3F;
-        const GL_TEXTURE_RED_TYPE: GLenum = 0x8C10;
-        const GL_TEXTURE_GREEN_TYPE: GLenum = 0x8C11;
-        const GL_TEXTURE_BLUE_TYPE: GLenum = 0x8C12;
-        const GL_TEXTURE_ALPHA_TYPE: GLenum = 0x8C13;
-        const GL_TEXTURE_DEPTH_TYPE: GLenum = 0x8C16;
-        const GL_TEXTURE_COMPRESSED: GLenum = 0x86A1;
-        const GL_SAMPLER_2D_MULTISAMPLE: GLenum = 0x9108;
-        const GL_INT_SAMPLER_2D_MULTISAMPLE: GLenum = 0x9109;
-        const GL_UNSIGNED_INT_SAMPLER_2D_MULTISAMPLE: GLenum = 0x910A;
-        const GL_VERTEX_ATTRIB_BINDING: GLenum = 0x82D4;
-        const GL_VERTEX_ATTRIB_RELATIVE_OFFSET: GLenum = 0x82D5;
-        const GL_VERTEX_BINDING_DIVISOR: GLenum = 0x82D6;
-        const GL_VERTEX_BINDING_OFFSET: GLenum = 0x82D7;
-        const GL_VERTEX_BINDING_STRIDE: GLenum = 0x82D8;
-        const GL_VERTEX_BINDING_BUFFER: GLenum = 0x8F4F;
-        const GL_MAX_VERTEX_ATTRIB_RELATIVE_OFFSET: GLenum = 0x82D9;
-        const GL_MAX_VERTEX_ATTRIB_BINDINGS: GLenum = 0x82DA;
-        const GL_MAX_VERTEX_ATTRIB_STRIDE: GLenum = 0x82E5;
+        const GL_COMPUTE_SHADER: GLenum = if (api.hasCompat(.V3_1)) 0x91B9 else @compileError("GL_COMPUTE_SHADER only available with GLES 3.1+");
+        const GL_MAX_COMPUTE_UNIFORM_BLOCKS: GLenum = if (api.hasCompat(.V3_1)) 0x91BB else @compileError("GL_MAX_COMPUTE_UNIFORM_BLOCKS only available with GLES 3.1+");
+        const GL_MAX_COMPUTE_TEXTURE_IMAGE_UNITS: GLenum = if (api.hasCompat(.V3_1)) 0x91BC else @compileError("GL_MAX_COMPUTE_TEXTURE_IMAGE_UNITS only available with GLES 3.1+");
+        const GL_MAX_COMPUTE_IMAGE_UNIFORMS: GLenum = if (api.hasCompat(.V3_1)) 0x91BD else @compileError("GL_MAX_COMPUTE_IMAGE_UNIFORMS only available with GLES 3.1+");
+        const GL_MAX_COMPUTE_SHARED_MEMORY_SIZE: GLenum = if (api.hasCompat(.V3_1)) 0x8262 else @compileError("GL_MAX_COMPUTE_SHARED_MEMORY_SIZE only available with GLES 3.1+");
+        const GL_MAX_COMPUTE_UNIFORM_COMPONENTS: GLenum = if (api.hasCompat(.V3_1)) 0x8263 else @compileError("GL_MAX_COMPUTE_UNIFORM_COMPONENTS only available with GLES 3.1+");
+        const GL_MAX_COMPUTE_ATOMIC_COUNTER_BUFFERS: GLenum = if (api.hasCompat(.V3_1)) 0x8264 else @compileError("GL_MAX_COMPUTE_ATOMIC_COUNTER_BUFFERS only available with GLES 3.1+");
+        const GL_MAX_COMPUTE_ATOMIC_COUNTERS: GLenum = if (api.hasCompat(.V3_1)) 0x8265 else @compileError("GL_MAX_COMPUTE_ATOMIC_COUNTERS only available with GLES 3.1+");
+        const GL_MAX_COMBINED_COMPUTE_UNIFORM_COMPONENTS: GLenum = if (api.hasCompat(.V3_1)) 0x8266 else @compileError("GL_MAX_COMBINED_COMPUTE_UNIFORM_COMPONENTS only available with GLES 3.1+");
+        const GL_MAX_COMPUTE_WORK_GROUP_INVOCATIONS: GLenum = if (api.hasCompat(.V3_1)) 0x90EB else @compileError("GL_MAX_COMPUTE_WORK_GROUP_INVOCATIONS only available with GLES 3.1+");
+        const GL_MAX_COMPUTE_WORK_GROUP_COUNT: GLenum = if (api.hasCompat(.V3_1)) 0x91BE else @compileError("GL_MAX_COMPUTE_WORK_GROUP_COUNT only available with GLES 3.1+");
+        const GL_MAX_COMPUTE_WORK_GROUP_SIZE: GLenum = if (api.hasCompat(.V3_1)) 0x91BF else @compileError("GL_MAX_COMPUTE_WORK_GROUP_SIZE only available with GLES 3.1+");
+        const GL_COMPUTE_WORK_GROUP_SIZE: GLenum = if (api.hasCompat(.V3_1)) 0x8267 else @compileError("GL_COMPUTE_WORK_GROUP_SIZE only available with GLES 3.1+");
+        const GL_DISPATCH_INDIRECT_BUFFER: GLenum = if (api.hasCompat(.V3_1)) 0x90EE else @compileError("GL_DISPATCH_INDIRECT_BUFFER only available with GLES 3.1+");
+        const GL_DISPATCH_INDIRECT_BUFFER_BINDING: GLenum = if (api.hasCompat(.V3_1)) 0x90EF else @compileError("GL_DISPATCH_INDIRECT_BUFFER_BINDING only available with GLES 3.1+");
+        const GL_COMPUTE_SHADER_BIT: GLenum = if (api.hasCompat(.V3_1)) 0x00000020 else @compileError("GL_COMPUTE_SHADER_BIT only available with GLES 3.1+");
+        const GL_DRAW_INDIRECT_BUFFER: GLenum = if (api.hasCompat(.V3_1)) 0x8F3F else @compileError("GL_DRAW_INDIRECT_BUFFER only available with GLES 3.1+");
+        const GL_DRAW_INDIRECT_BUFFER_BINDING: GLenum = if (api.hasCompat(.V3_1)) 0x8F43 else @compileError("GL_DRAW_INDIRECT_BUFFER_BINDING only available with GLES 3.1+");
+        const GL_MAX_UNIFORM_LOCATIONS: GLenum = if (api.hasCompat(.V3_1)) 0x826E else @compileError("GL_MAX_UNIFORM_LOCATIONS only available with GLES 3.1+");
+        const GL_FRAMEBUFFER_DEFAULT_WIDTH: GLenum = if (api.hasCompat(.V3_1)) 0x9310 else @compileError("GL_FRAMEBUFFER_DEFAULT_WIDTH only available with GLES 3.1+");
+        const GL_FRAMEBUFFER_DEFAULT_HEIGHT: GLenum = if (api.hasCompat(.V3_1)) 0x9311 else @compileError("GL_FRAMEBUFFER_DEFAULT_HEIGHT only available with GLES 3.1+");
+        const GL_FRAMEBUFFER_DEFAULT_SAMPLES: GLenum = if (api.hasCompat(.V3_1)) 0x9313 else @compileError("GL_FRAMEBUFFER_DEFAULT_SAMPLES only available with GLES 3.1+");
+        const GL_FRAMEBUFFER_DEFAULT_FIXED_SAMPLE_LOCATIONS: GLenum = if (api.hasCompat(.V3_1)) 0x9314 else @compileError("GL_FRAMEBUFFER_DEFAULT_FIXED_SAMPLE_LOCATIONS only available with GLES 3.1+");
+        const GL_MAX_FRAMEBUFFER_WIDTH: GLenum = if (api.hasCompat(.V3_1)) 0x9315 else @compileError("GL_MAX_FRAMEBUFFER_WIDTH only available with GLES 3.1+");
+        const GL_MAX_FRAMEBUFFER_HEIGHT: GLenum = if (api.hasCompat(.V3_1)) 0x9316 else @compileError("GL_MAX_FRAMEBUFFER_HEIGHT only available with GLES 3.1+");
+        const GL_MAX_FRAMEBUFFER_SAMPLES: GLenum = if (api.hasCompat(.V3_1)) 0x9318 else @compileError("GL_MAX_FRAMEBUFFER_SAMPLES only available with GLES 3.1+");
+        const GL_UNIFORM: GLenum = if (api.hasCompat(.V3_1)) 0x92E1 else @compileError("GL_UNIFORM only available with GLES 3.1+");
+        const GL_UNIFORM_BLOCK: GLenum = if (api.hasCompat(.V3_1)) 0x92E2 else @compileError("GL_UNIFORM_BLOCK only available with GLES 3.1+");
+        const GL_PROGRAM_INPUT: GLenum = if (api.hasCompat(.V3_1)) 0x92E3 else @compileError("GL_PROGRAM_INPUT only available with GLES 3.1+");
+        const GL_PROGRAM_OUTPUT: GLenum = if (api.hasCompat(.V3_1)) 0x92E4 else @compileError("GL_PROGRAM_OUTPUT only available with GLES 3.1+");
+        const GL_BUFFER_VARIABLE: GLenum = if (api.hasCompat(.V3_1)) 0x92E5 else @compileError("GL_BUFFER_VARIABLE only available with GLES 3.1+");
+        const GL_SHADER_STORAGE_BLOCK: GLenum = if (api.hasCompat(.V3_1)) 0x92E6 else @compileError("GL_SHADER_STORAGE_BLOCK only available with GLES 3.1+");
+        const GL_ATOMIC_COUNTER_BUFFER: GLenum = if (api.hasCompat(.V3_1)) 0x92C0 else @compileError("GL_ATOMIC_COUNTER_BUFFER only available with GLES 3.1+");
+        const GL_TRANSFORM_FEEDBACK_VARYING: GLenum = if (api.hasCompat(.V3_1)) 0x92F4 else @compileError("GL_TRANSFORM_FEEDBACK_VARYING only available with GLES 3.1+");
+        const GL_ACTIVE_RESOURCES: GLenum = if (api.hasCompat(.V3_1)) 0x92F5 else @compileError("GL_ACTIVE_RESOURCES only available with GLES 3.1+");
+        const GL_MAX_NAME_LENGTH: GLenum = if (api.hasCompat(.V3_1)) 0x92F6 else @compileError("GL_MAX_NAME_LENGTH only available with GLES 3.1+");
+        const GL_MAX_NUM_ACTIVE_VARIABLES: GLenum = if (api.hasCompat(.V3_1)) 0x92F7 else @compileError("GL_MAX_NUM_ACTIVE_VARIABLES only available with GLES 3.1+");
+        const GL_NAME_LENGTH: GLenum = if (api.hasCompat(.V3_1)) 0x92F9 else @compileError("GL_NAME_LENGTH only available with GLES 3.1+");
+        const GL_TYPE: GLenum = if (api.hasCompat(.V3_1)) 0x92FA else @compileError("GL_TYPE only available with GLES 3.1+");
+        const GL_ARRAY_SIZE: GLenum = if (api.hasCompat(.V3_1)) 0x92FB else @compileError("GL_ARRAY_SIZE only available with GLES 3.1+");
+        const GL_OFFSET: GLenum = if (api.hasCompat(.V3_1)) 0x92FC else @compileError("GL_OFFSET only available with GLES 3.1+");
+        const GL_BLOCK_INDEX: GLenum = if (api.hasCompat(.V3_1)) 0x92FD else @compileError("GL_BLOCK_INDEX only available with GLES 3.1+");
+        const GL_ARRAY_STRIDE: GLenum = if (api.hasCompat(.V3_1)) 0x92FE else @compileError("GL_ARRAY_STRIDE only available with GLES 3.1+");
+        const GL_MATRIX_STRIDE: GLenum = if (api.hasCompat(.V3_1)) 0x92FF else @compileError("GL_MATRIX_STRIDE only available with GLES 3.1+");
+        const GL_IS_ROW_MAJOR: GLenum = if (api.hasCompat(.V3_1)) 0x9300 else @compileError("GL_IS_ROW_MAJOR only available with GLES 3.1+");
+        const GL_ATOMIC_COUNTER_BUFFER_INDEX: GLenum = if (api.hasCompat(.V3_1)) 0x9301 else @compileError("GL_ATOMIC_COUNTER_BUFFER_INDEX only available with GLES 3.1+");
+        const GL_BUFFER_BINDING: GLenum = if (api.hasCompat(.V3_1)) 0x9302 else @compileError("GL_BUFFER_BINDING only available with GLES 3.1+");
+        const GL_BUFFER_DATA_SIZE: GLenum = if (api.hasCompat(.V3_1)) 0x9303 else @compileError("GL_BUFFER_DATA_SIZE only available with GLES 3.1+");
+        const GL_NUM_ACTIVE_VARIABLES: GLenum = if (api.hasCompat(.V3_1)) 0x9304 else @compileError("GL_NUM_ACTIVE_VARIABLES only available with GLES 3.1+");
+        const GL_ACTIVE_VARIABLES: GLenum = if (api.hasCompat(.V3_1)) 0x9305 else @compileError("GL_ACTIVE_VARIABLES only available with GLES 3.1+");
+        const GL_REFERENCED_BY_VERTEX_SHADER: GLenum = if (api.hasCompat(.V3_1)) 0x9306 else @compileError("GL_REFERENCED_BY_VERTEX_SHADER only available with GLES 3.1+");
+        const GL_REFERENCED_BY_FRAGMENT_SHADER: GLenum = if (api.hasCompat(.V3_1)) 0x930A else @compileError("GL_REFERENCED_BY_FRAGMENT_SHADER only available with GLES 3.1+");
+        const GL_REFERENCED_BY_COMPUTE_SHADER: GLenum = if (api.hasCompat(.V3_1)) 0x930B else @compileError("GL_REFERENCED_BY_COMPUTE_SHADER only available with GLES 3.1+");
+        const GL_TOP_LEVEL_ARRAY_SIZE: GLenum = if (api.hasCompat(.V3_1)) 0x930C else @compileError("GL_TOP_LEVEL_ARRAY_SIZE only available with GLES 3.1+");
+        const GL_TOP_LEVEL_ARRAY_STRIDE: GLenum = if (api.hasCompat(.V3_1)) 0x930D else @compileError("GL_TOP_LEVEL_ARRAY_STRIDE only available with GLES 3.1+");
+        const GL_LOCATION: GLenum = if (api.hasCompat(.V3_1)) 0x930E else @compileError("GL_LOCATION only available with GLES 3.1+");
+        const GL_VERTEX_SHADER_BIT: GLenum = if (api.hasCompat(.V3_1)) 0x00000001 else @compileError("GL_VERTEX_SHADER_BIT only available with GLES 3.1+");
+        const GL_FRAGMENT_SHADER_BIT: GLenum = if (api.hasCompat(.V3_1)) 0x00000002 else @compileError("GL_FRAGMENT_SHADER_BIT only available with GLES 3.1+");
+        const GL_ALL_SHADER_BITS: GLenum = if (api.hasCompat(.V3_1)) 0xFFFFFFFF else @compileError("GL_ALL_SHADER_BITS only available with GLES 3.1+");
+        const GL_PROGRAM_SEPARABLE: GLenum = if (api.hasCompat(.V3_1)) 0x8258 else @compileError("GL_PROGRAM_SEPARABLE only available with GLES 3.1+");
+        const GL_ACTIVE_PROGRAM: GLenum = if (api.hasCompat(.V3_1)) 0x8259 else @compileError("GL_ACTIVE_PROGRAM only available with GLES 3.1+");
+        const GL_PROGRAM_PIPELINE_BINDING: GLenum = if (api.hasCompat(.V3_1)) 0x825A else @compileError("GL_PROGRAM_PIPELINE_BINDING only available with GLES 3.1+");
+        const GL_ATOMIC_COUNTER_BUFFER_BINDING: GLenum = if (api.hasCompat(.V3_1)) 0x92C1 else @compileError("GL_ATOMIC_COUNTER_BUFFER_BINDING only available with GLES 3.1+");
+        const GL_ATOMIC_COUNTER_BUFFER_START: GLenum = if (api.hasCompat(.V3_1)) 0x92C2 else @compileError("GL_ATOMIC_COUNTER_BUFFER_START only available with GLES 3.1+");
+        const GL_ATOMIC_COUNTER_BUFFER_SIZE: GLenum = if (api.hasCompat(.V3_1)) 0x92C3 else @compileError("GL_ATOMIC_COUNTER_BUFFER_SIZE only available with GLES 3.1+");
+        const GL_MAX_VERTEX_ATOMIC_COUNTER_BUFFERS: GLenum = if (api.hasCompat(.V3_1)) 0x92CC else @compileError("GL_MAX_VERTEX_ATOMIC_COUNTER_BUFFERS only available with GLES 3.1+");
+        const GL_MAX_FRAGMENT_ATOMIC_COUNTER_BUFFERS: GLenum = if (api.hasCompat(.V3_1)) 0x92D0 else @compileError("GL_MAX_FRAGMENT_ATOMIC_COUNTER_BUFFERS only available with GLES 3.1+");
+        const GL_MAX_COMBINED_ATOMIC_COUNTER_BUFFERS: GLenum = if (api.hasCompat(.V3_1)) 0x92D1 else @compileError("GL_MAX_COMBINED_ATOMIC_COUNTER_BUFFERS only available with GLES 3.1+");
+        const GL_MAX_VERTEX_ATOMIC_COUNTERS: GLenum = if (api.hasCompat(.V3_1)) 0x92D2 else @compileError("GL_MAX_VERTEX_ATOMIC_COUNTERS only available with GLES 3.1+");
+        const GL_MAX_FRAGMENT_ATOMIC_COUNTERS: GLenum = if (api.hasCompat(.V3_1)) 0x92D6 else @compileError("GL_MAX_FRAGMENT_ATOMIC_COUNTERS only available with GLES 3.1+");
+        const GL_MAX_COMBINED_ATOMIC_COUNTERS: GLenum = if (api.hasCompat(.V3_1)) 0x92D7 else @compileError("GL_MAX_COMBINED_ATOMIC_COUNTERS only available with GLES 3.1+");
+        const GL_MAX_ATOMIC_COUNTER_BUFFER_SIZE: GLenum = if (api.hasCompat(.V3_1)) 0x92D8 else @compileError("GL_MAX_ATOMIC_COUNTER_BUFFER_SIZE only available with GLES 3.1+");
+        const GL_MAX_ATOMIC_COUNTER_BUFFER_BINDINGS: GLenum = if (api.hasCompat(.V3_1)) 0x92DC else @compileError("GL_MAX_ATOMIC_COUNTER_BUFFER_BINDINGS only available with GLES 3.1+");
+        const GL_ACTIVE_ATOMIC_COUNTER_BUFFERS: GLenum = if (api.hasCompat(.V3_1)) 0x92D9 else @compileError("GL_ACTIVE_ATOMIC_COUNTER_BUFFERS only available with GLES 3.1+");
+        const GL_UNSIGNED_INT_ATOMIC_COUNTER: GLenum = if (api.hasCompat(.V3_1)) 0x92DB else @compileError("GL_UNSIGNED_INT_ATOMIC_COUNTER only available with GLES 3.1+");
+        const GL_MAX_IMAGE_UNITS: GLenum = if (api.hasCompat(.V3_1)) 0x8F38 else @compileError("GL_MAX_IMAGE_UNITS only available with GLES 3.1+");
+        const GL_MAX_VERTEX_IMAGE_UNIFORMS: GLenum = if (api.hasCompat(.V3_1)) 0x90CA else @compileError("GL_MAX_VERTEX_IMAGE_UNIFORMS only available with GLES 3.1+");
+        const GL_MAX_FRAGMENT_IMAGE_UNIFORMS: GLenum = if (api.hasCompat(.V3_1)) 0x90CE else @compileError("GL_MAX_FRAGMENT_IMAGE_UNIFORMS only available with GLES 3.1+");
+        const GL_MAX_COMBINED_IMAGE_UNIFORMS: GLenum = if (api.hasCompat(.V3_1)) 0x90CF else @compileError("GL_MAX_COMBINED_IMAGE_UNIFORMS only available with GLES 3.1+");
+        const GL_IMAGE_BINDING_NAME: GLenum = if (api.hasCompat(.V3_1)) 0x8F3A else @compileError("GL_IMAGE_BINDING_NAME only available with GLES 3.1+");
+        const GL_IMAGE_BINDING_LEVEL: GLenum = if (api.hasCompat(.V3_1)) 0x8F3B else @compileError("GL_IMAGE_BINDING_LEVEL only available with GLES 3.1+");
+        const GL_IMAGE_BINDING_LAYERED: GLenum = if (api.hasCompat(.V3_1)) 0x8F3C else @compileError("GL_IMAGE_BINDING_LAYERED only available with GLES 3.1+");
+        const GL_IMAGE_BINDING_LAYER: GLenum = if (api.hasCompat(.V3_1)) 0x8F3D else @compileError("GL_IMAGE_BINDING_LAYER only available with GLES 3.1+");
+        const GL_IMAGE_BINDING_ACCESS: GLenum = if (api.hasCompat(.V3_1)) 0x8F3E else @compileError("GL_IMAGE_BINDING_ACCESS only available with GLES 3.1+");
+        const GL_IMAGE_BINDING_FORMAT: GLenum = if (api.hasCompat(.V3_1)) 0x906E else @compileError("GL_IMAGE_BINDING_FORMAT only available with GLES 3.1+");
+        const GL_VERTEX_ATTRIB_ARRAY_BARRIER_BIT: GLenum = if (api.hasCompat(.V3_1)) 0x00000001 else @compileError("GL_VERTEX_ATTRIB_ARRAY_BARRIER_BIT only available with GLES 3.1+");
+        const GL_ELEMENT_ARRAY_BARRIER_BIT: GLenum = if (api.hasCompat(.V3_1)) 0x00000002 else @compileError("GL_ELEMENT_ARRAY_BARRIER_BIT only available with GLES 3.1+");
+        const GL_UNIFORM_BARRIER_BIT: GLenum = if (api.hasCompat(.V3_1)) 0x00000004 else @compileError("GL_UNIFORM_BARRIER_BIT only available with GLES 3.1+");
+        const GL_TEXTURE_FETCH_BARRIER_BIT: GLenum = if (api.hasCompat(.V3_1)) 0x00000008 else @compileError("GL_TEXTURE_FETCH_BARRIER_BIT only available with GLES 3.1+");
+        const GL_SHADER_IMAGE_ACCESS_BARRIER_BIT: GLenum = if (api.hasCompat(.V3_1)) 0x00000020 else @compileError("GL_SHADER_IMAGE_ACCESS_BARRIER_BIT only available with GLES 3.1+");
+        const GL_COMMAND_BARRIER_BIT: GLenum = if (api.hasCompat(.V3_1)) 0x00000040 else @compileError("GL_COMMAND_BARRIER_BIT only available with GLES 3.1+");
+        const GL_PIXEL_BUFFER_BARRIER_BIT: GLenum = if (api.hasCompat(.V3_1)) 0x00000080 else @compileError("GL_PIXEL_BUFFER_BARRIER_BIT only available with GLES 3.1+");
+        const GL_TEXTURE_UPDATE_BARRIER_BIT: GLenum = if (api.hasCompat(.V3_1)) 0x00000100 else @compileError("GL_TEXTURE_UPDATE_BARRIER_BIT only available with GLES 3.1+");
+        const GL_BUFFER_UPDATE_BARRIER_BIT: GLenum = if (api.hasCompat(.V3_1)) 0x00000200 else @compileError("GL_BUFFER_UPDATE_BARRIER_BIT only available with GLES 3.1+");
+        const GL_FRAMEBUFFER_BARRIER_BIT: GLenum = if (api.hasCompat(.V3_1)) 0x00000400 else @compileError("GL_FRAMEBUFFER_BARRIER_BIT only available with GLES 3.1+");
+        const GL_TRANSFORM_FEEDBACK_BARRIER_BIT: GLenum = if (api.hasCompat(.V3_1)) 0x00000800 else @compileError("GL_TRANSFORM_FEEDBACK_BARRIER_BIT only available with GLES 3.1+");
+        const GL_ATOMIC_COUNTER_BARRIER_BIT: GLenum = if (api.hasCompat(.V3_1)) 0x00001000 else @compileError("GL_ATOMIC_COUNTER_BARRIER_BIT only available with GLES 3.1+");
+        const GL_ALL_BARRIER_BITS: GLenum = if (api.hasCompat(.V3_1)) 0xFFFFFFFF else @compileError("GL_ALL_BARRIER_BITS only available with GLES 3.1+");
+        const GL_IMAGE_2D: GLenum = if (api.hasCompat(.V3_1)) 0x904D else @compileError("GL_IMAGE_2D only available with GLES 3.1+");
+        const GL_IMAGE_3D: GLenum = if (api.hasCompat(.V3_1)) 0x904E else @compileError("GL_IMAGE_3D only available with GLES 3.1+");
+        const GL_IMAGE_CUBE: GLenum = if (api.hasCompat(.V3_1)) 0x9050 else @compileError("GL_IMAGE_CUBE only available with GLES 3.1+");
+        const GL_IMAGE_2D_ARRAY: GLenum = if (api.hasCompat(.V3_1)) 0x9053 else @compileError("GL_IMAGE_2D_ARRAY only available with GLES 3.1+");
+        const GL_INT_IMAGE_2D: GLenum = if (api.hasCompat(.V3_1)) 0x9058 else @compileError("GL_INT_IMAGE_2D only available with GLES 3.1+");
+        const GL_INT_IMAGE_3D: GLenum = if (api.hasCompat(.V3_1)) 0x9059 else @compileError("GL_INT_IMAGE_3D only available with GLES 3.1+");
+        const GL_INT_IMAGE_CUBE: GLenum = if (api.hasCompat(.V3_1)) 0x905B else @compileError("GL_INT_IMAGE_CUBE only available with GLES 3.1+");
+        const GL_INT_IMAGE_2D_ARRAY: GLenum = if (api.hasCompat(.V3_1)) 0x905E else @compileError("GL_INT_IMAGE_2D_ARRAY only available with GLES 3.1+");
+        const GL_UNSIGNED_INT_IMAGE_2D: GLenum = if (api.hasCompat(.V3_1)) 0x9063 else @compileError("GL_UNSIGNED_INT_IMAGE_2D only available with GLES 3.1+");
+        const GL_UNSIGNED_INT_IMAGE_3D: GLenum = if (api.hasCompat(.V3_1)) 0x9064 else @compileError("GL_UNSIGNED_INT_IMAGE_3D only available with GLES 3.1+");
+        const GL_UNSIGNED_INT_IMAGE_CUBE: GLenum = if (api.hasCompat(.V3_1)) 0x9066 else @compileError("GL_UNSIGNED_INT_IMAGE_CUBE only available with GLES 3.1+");
+        const GL_UNSIGNED_INT_IMAGE_2D_ARRAY: GLenum = if (api.hasCompat(.V3_1)) 0x9069 else @compileError("GL_UNSIGNED_INT_IMAGE_2D_ARRAY only available with GLES 3.1+");
+        const GL_IMAGE_FORMAT_COMPATIBILITY_TYPE: GLenum = if (api.hasCompat(.V3_1)) 0x90C7 else @compileError("GL_IMAGE_FORMAT_COMPATIBILITY_TYPE only available with GLES 3.1+");
+        const GL_IMAGE_FORMAT_COMPATIBILITY_BY_SIZE: GLenum = if (api.hasCompat(.V3_1)) 0x90C8 else @compileError("GL_IMAGE_FORMAT_COMPATIBILITY_BY_SIZE only available with GLES 3.1+");
+        const GL_IMAGE_FORMAT_COMPATIBILITY_BY_CLASS: GLenum = if (api.hasCompat(.V3_1)) 0x90C9 else @compileError("GL_IMAGE_FORMAT_COMPATIBILITY_BY_CLASS only available with GLES 3.1+");
+        const GL_READ_ONLY: GLenum = if (api.hasCompat(.V3_1)) 0x88B8 else @compileError("GL_READ_ONLY only available with GLES 3.1+");
+        const GL_WRITE_ONLY: GLenum = if (api.hasCompat(.V3_1)) 0x88B9 else @compileError("GL_WRITE_ONLY only available with GLES 3.1+");
+        const GL_READ_WRITE: GLenum = if (api.hasCompat(.V3_1)) 0x88BA else @compileError("GL_READ_WRITE only available with GLES 3.1+");
+        const GL_SHADER_STORAGE_BUFFER: GLenum = if (api.hasCompat(.V3_1)) 0x90D2 else @compileError("GL_SHADER_STORAGE_BUFFER only available with GLES 3.1+");
+        const GL_SHADER_STORAGE_BUFFER_BINDING: GLenum = if (api.hasCompat(.V3_1)) 0x90D3 else @compileError("GL_SHADER_STORAGE_BUFFER_BINDING only available with GLES 3.1+");
+        const GL_SHADER_STORAGE_BUFFER_START: GLenum = if (api.hasCompat(.V3_1)) 0x90D4 else @compileError("GL_SHADER_STORAGE_BUFFER_START only available with GLES 3.1+");
+        const GL_SHADER_STORAGE_BUFFER_SIZE: GLenum = if (api.hasCompat(.V3_1)) 0x90D5 else @compileError("GL_SHADER_STORAGE_BUFFER_SIZE only available with GLES 3.1+");
+        const GL_MAX_VERTEX_SHADER_STORAGE_BLOCKS: GLenum = if (api.hasCompat(.V3_1)) 0x90D6 else @compileError("GL_MAX_VERTEX_SHADER_STORAGE_BLOCKS only available with GLES 3.1+");
+        const GL_MAX_FRAGMENT_SHADER_STORAGE_BLOCKS: GLenum = if (api.hasCompat(.V3_1)) 0x90DA else @compileError("GL_MAX_FRAGMENT_SHADER_STORAGE_BLOCKS only available with GLES 3.1+");
+        const GL_MAX_COMPUTE_SHADER_STORAGE_BLOCKS: GLenum = if (api.hasCompat(.V3_1)) 0x90DB else @compileError("GL_MAX_COMPUTE_SHADER_STORAGE_BLOCKS only available with GLES 3.1+");
+        const GL_MAX_COMBINED_SHADER_STORAGE_BLOCKS: GLenum = if (api.hasCompat(.V3_1)) 0x90DC else @compileError("GL_MAX_COMBINED_SHADER_STORAGE_BLOCKS only available with GLES 3.1+");
+        const GL_MAX_SHADER_STORAGE_BUFFER_BINDINGS: GLenum = if (api.hasCompat(.V3_1)) 0x90DD else @compileError("GL_MAX_SHADER_STORAGE_BUFFER_BINDINGS only available with GLES 3.1+");
+        const GL_MAX_SHADER_STORAGE_BLOCK_SIZE: GLenum = if (api.hasCompat(.V3_1)) 0x90DE else @compileError("GL_MAX_SHADER_STORAGE_BLOCK_SIZE only available with GLES 3.1+");
+        const GL_SHADER_STORAGE_BUFFER_OFFSET_ALIGNMENT: GLenum = if (api.hasCompat(.V3_1)) 0x90DF else @compileError("GL_SHADER_STORAGE_BUFFER_OFFSET_ALIGNMENT only available with GLES 3.1+");
+        const GL_SHADER_STORAGE_BARRIER_BIT: GLenum = if (api.hasCompat(.V3_1)) 0x00002000 else @compileError("GL_SHADER_STORAGE_BARRIER_BIT only available with GLES 3.1+");
+        const GL_MAX_COMBINED_SHADER_OUTPUT_RESOURCES: GLenum = if (api.hasCompat(.V3_1)) 0x8F39 else @compileError("GL_MAX_COMBINED_SHADER_OUTPUT_RESOURCES only available with GLES 3.1+");
+        const GL_DEPTH_STENCIL_TEXTURE_MODE: GLenum = if (api.hasCompat(.V3_1)) 0x90EA else @compileError("GL_DEPTH_STENCIL_TEXTURE_MODE only available with GLES 3.1+");
+        const GL_STENCIL_INDEX: GLenum = if (api.hasCompat(.V3_1)) 0x1901 else @compileError("GL_STENCIL_INDEX only available with GLES 3.1+");
+        const GL_MIN_PROGRAM_TEXTURE_GATHER_OFFSET: GLenum = if (api.hasCompat(.V3_1)) 0x8E5E else @compileError("GL_MIN_PROGRAM_TEXTURE_GATHER_OFFSET only available with GLES 3.1+");
+        const GL_MAX_PROGRAM_TEXTURE_GATHER_OFFSET: GLenum = if (api.hasCompat(.V3_1)) 0x8E5F else @compileError("GL_MAX_PROGRAM_TEXTURE_GATHER_OFFSET only available with GLES 3.1+");
+        const GL_SAMPLE_POSITION: GLenum = if (api.hasCompat(.V3_1)) 0x8E50 else @compileError("GL_SAMPLE_POSITION only available with GLES 3.1+");
+        const GL_SAMPLE_MASK: GLenum = if (api.hasCompat(.V3_1)) 0x8E51 else @compileError("GL_SAMPLE_MASK only available with GLES 3.1+");
+        const GL_SAMPLE_MASK_VALUE: GLenum = if (api.hasCompat(.V3_1)) 0x8E52 else @compileError("GL_SAMPLE_MASK_VALUE only available with GLES 3.1+");
+        const GL_TEXTURE_2D_MULTISAMPLE: GLenum = if (api.hasCompat(.V3_1)) 0x9100 else @compileError("GL_TEXTURE_2D_MULTISAMPLE only available with GLES 3.1+");
+        const GL_MAX_SAMPLE_MASK_WORDS: GLenum = if (api.hasCompat(.V3_1)) 0x8E59 else @compileError("GL_MAX_SAMPLE_MASK_WORDS only available with GLES 3.1+");
+        const GL_MAX_COLOR_TEXTURE_SAMPLES: GLenum = if (api.hasCompat(.V3_1)) 0x910E else @compileError("GL_MAX_COLOR_TEXTURE_SAMPLES only available with GLES 3.1+");
+        const GL_MAX_DEPTH_TEXTURE_SAMPLES: GLenum = if (api.hasCompat(.V3_1)) 0x910F else @compileError("GL_MAX_DEPTH_TEXTURE_SAMPLES only available with GLES 3.1+");
+        const GL_MAX_INTEGER_SAMPLES: GLenum = if (api.hasCompat(.V3_1)) 0x9110 else @compileError("GL_MAX_INTEGER_SAMPLES only available with GLES 3.1+");
+        const GL_TEXTURE_BINDING_2D_MULTISAMPLE: GLenum = if (api.hasCompat(.V3_1)) 0x9104 else @compileError("GL_TEXTURE_BINDING_2D_MULTISAMPLE only available with GLES 3.1+");
+        const GL_TEXTURE_SAMPLES: GLenum = if (api.hasCompat(.V3_1)) 0x9106 else @compileError("GL_TEXTURE_SAMPLES only available with GLES 3.1+");
+        const GL_TEXTURE_FIXED_SAMPLE_LOCATIONS: GLenum = if (api.hasCompat(.V3_1)) 0x9107 else @compileError("GL_TEXTURE_FIXED_SAMPLE_LOCATIONS only available with GLES 3.1+");
+        const GL_TEXTURE_WIDTH: GLenum = if (api.hasCompat(.V3_1)) 0x1000 else @compileError("GL_TEXTURE_WIDTH only available with GLES 3.1+");
+        const GL_TEXTURE_HEIGHT: GLenum = if (api.hasCompat(.V3_1)) 0x1001 else @compileError("GL_TEXTURE_HEIGHT only available with GLES 3.1+");
+        const GL_TEXTURE_DEPTH: GLenum = if (api.hasCompat(.V3_1)) 0x8071 else @compileError("GL_TEXTURE_DEPTH only available with GLES 3.1+");
+        const GL_TEXTURE_INTERNAL_FORMAT: GLenum = if (api.hasCompat(.V3_1)) 0x1003 else @compileError("GL_TEXTURE_INTERNAL_FORMAT only available with GLES 3.1+");
+        const GL_TEXTURE_RED_SIZE: GLenum = if (api.hasCompat(.V3_1)) 0x805C else @compileError("GL_TEXTURE_RED_SIZE only available with GLES 3.1+");
+        const GL_TEXTURE_GREEN_SIZE: GLenum = if (api.hasCompat(.V3_1)) 0x805D else @compileError("GL_TEXTURE_GREEN_SIZE only available with GLES 3.1+");
+        const GL_TEXTURE_BLUE_SIZE: GLenum = if (api.hasCompat(.V3_1)) 0x805E else @compileError("GL_TEXTURE_BLUE_SIZE only available with GLES 3.1+");
+        const GL_TEXTURE_ALPHA_SIZE: GLenum = if (api.hasCompat(.V3_1)) 0x805F else @compileError("GL_TEXTURE_ALPHA_SIZE only available with GLES 3.1+");
+        const GL_TEXTURE_DEPTH_SIZE: GLenum = if (api.hasCompat(.V3_1)) 0x884A else @compileError("GL_TEXTURE_DEPTH_SIZE only available with GLES 3.1+");
+        const GL_TEXTURE_STENCIL_SIZE: GLenum = if (api.hasCompat(.V3_1)) 0x88F1 else @compileError("GL_TEXTURE_STENCIL_SIZE only available with GLES 3.1+");
+        const GL_TEXTURE_SHARED_SIZE: GLenum = if (api.hasCompat(.V3_1)) 0x8C3F else @compileError("GL_TEXTURE_SHARED_SIZE only available with GLES 3.1+");
+        const GL_TEXTURE_RED_TYPE: GLenum = if (api.hasCompat(.V3_1)) 0x8C10 else @compileError("GL_TEXTURE_RED_TYPE only available with GLES 3.1+");
+        const GL_TEXTURE_GREEN_TYPE: GLenum = if (api.hasCompat(.V3_1)) 0x8C11 else @compileError("GL_TEXTURE_GREEN_TYPE only available with GLES 3.1+");
+        const GL_TEXTURE_BLUE_TYPE: GLenum = if (api.hasCompat(.V3_1)) 0x8C12 else @compileError("GL_TEXTURE_BLUE_TYPE only available with GLES 3.1+");
+        const GL_TEXTURE_ALPHA_TYPE: GLenum = if (api.hasCompat(.V3_1)) 0x8C13 else @compileError("GL_TEXTURE_ALPHA_TYPE only available with GLES 3.1+");
+        const GL_TEXTURE_DEPTH_TYPE: GLenum = if (api.hasCompat(.V3_1)) 0x8C16 else @compileError("GL_TEXTURE_DEPTH_TYPE only available with GLES 3.1+");
+        const GL_TEXTURE_COMPRESSED: GLenum = if (api.hasCompat(.V3_1)) 0x86A1 else @compileError("GL_TEXTURE_COMPRESSED only available with GLES 3.1+");
+        const GL_SAMPLER_2D_MULTISAMPLE: GLenum = if (api.hasCompat(.V3_1)) 0x9108 else @compileError("GL_SAMPLER_2D_MULTISAMPLE only available with GLES 3.1+");
+        const GL_INT_SAMPLER_2D_MULTISAMPLE: GLenum = if (api.hasCompat(.V3_1)) 0x9109 else @compileError("GL_INT_SAMPLER_2D_MULTISAMPLE only available with GLES 3.1+");
+        const GL_UNSIGNED_INT_SAMPLER_2D_MULTISAMPLE: GLenum = if (api.hasCompat(.V3_1)) 0x910A else @compileError("GL_UNSIGNED_INT_SAMPLER_2D_MULTISAMPLE only available with GLES 3.1+");
+        const GL_VERTEX_ATTRIB_BINDING: GLenum = if (api.hasCompat(.V3_1)) 0x82D4 else @compileError("GL_VERTEX_ATTRIB_BINDING only available with GLES 3.1+");
+        const GL_VERTEX_ATTRIB_RELATIVE_OFFSET: GLenum = if (api.hasCompat(.V3_1)) 0x82D5 else @compileError("GL_VERTEX_ATTRIB_RELATIVE_OFFSET only available with GLES 3.1+");
+        const GL_VERTEX_BINDING_DIVISOR: GLenum = if (api.hasCompat(.V3_1)) 0x82D6 else @compileError("GL_VERTEX_BINDING_DIVISOR only available with GLES 3.1+");
+        const GL_VERTEX_BINDING_OFFSET: GLenum = if (api.hasCompat(.V3_1)) 0x82D7 else @compileError("GL_VERTEX_BINDING_OFFSET only available with GLES 3.1+");
+        const GL_VERTEX_BINDING_STRIDE: GLenum = if (api.hasCompat(.V3_1)) 0x82D8 else @compileError("GL_VERTEX_BINDING_STRIDE only available with GLES 3.1+");
+        const GL_VERTEX_BINDING_BUFFER: GLenum = if (api.hasCompat(.V3_1)) 0x8F4F else @compileError("GL_VERTEX_BINDING_BUFFER only available with GLES 3.1+");
+        const GL_MAX_VERTEX_ATTRIB_RELATIVE_OFFSET: GLenum = if (api.hasCompat(.V3_1)) 0x82D9 else @compileError("GL_MAX_VERTEX_ATTRIB_RELATIVE_OFFSET only available with GLES 3.1+");
+        const GL_MAX_VERTEX_ATTRIB_BINDINGS: GLenum = if (api.hasCompat(.V3_1)) 0x82DA else @compileError("GL_MAX_VERTEX_ATTRIB_BINDINGS only available with GLES 3.1+");
+        const GL_MAX_VERTEX_ATTRIB_STRIDE: GLenum = if (api.hasCompat(.V3_1)) 0x82E5 else @compileError("GL_MAX_VERTEX_ATTRIB_STRIDE only available with GLES 3.1+");
     };
 }
