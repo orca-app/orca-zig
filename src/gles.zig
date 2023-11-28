@@ -285,23 +285,23 @@ pub fn getApi(comptime api: Api) type {
             // v3.1
             extern fn glDispatchCompute(num_groups_x: GLuint, num_groups_y: GLuint, num_groups_z: GLuint) void;
             extern fn glDispatchComputeIndirect(indirect: GLintptr) void;
-            extern fn glDrawArraysIndirect(mode: GLenum, indirect: *const void) void;
-            extern fn glDrawElementsIndirect(mode: GLenum, type: GLenum, indirect: *const void) void;
+            extern fn glDrawArraysIndirect(mode: GLenum, indirect: ?*const anyopaque) void;
+            extern fn glDrawElementsIndirect(mode: GLenum, type: GLenum, indirect: ?*const anyopaque) void;
             extern fn glFramebufferParameteri(target: GLenum, pname: GLenum, param: GLint) void;
-            extern fn glGetFramebufferParameteriv(target: GLenum, pname: GLenum, params: *GLint) void;
-            extern fn glGetProgramInterfaceiv(program: GLuint, programInterface: GLenum, pname: GLenum, params: *GLint) void;
-            extern fn glGetProgramResourceIndex(program: GLuint, programInterface: GLenum, name: *const GLchar) GLuint;
-            extern fn glGetProgramResourceName(program: GLuint, programInterface: GLenum, index: GLuint, bufSize: GLsizei, length: *GLsizei, name: *GLchar) void;
-            extern fn glGetProgramResourceiv(program: GLuint, programInterface: GLenum, index: GLuint, propCount: GLsizei, props: *const GLenum, count: GLsizei, length: *GLsizei, params: *GLint) void;
-            extern fn glGetProgramResourceLocation(program: GLuint, programInterface: GLenum, name: *const GLchar) GLint;
+            extern fn glGetFramebufferParameteriv(target: GLenum, pname: GLenum, params: [*]GLint) void;
+            extern fn glGetProgramInterfaceiv(program: GLuint, programInterface: GLenum, pname: GLenum, params: [*]GLint) void;
+            extern fn glGetProgramResourceIndex(program: GLuint, programInterface: GLenum, name: [*:0]const GLchar) GLuint;
+            extern fn glGetProgramResourceName(program: GLuint, programInterface: GLenum, index: GLuint, bufSize: GLsizei, length: [*]GLsizei, name: [*:0]GLchar) void;
+            extern fn glGetProgramResourceiv(program: GLuint, programInterface: GLenum, index: GLuint, propCount: GLsizei, props: [*]const GLenum, count: GLsizei, length: *GLsizei, params: [*]GLint) void;
+            extern fn glGetProgramResourceLocation(program: GLuint, programInterface: GLenum, name: [*:0]const GLchar) GLint;
             extern fn glUseProgramStages(pipeline: GLuint, stages: GLbitfield, program: GLuint) void;
             extern fn glActiveShaderProgram(pipeline: GLuint, program: GLuint) void;
-            extern fn glCreateShaderProgramv(type: GLenum, count: GLsizei, strings: *const *const GLchar) GLuint;
+            extern fn glCreateShaderProgramv(type: GLenum, count: GLsizei, strings: [*]const [*:0]const GLchar) GLuint;
             extern fn glBindProgramPipeline(pipeline: GLuint) void;
-            extern fn glDeleteProgramPipelines(n: GLsizei, pipelines: *const GLuint) void;
-            extern fn glGenProgramPipelines(n: GLsizei, pipelines: *GLuint) void;
+            extern fn glDeleteProgramPipelines(n: GLsizei, pipelines: [*]const GLuint) void;
+            extern fn glGenProgramPipelines(n: GLsizei, pipelines: [*]GLuint) void;
             extern fn glIsProgramPipeline(pipeline: GLuint) GLboolean;
-            extern fn glGetProgramPipelineiv(pipeline: GLuint, pname: GLenum, params: *GLint) void;
+            extern fn glGetProgramPipelineiv(pipeline: GLuint, pname: GLenum, params: [*]GLint) void;
             extern fn glProgramUniform1i(program: GLuint, location: GLint, v0: GLint) void;
             extern fn glProgramUniform2i(program: GLuint, location: GLint, v0: GLint, v1: GLint) void;
             extern fn glProgramUniform3i(program: GLuint, location: GLint, v0: GLint, v1: GLint, v2: GLint) void;
@@ -314,38 +314,38 @@ pub fn getApi(comptime api: Api) type {
             extern fn glProgramUniform2f(program: GLuint, location: GLint, v0: GLfloat, v1: GLfloat) void;
             extern fn glProgramUniform3f(program: GLuint, location: GLint, v0: GLfloat, v1: GLfloat, v2: GLfloat) void;
             extern fn glProgramUniform4f(program: GLuint, location: GLint, v0: GLfloat, v1: GLfloat, v2: GLfloat, v3: GLfloat) void;
-            extern fn glProgramUniform1iv(program: GLuint, location: GLint, count: GLsizei, value: *const GLint) void;
-            extern fn glProgramUniform2iv(program: GLuint, location: GLint, count: GLsizei, value: *const GLint) void;
-            extern fn glProgramUniform3iv(program: GLuint, location: GLint, count: GLsizei, value: *const GLint) void;
-            extern fn glProgramUniform4iv(program: GLuint, location: GLint, count: GLsizei, value: *const GLint) void;
-            extern fn glProgramUniform1uiv(program: GLuint, location: GLint, count: GLsizei, value: *const GLuint) void;
-            extern fn glProgramUniform2uiv(program: GLuint, location: GLint, count: GLsizei, value: *const GLuint) void;
-            extern fn glProgramUniform3uiv(program: GLuint, location: GLint, count: GLsizei, value: *const GLuint) void;
-            extern fn glProgramUniform4uiv(program: GLuint, location: GLint, count: GLsizei, value: *const GLuint) void;
-            extern fn glProgramUniform1fv(program: GLuint, location: GLint, count: GLsizei, value: *const GLfloat) void;
-            extern fn glProgramUniform2fv(program: GLuint, location: GLint, count: GLsizei, value: *const GLfloat) void;
-            extern fn glProgramUniform3fv(program: GLuint, location: GLint, count: GLsizei, value: *const GLfloat) void;
-            extern fn glProgramUniform4fv(program: GLuint, location: GLint, count: GLsizei, value: *const GLfloat) void;
-            extern fn glProgramUniformMatrix2fv(program: GLuint, location: GLint, count: GLsizei, transpose: GLboolean, value: *const GLfloat) void;
-            extern fn glProgramUniformMatrix3fv(program: GLuint, location: GLint, count: GLsizei, transpose: GLboolean, value: *const GLfloat) void;
-            extern fn glProgramUniformMatrix4fv(program: GLuint, location: GLint, count: GLsizei, transpose: GLboolean, value: *const GLfloat) void;
-            extern fn glProgramUniformMatrix2x3fv(program: GLuint, location: GLint, count: GLsizei, transpose: GLboolean, value: *const GLfloat) void;
-            extern fn glProgramUniformMatrix3x2fv(program: GLuint, location: GLint, count: GLsizei, transpose: GLboolean, value: *const GLfloat) void;
-            extern fn glProgramUniformMatrix2x4fv(program: GLuint, location: GLint, count: GLsizei, transpose: GLboolean, value: *const GLfloat) void;
-            extern fn glProgramUniformMatrix4x2fv(program: GLuint, location: GLint, count: GLsizei, transpose: GLboolean, value: *const GLfloat) void;
-            extern fn glProgramUniformMatrix3x4fv(program: GLuint, location: GLint, count: GLsizei, transpose: GLboolean, value: *const GLfloat) void;
-            extern fn glProgramUniformMatrix4x3fv(program: GLuint, location: GLint, count: GLsizei, transpose: GLboolean, value: *const GLfloat) void;
+            extern fn glProgramUniform1iv(program: GLuint, location: GLint, count: GLsizei, value: [*]const GLint) void;
+            extern fn glProgramUniform2iv(program: GLuint, location: GLint, count: GLsizei, value: [*]const GLint) void;
+            extern fn glProgramUniform3iv(program: GLuint, location: GLint, count: GLsizei, value: [*]const GLint) void;
+            extern fn glProgramUniform4iv(program: GLuint, location: GLint, count: GLsizei, value: [*]const GLint) void;
+            extern fn glProgramUniform1uiv(program: GLuint, location: GLint, count: GLsizei, value: [*]const GLuint) void;
+            extern fn glProgramUniform2uiv(program: GLuint, location: GLint, count: GLsizei, value: [*]const GLuint) void;
+            extern fn glProgramUniform3uiv(program: GLuint, location: GLint, count: GLsizei, value: [*]const GLuint) void;
+            extern fn glProgramUniform4uiv(program: GLuint, location: GLint, count: GLsizei, value: [*]const GLuint) void;
+            extern fn glProgramUniform1fv(program: GLuint, location: GLint, count: GLsizei, value: [*]const GLfloat) void;
+            extern fn glProgramUniform2fv(program: GLuint, location: GLint, count: GLsizei, value: [*]const GLfloat) void;
+            extern fn glProgramUniform3fv(program: GLuint, location: GLint, count: GLsizei, value: [*]const GLfloat) void;
+            extern fn glProgramUniform4fv(program: GLuint, location: GLint, count: GLsizei, value: [*]const GLfloat) void;
+            extern fn glProgramUniformMatrix2fv(program: GLuint, location: GLint, count: GLsizei, transpose: GLboolean, value: [*]const GLfloat) void;
+            extern fn glProgramUniformMatrix3fv(program: GLuint, location: GLint, count: GLsizei, transpose: GLboolean, value: [*]const GLfloat) void;
+            extern fn glProgramUniformMatrix4fv(program: GLuint, location: GLint, count: GLsizei, transpose: GLboolean, value: [*]const GLfloat) void;
+            extern fn glProgramUniformMatrix2x3fv(program: GLuint, location: GLint, count: GLsizei, transpose: GLboolean, value: [*]const GLfloat) void;
+            extern fn glProgramUniformMatrix3x2fv(program: GLuint, location: GLint, count: GLsizei, transpose: GLboolean, value: [*]const GLfloat) void;
+            extern fn glProgramUniformMatrix2x4fv(program: GLuint, location: GLint, count: GLsizei, transpose: GLboolean, value: [*]const GLfloat) void;
+            extern fn glProgramUniformMatrix4x2fv(program: GLuint, location: GLint, count: GLsizei, transpose: GLboolean, value: [*]const GLfloat) void;
+            extern fn glProgramUniformMatrix3x4fv(program: GLuint, location: GLint, count: GLsizei, transpose: GLboolean, value: [*]const GLfloat) void;
+            extern fn glProgramUniformMatrix4x3fv(program: GLuint, location: GLint, count: GLsizei, transpose: GLboolean, value: [*]const GLfloat) void;
             extern fn glValidateProgramPipeline(pipeline: GLuint) void;
-            extern fn glGetProgramPipelineInfoLog(pipeline: GLuint, bufSize: GLsizei, length: *GLsizei, infoLog: *GLchar) void;
+            extern fn glGetProgramPipelineInfoLog(pipeline: GLuint, bufSize: GLsizei, length: *GLsizei, infoLog: [*]GLchar) void;
             extern fn glBindImageTexture(unit: GLuint, texture: GLuint, level: GLint, layered: GLboolean, layer: GLint, access: GLenum, format: GLenum) void;
-            extern fn glGetBooleani_v(target: GLenum, index: GLuint, data: *GLboolean) void;
+            extern fn glGetBooleani_v(target: GLenum, index: GLuint, data: [*]GLboolean) void;
             extern fn glMemoryBarrier(barriers: GLbitfield) void;
             extern fn glMemoryBarrierByRegion(barriers: GLbitfield) void;
             extern fn glTexStorage2DMultisample(target: GLenum, samples: GLsizei, internalformat: GLenum, width: GLsizei, height: GLsizei, fixedsamplelocations: GLboolean) void;
-            extern fn glGetMultisamplefv(pname: GLenum, index: GLuint, val: *GLfloat) void;
+            extern fn glGetMultisamplefv(pname: GLenum, index: GLuint, val: [*]GLfloat) void;
             extern fn glSampleMaski(maskNumber: GLuint, mask: GLbitfield) void;
-            extern fn glGetTexLevelParameteriv(target: GLenum, level: GLint, pname: GLenum, params: *GLint) void;
-            extern fn glGetTexLevelParameterfv(target: GLenum, level: GLint, pname: GLenum, params: *GLfloat) void;
+            extern fn glGetTexLevelParameteriv(target: GLenum, level: GLint, pname: GLenum, params: [*]GLint) void;
+            extern fn glGetTexLevelParameterfv(target: GLenum, level: GLint, pname: GLenum, params: [*]GLfloat) void;
             extern fn glBindVertexBuffer(bindingindex: GLuint, buffer: GLuint, offset: GLintptr, stride: GLsizei) void;
             extern fn glVertexAttribFormat(attribindex: GLuint, size: GLint, type: GLenum, normalized: GLboolean, relativeoffset: GLuint) void;
             extern fn glVertexAttribIFormat(attribindex: GLuint, size: GLint, type: GLenum, relativeoffset: GLuint) void;
@@ -770,6 +770,170 @@ pub fn getApi(comptime api: Api) type {
 
             fn glGetInternalformativ(target: GLenum, internal_format: GLenum, pname: GLenum, params: []GLint) void {
                 Externs.glGetInternalformativ(target, internal_format, pname, params.len, params.ptr);
+            }
+
+            fn glGetFramebufferParameteriv(target: GLenum, pname: GLenum, params: []GLint) void {
+                Externs.glGetFramebufferParameteriv(target, pname, params.ptr);
+            }
+
+            fn glGetProgramInterfaceiv(program: GLuint, program_interface: GLenum, pname: GLenum, params: []GLint) void {
+                Externs.glGetProgramInterfaceiv(program, program_interface, pname, params.ptr);
+            }
+
+            fn glGetProgramResourceIndex(program: GLuint, program_interface: GLenum, name: [:0]const u8) GLuint {
+                return Externs.glGetProgramResourceIndex(program, program_interface, @ptrCast(name.ptr));
+            }
+
+            fn glGetProgramResourceName(program: GLuint, program_interface: GLenum, index: GLuint, name: [:0]u8) []u8 {
+                var written: GLsizei = 0;
+                Externs.glGetProgramResourceName(program, program_interface, index, name.len, &written, @ptrCast(name.ptr));
+                return name[0..written];
+            }
+
+            fn glGetProgramResourceiv(program: GLuint, program_interface: GLenum, index: GLuint, props: []const GLenum, params: []GLint) []GLint {
+                var written: GLsizei = 0;
+                Externs.glGetProgramResourceiv(program, program_interface, index, props.len, props.ptr, params.len, &written, params.ptr);
+                return params[0..written];
+            }
+
+            fn glGetProgramResourceLocation(program: GLuint, program_interface: GLenum, name: [:0]const u8) GLint {
+                return Externs.glGetProgramResourceLocation(program, program_interface, @ptrCast(name.ptr));
+            }
+
+            fn glCreateShaderProgramv(shader_type: GLenum, strings: []const [:0]const u8) GLuint {
+                var mem: [4096]u8 = undefined;
+                var fba = std.heap.FixedBufferAllocator.init(&mem);
+
+                const c_names: []const [*:0]const GLchar = Helpers.zigStringsToCStrings(strings, fba.allocator());
+
+                return Externs.glCreateShaderProgramv(shader_type, c_names.len, @ptrCast(c_names.ptr));
+            }
+
+            fn glDeleteProgramPipelines(pipelines: []const GLuint) void {
+                Externs.glDeleteProgramPipelines(pipelines.len, pipelines.ptr);
+            }
+
+            fn glGenProgramPipelines(pipelines: []GLuint) void {
+                Externs.glGenProgramPipelines(pipelines.len, pipelines.ptr);
+            }
+
+            fn glGetProgramPipelineiv(pipeline: GLuint, pname: GLenum, params: []GLint) void {
+                Externs.glGetProgramPipelineiv(pipeline, pname, params.ptr);
+            }
+
+            fn glProgramUniform1iv(program: GLuint, location: GLint, count: GLsizei, value: []const GLint) void {
+                Externs.glProgramUniform1iv(program, location, count, value.ptr);
+            }
+
+            fn glProgramUniform2iv(program: GLuint, location: GLint, count: GLsizei, value: []const GLint) void {
+                Externs.glProgramUniform2iv(program, location, count, value.ptr);
+            }
+
+            fn glProgramUniform3iv(program: GLuint, location: GLint, count: GLsizei, value: []const GLint) void {
+                Externs.glProgramUniform3iv(program, location, count, value.ptr);
+            }
+
+            fn glProgramUniform4iv(program: GLuint, location: GLint, count: GLsizei, value: []const GLint) void {
+                Externs.glProgramUniform4iv(program, location, count, value.ptr);
+            }
+
+            fn glProgramUniform1uiv(program: GLuint, location: GLint, count: GLsizei, value: []const GLuint) void {
+                Externs.glProgramUniform1uiv(program, location, count, value.ptr);
+            }
+
+            fn glProgramUniform2uiv(program: GLuint, location: GLint, count: GLsizei, value: []const GLuint) void {
+                Externs.glProgramUniform2uiv(program, location, count, value.ptr);
+            }
+
+            fn glProgramUniform3uiv(program: GLuint, location: GLint, count: GLsizei, value: []const GLuint) void {
+                Externs.glProgramUniform3uiv(program, location, count, value.ptr);
+            }
+
+            fn glProgramUniform4uiv(program: GLuint, location: GLint, count: GLsizei, value: []const GLuint) void {
+                Externs.glProgramUniform4uiv(program, location, count, value.ptr);
+            }
+
+            fn glProgramUniform1fv(program: GLuint, location: GLint, count: GLsizei, value: []const GLfloat) void {
+                Externs.glProgramUniform1fv(program, location, count, value.ptr);
+            }
+
+            fn glProgramUniform2fv(program: GLuint, location: GLint, count: GLsizei, value: []const GLfloat) void {
+                Externs.glProgramUniform2fv(program, location, count, value.ptr);
+            }
+
+            fn glProgramUniform3fv(program: GLuint, location: GLint, count: GLsizei, value: []const GLfloat) void {
+                Externs.glProgramUniform3fv(program, location, count, value.ptr);
+            }
+
+            fn glProgramUniform4fv(program: GLuint, location: GLint, count: GLsizei, value: []const GLfloat) void {
+                Externs.glProgramUniform4fv(program, location, count, value.ptr);
+            }
+
+            fn glProgramUniformMatrix2fv(program: GLuint, location: GLint, count: GLsizei, transpose: bool, value: []const GLfloat) void {
+                const c_transpose = if (transpose) GL_TRUE else GL_FALSE;
+                Externs.glProgramUniformMatrix2fv(program, location, count, c_transpose, value.ptr);
+            }
+
+            fn glProgramUniformMatrix3fv(program: GLuint, location: GLint, count: GLsizei, transpose: bool, value: []const GLfloat) void {
+                const c_transpose = if (transpose) GL_TRUE else GL_FALSE;
+                Externs.glProgramUniformMatrix3fv(program, location, count, c_transpose, value.ptr);
+            }
+
+            fn glProgramUniformMatrix4fv(program: GLuint, location: GLint, count: GLsizei, transpose: bool, value: []const GLfloat) void {
+                const c_transpose = if (transpose) GL_TRUE else GL_FALSE;
+                Externs.glProgramUniformMatrix4fv(program, location, count, c_transpose, value.ptr);
+            }
+
+            fn glProgramUniformMatrix2x3fv(program: GLuint, location: GLint, count: GLsizei, transpose: bool, value: []const GLfloat) void {
+                const c_transpose = if (transpose) GL_TRUE else GL_FALSE;
+                Externs.glProgramUniformMatrix2x3fv(program, location, count, c_transpose, value.ptr);
+            }
+
+            fn glProgramUniformMatrix3x2fv(program: GLuint, location: GLint, count: GLsizei, transpose: bool, value: []const GLfloat) void {
+                const c_transpose = if (transpose) GL_TRUE else GL_FALSE;
+                Externs.glProgramUniformMatrix3x2fv(program, location, count, c_transpose, value.ptr);
+            }
+
+            fn glProgramUniformMatrix2x4fv(program: GLuint, location: GLint, count: GLsizei, transpose: bool, value: []const GLfloat) void {
+                const c_transpose = if (transpose) GL_TRUE else GL_FALSE;
+                Externs.glProgramUniformMatrix2x4fv(program, location, count, c_transpose, value.ptr);
+            }
+
+            fn glProgramUniformMatrix4x2fv(program: GLuint, location: GLint, count: GLsizei, transpose: bool, value: []const GLfloat) void {
+                const c_transpose = if (transpose) GL_TRUE else GL_FALSE;
+                Externs.glProgramUniformMatrix4x2fv(program, location, count, c_transpose, value.ptr);
+            }
+
+            fn glProgramUniformMatrix3x4fv(program: GLuint, location: GLint, count: GLsizei, transpose: bool, value: []const GLfloat) void {
+                const c_transpose = if (transpose) GL_TRUE else GL_FALSE;
+                Externs.glProgramUniformMatrix3x4fv(program, location, count, c_transpose, value.ptr);
+            }
+
+            fn glProgramUniformMatrix4x3fv(program: GLuint, location: GLint, count: GLsizei, transpose: bool, value: []const GLfloat) void {
+                const c_transpose = if (transpose) GL_TRUE else GL_FALSE;
+                Externs.glProgramUniformMatrix4x3fv(program, location, count, c_transpose, value.ptr);
+            }
+
+            fn glGetProgramPipelineInfoLog(pipeline: GLuint, info_log: []u8) []u8 {
+                var written: GLsizei = 0;
+                Externs.glGetProgramPipelineInfoLog(pipeline, info_log.len, &written, @ptrCast(info_log.ptr));
+                return info_log[0..written];
+            }
+
+            fn glGetBooleani_v(target: GLenum, index: GLuint, data: []GLboolean) void {
+                Externs.glGetBooleani_v(target, index, data.ptr);
+            }
+
+            fn glGetMultisamplefv(pname: GLenum, index: GLuint, val: []GLfloat) void {
+                Externs.glGetMultisamplefv(pname, index, val.ptr);
+            }
+
+            fn glGetTexLevelParameteriv(target: GLenum, level: GLint, pname: GLenum, params: []GLint) void {
+                Externs.glGetTexLevelParameteriv(target, level, pname, params.ptr);
+            }
+
+            fn glGetTexLevelParameterfv(target: GLenum, level: GLint, pname: GLenum, params: []GLfloat) void {
+                Externs.glGetTexLevelParameterfv(target, level, pname, params.ptr);
             }
         };
 
@@ -1840,5 +2004,74 @@ pub fn getApi(comptime api: Api) type {
         const GL_MAX_VERTEX_ATTRIB_RELATIVE_OFFSET: GLenum = if (api.hasCompat(.V3_1)) 0x82D9 else @compileError("GL_MAX_VERTEX_ATTRIB_RELATIVE_OFFSET only available with GLES 3.1+");
         const GL_MAX_VERTEX_ATTRIB_BINDINGS: GLenum = if (api.hasCompat(.V3_1)) 0x82DA else @compileError("GL_MAX_VERTEX_ATTRIB_BINDINGS only available with GLES 3.1+");
         const GL_MAX_VERTEX_ATTRIB_STRIDE: GLenum = if (api.hasCompat(.V3_1)) 0x82E5 else @compileError("GL_MAX_VERTEX_ATTRIB_STRIDE only available with GLES 3.1+");
+
+        const glDispatchCompute = if (api.hasCompat(.V3_1)) Externs.glDispatchCompute else @compileError("glDispatchCompute only available with GLES 3.1+");
+        const glDispatchComputeIndirect = if (api.hasCompat(.V3_1)) Externs.glDispatchComputeIndirect else @compileError("glDispatchComputeIndirect only available with GLES 3.1+");
+        const glDrawArraysIndirect = if (api.hasCompat(.V3_1)) Externs.glDrawArraysIndirect else @compileError("glDrawArraysIndirect only available with GLES 3.1+");
+        const glDrawElementsIndirect = if (api.hasCompat(.V3_1)) Externs.glDrawElementsIndirect else @compileError("glDrawElementsIndirect only available with GLES 3.1+");
+        const glFramebufferParameteri = if (api.hasCompat(.V3_1)) Externs.glFramebufferParameteri else @compileError("glFramebufferParameteri only available with GLES 3.1+");
+        const glGetFramebufferParameteriv = if (api.hasCompat(.V3_1)) Bindings.glGetFramebufferParameteriv else @compileError("glGetFramebufferParameteriv only available with GLES 3.1+");
+        const glGetProgramInterfaceiv = if (api.hasCompat(.V3_1)) Bindings.glGetProgramInterfaceiv else @compileError("glGetProgramInterfaceiv only available with GLES 3.1+");
+        const glGetProgramResourceIndex = if (api.hasCompat(.V3_1)) Bindings.glGetProgramResourceIndex else @compileError("glGetProgramResourceIndex only available with GLES 3.1+");
+        const glGetProgramResourceName = if (api.hasCompat(.V3_1)) Bindings.glGetProgramResourceName else @compileError("glGetProgramResourceName only available with GLES 3.1+");
+        const glGetProgramResourceiv = if (api.hasCompat(.V3_1)) Bindings.glGetProgramResourceiv else @compileError("glGetProgramResourceiv only available with GLES 3.1+");
+        const glGetProgramResourceLocation = if (api.hasCompat(.V3_1)) Bindings.glGetProgramResourceLocation else @compileError("glGetProgramResourceLocation only available with GLES 3.1+");
+        const glUseProgramStages = if (api.hasCompat(.V3_1)) Externs.glUseProgramStages else @compileError("glUseProgramStages only available with GLES 3.1+");
+        const glActiveShaderProgram = if (api.hasCompat(.V3_1)) Externs.glActiveShaderProgram else @compileError("glActiveShaderProgram only available with GLES 3.1+");
+        const glCreateShaderProgramv = if (api.hasCompat(.V3_1)) Bindings.glCreateShaderProgramv else @compileError("glCreateShaderProgramv only available with GLES 3.1+");
+        const glBindProgramPipeline = if (api.hasCompat(.V3_1)) Externs.glBindProgramPipeline else @compileError("glBindProgramPipeline only available with GLES 3.1+");
+        const glDeleteProgramPipelines = if (api.hasCompat(.V3_1)) Bindings.glDeleteProgramPipelines else @compileError("glDeleteProgramPipelines only available with GLES 3.1+");
+        const glGenProgramPipelines = if (api.hasCompat(.V3_1)) Bindings.glGenProgramPipelines else @compileError("glGenProgramPipelines only available with GLES 3.1+");
+        const glIsProgramPipeline = if (api.hasCompat(.V3_1)) Externs.glIsProgramPipeline else @compileError("glIsProgramPipeline only available with GLES 3.1+");
+        const glGetProgramPipelineiv = if (api.hasCompat(.V3_1)) Bindings.glGetProgramPipelineiv else @compileError("glGetProgramPipelineiv only available with GLES 3.1+");
+        const glProgramUniform1i = if (api.hasCompat(.V3_1)) Externs.glProgramUniform1i else @compileError("glProgramUniform1i only available with GLES 3.1+");
+        const glProgramUniform2i = if (api.hasCompat(.V3_1)) Externs.glProgramUniform2i else @compileError("glProgramUniform2i only available with GLES 3.1+");
+        const glProgramUniform3i = if (api.hasCompat(.V3_1)) Externs.glProgramUniform3i else @compileError("glProgramUniform3i only available with GLES 3.1+");
+        const glProgramUniform4i = if (api.hasCompat(.V3_1)) Externs.glProgramUniform4i else @compileError("glProgramUniform4i only available with GLES 3.1+");
+        const glProgramUniform1ui = if (api.hasCompat(.V3_1)) Externs.glProgramUniform1ui else @compileError("glProgramUniform1ui only available with GLES 3.1+");
+        const glProgramUniform2ui = if (api.hasCompat(.V3_1)) Externs.glProgramUniform2ui else @compileError("glProgramUniform2ui only available with GLES 3.1+");
+        const glProgramUniform3ui = if (api.hasCompat(.V3_1)) Externs.glProgramUniform3ui else @compileError("glProgramUniform3ui only available with GLES 3.1+");
+        const glProgramUniform4ui = if (api.hasCompat(.V3_1)) Externs.glProgramUniform4ui else @compileError("glProgramUniform4ui only available with GLES 3.1+");
+        const glProgramUniform1f = if (api.hasCompat(.V3_1)) Externs.glProgramUniform1f else @compileError("glProgramUniform1f only available with GLES 3.1+");
+        const glProgramUniform2f = if (api.hasCompat(.V3_1)) Externs.glProgramUniform2f else @compileError("glProgramUniform2f only available with GLES 3.1+");
+        const glProgramUniform3f = if (api.hasCompat(.V3_1)) Externs.glProgramUniform3f else @compileError("glProgramUniform3f only available with GLES 3.1+");
+        const glProgramUniform4f = if (api.hasCompat(.V3_1)) Externs.glProgramUniform4f else @compileError("glProgramUniform4f only available with GLES 3.1+");
+        const glProgramUniform1iv = if (api.hasCompat(.V3_1)) Bindings.glProgramUniform1iv else @compileError("glProgramUniform1iv only available with GLES 3.1+");
+        const glProgramUniform2iv = if (api.hasCompat(.V3_1)) Bindings.glProgramUniform2iv else @compileError("glProgramUniform2iv only available with GLES 3.1+");
+        const glProgramUniform3iv = if (api.hasCompat(.V3_1)) Bindings.glProgramUniform3iv else @compileError("glProgramUniform3iv only available with GLES 3.1+");
+        const glProgramUniform4iv = if (api.hasCompat(.V3_1)) Bindings.glProgramUniform4iv else @compileError("glProgramUniform4iv only available with GLES 3.1+");
+        const glProgramUniform1uiv = if (api.hasCompat(.V3_1)) Bindings.glProgramUniform1uiv else @compileError("glProgramUniform1uiv only available with GLES 3.1+");
+        const glProgramUniform2uiv = if (api.hasCompat(.V3_1)) Bindings.glProgramUniform2uiv else @compileError("glProgramUniform2uiv only available with GLES 3.1+");
+        const glProgramUniform3uiv = if (api.hasCompat(.V3_1)) Bindings.glProgramUniform3uiv else @compileError("glProgramUniform3uiv only available with GLES 3.1+");
+        const glProgramUniform4uiv = if (api.hasCompat(.V3_1)) Bindings.glProgramUniform4uiv else @compileError("glProgramUniform4uiv only available with GLES 3.1+");
+        const glProgramUniform1fv = if (api.hasCompat(.V3_1)) Bindings.glProgramUniform1fv else @compileError("glProgramUniform1fv only available with GLES 3.1+");
+        const glProgramUniform2fv = if (api.hasCompat(.V3_1)) Bindings.glProgramUniform2fv else @compileError("glProgramUniform2fv only available with GLES 3.1+");
+        const glProgramUniform3fv = if (api.hasCompat(.V3_1)) Bindings.glProgramUniform3fv else @compileError("glProgramUniform3fv only available with GLES 3.1+");
+        const glProgramUniform4fv = if (api.hasCompat(.V3_1)) Bindings.glProgramUniform4fv else @compileError("glProgramUniform4fv only available with GLES 3.1+");
+        const glProgramUniformMatrix2fv = if (api.hasCompat(.V3_1)) Bindings.glProgramUniformMatrix2fv else @compileError("glProgramUniformMatrix2fv only available with GLES 3.1+");
+        const glProgramUniformMatrix3fv = if (api.hasCompat(.V3_1)) Bindings.glProgramUniformMatrix3fv else @compileError("glProgramUniformMatrix3fv only available with GLES 3.1+");
+        const glProgramUniformMatrix4fv = if (api.hasCompat(.V3_1)) Bindings.glProgramUniformMatrix4fv else @compileError("glProgramUniformMatrix4fv only available with GLES 3.1+");
+        const glProgramUniformMatrix2x3fv = if (api.hasCompat(.V3_1)) Bindings.glProgramUniformMatrix2x3fv else @compileError("glProgramUniformMatrix2x3fv only available with GLES 3.1+");
+        const glProgramUniformMatrix3x2fv = if (api.hasCompat(.V3_1)) Bindings.glProgramUniformMatrix3x2fv else @compileError("glProgramUniformMatrix3x2fv only available with GLES 3.1+");
+        const glProgramUniformMatrix2x4fv = if (api.hasCompat(.V3_1)) Bindings.glProgramUniformMatrix2x4fv else @compileError("glProgramUniformMatrix2x4fv only available with GLES 3.1+");
+        const glProgramUniformMatrix4x2fv = if (api.hasCompat(.V3_1)) Bindings.glProgramUniformMatrix4x2fv else @compileError("glProgramUniformMatrix4x2fv only available with GLES 3.1+");
+        const glProgramUniformMatrix3x4fv = if (api.hasCompat(.V3_1)) Bindings.glProgramUniformMatrix3x4fv else @compileError("glProgramUniformMatrix3x4fv only available with GLES 3.1+");
+        const glProgramUniformMatrix4x3fv = if (api.hasCompat(.V3_1)) Bindings.glProgramUniformMatrix4x3fv else @compileError("glProgramUniformMatrix4x3fv only available with GLES 3.1+");
+        const glValidateProgramPipeline = if (api.hasCompat(.V3_1)) Externs.glValidateProgramPipeline else @compileError("glValidateProgramPipeline only available with GLES 3.1+");
+        const glGetProgramPipelineInfoLog = if (api.hasCompat(.V3_1)) Bindings.glGetProgramPipelineInfoLog else @compileError("glGetProgramPipelineInfoLog only available with GLES 3.1+");
+        const glBindImageTexture = if (api.hasCompat(.V3_1)) Externs.glBindImageTexture else @compileError("glBindImageTexture only available with GLES 3.1+");
+        const glGetBooleani_v = if (api.hasCompat(.V3_1)) Bindings.glGetBooleani_v else @compileError("glGetBooleani_v only available with GLES 3.1+");
+        const glMemoryBarrier = if (api.hasCompat(.V3_1)) Externs.glMemoryBarrier else @compileError("glMemoryBarrier only available with GLES 3.1+");
+        const glMemoryBarrierByRegion = if (api.hasCompat(.V3_1)) Externs.glMemoryBarrierByRegion else @compileError("glMemoryBarrierByRegion only available with GLES 3.1+");
+        const glTexStorage2DMultisample = if (api.hasCompat(.V3_1)) Externs.glTexStorage2DMultisample else @compileError("glTexStorage2DMultisample only available with GLES 3.1+");
+        const glGetMultisamplefv = if (api.hasCompat(.V3_1)) Bindings.glGetMultisamplefv else @compileError("glGetMultisamplefv only available with GLES 3.1+");
+        const glSampleMaski = if (api.hasCompat(.V3_1)) Externs.glSampleMaski else @compileError("glSampleMaski only available with GLES 3.1+");
+        const glGetTexLevelParameteriv = if (api.hasCompat(.V3_1)) Bindings.glGetTexLevelParameteriv else @compileError("glGetTexLevelParameteriv only available with GLES 3.1+");
+        const glGetTexLevelParameterfv = if (api.hasCompat(.V3_1)) Bindings.glGetTexLevelParameterfv else @compileError("glGetTexLevelParameterfv only available with GLES 3.1+");
+        const glBindVertexBuffer = if (api.hasCompat(.V3_1)) Externs.glBindVertexBuffer else @compileError("glBindVertexBuffer only available with GLES 3.1+");
+        const glVertexAttribFormat = if (api.hasCompat(.V3_1)) Externs.glVertexAttribFormat else @compileError("glVertexAttribFormat only available with GLES 3.1+");
+        const glVertexAttribIFormat = if (api.hasCompat(.V3_1)) Externs.glVertexAttribIFormat else @compileError("glVertexAttribIFormat only available with GLES 3.1+");
+        const glVertexAttribBinding = if (api.hasCompat(.V3_1)) Externs.glVertexAttribBinding else @compileError("glVertexAttribBinding only available with GLES 3.1+");
+        const glVertexBindingDivisor = if (api.hasCompat(.V3_1)) Externs.glVertexBindingDivisor else @compileError("glVertexBindingDivisor only available with GLES 3.1+");
     };
 }
