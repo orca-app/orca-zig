@@ -1,16 +1,14 @@
 ## Overview
-Here lies Zig bindings for the Orca project, along with some samples that demo how to setup a build.zig script to link with the orca libs, bundle your app, and run it. All bindings are contained in a single `orca.zig` file located in `src/`. 
+Here lies Zig bindings for the Orca project, along with some samples that demo how to setup a build.zig script to link with the orca libs, bundle your app, and run it.
 
 ### Warning
-These bindings are in-progress and experimental. You may encounter bugs since not all the bound APIs have been tested extensively - the included samples are the only code doing so! Additionally, not all APIs have zig coverage yet, notably:
-* `gles`
+These bindings are in-progress and experimental. You may encounter bugs since not all the bound APIs have been tested extensively - the included samples are the only code doing so!
 
 As more APIs get tested and ergonomics are worked out, there is a possibility of breaking changes. Please report any bugs or other issues you find on the Handmade discord in the #orca channel.
 
 ## Samples
-Two samples are included:
-* A general sample showing off common use APIs such as: logging, arena allocation, 
-* A UI-focused sample that is essentially a port of the C UI sample in the main orca repo
+* A general sample showing off common use APIs such as: logging, arena allocation, file IO, vector image drawing, etc.
+* Ports of the samples in the main Orca repo: UI and triangle.
 
 ### Build and run
 First you must have built the orca runtime and installed it via the dev scripts from a local checkout of the main orca repo:
