@@ -51,8 +51,8 @@ pub const log = struct {
     pub fn ext(comptime level: Level, comptime fmt: []const u8, args: anytype, source: std.builtin.SourceLocation) void {
         var format_buf: [512:0]u8 = undefined;
         _ = std.fmt.bufPrintZ(&format_buf, fmt, args) catch 0; // just discard NoSpaceLeft error for now
-        var line: c_int = @intCast(source.line);
 
+        const line: c_int = @intCast(source.line);
         oc_log_ext(level, source.fn_name.ptr, source.file.ptr, line, format_buf[0..].ptr);
     }
 };
@@ -68,8 +68,8 @@ pub fn assert(condition: bool, comptime fmt: []const u8, args: anytype, source: 
     if (builtin.mode == .Debug and condition == false) {
         var format_buf: [512:0]u8 = undefined;
         _ = std.fmt.bufPrintZ(&format_buf, fmt, args) catch 0;
-        var line: c_int = @intCast(source.line);
 
+        const line: c_int = @intCast(source.line);
         oc_assert_fail(source.file.ptr, source.fn_name.ptr, line, "assertion failed", format_buf[0..].ptr);
     }
 }
@@ -77,8 +77,8 @@ pub fn assert(condition: bool, comptime fmt: []const u8, args: anytype, source: 
 pub fn abort(comptime fmt: []const u8, args: anytype, source: std.builtin.SourceLocation) noreturn {
     var format_buf: [512:0]u8 = undefined;
     _ = std.fmt.bufPrintZ(&format_buf, fmt, args) catch 0;
-    var line: c_int = @intCast(source.line);
 
+    const line: c_int = @intCast(source.line);
     oc_abort_ext(source.file.ptr, source.fn_name.ptr, line, format_buf[0..].ptr);
     unreachable;
 }

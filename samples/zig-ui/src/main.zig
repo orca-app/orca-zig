@@ -33,8 +33,8 @@ pub fn onInit() !void {
     canvas = oc.Canvas.create();
     ui.init(&ui_ctx);
 
-    var fonts = [_]*oc.Font{ &font_regular, &font_bold };
-    var font_names = [_][]const u8{ "/OpenSans-Regular.ttf", "/OpenSans-Bold.ttf" };
+    const fonts = [_]*oc.Font{ &font_regular, &font_bold };
+    const font_names = [_][]const u8{ "/OpenSans-Regular.ttf", "/OpenSans-Bold.ttf" };
     for (fonts, font_names) |font, name| {
         var scratch = oc.Arena.scratchBegin();
         defer scratch.end();
@@ -44,8 +44,8 @@ pub fn onInit() !void {
             return e;
         };
 
-        var size = try file.getSize();
-        var buffer = scratch.arena.push(@intCast(size));
+        const size = try file.getSize();
+        const buffer = scratch.arena.push(@intCast(size));
         _ = try file.read(buffer);
         file.close();
 
@@ -238,7 +238,7 @@ fn widgets(arena: *oc.Arena) void {
         ui.styleNext(.{ .size = .{ .height = .{ .pixels = 130 } } });
         _ = ui.slider("v_slider", &v_slider_value);
 
-        var now = oc.clock.time(.Monotonic);
+        const now = oc.clock.time(.Monotonic);
         if ((now - v_slider_log_time) >= 0.2 and v_slider_value != v_slider_logged_value) {
             logPushf("Vertical slider moved to {d:.3}", .{v_slider_value});
             v_slider_logged_value = v_slider_value;
@@ -273,7 +273,7 @@ fn widgets(arena: *oc.Arena) void {
                 .selected_index = radio_selected,
                 .options = &options,
             };
-            var result = ui.radioGroup("radio_group", &radio_group_info);
+            const result = ui.radioGroup("radio_group", &radio_group_info);
             radio_selected = result.selected_index.?;
             if (result.changed) {
                 logPushf("Selected {s}", .{options[radio_selected]});
@@ -302,7 +302,7 @@ fn widgets(arena: *oc.Arena) void {
             .height = .text,
         },
     });
-    var textResult = ui.textBox("text", arena, text);
+    const textResult = ui.textBox("text", arena, text);
     if (textResult.changed) {
         text_arena.clear();
         text = text_arena.pushStr(textResult.text);
@@ -323,7 +323,7 @@ fn widgets(arena: *oc.Arena) void {
         .options = &options,
         .placeholder = "Select",
     };
-    var selectResult = ui.selectPopup("select", &select_popup_info);
+    const selectResult = ui.selectPopup("select", &select_popup_info);
     if (selectResult.selected_index != selected) {
         logPushf("Selected {s}", .{options[selectResult.selected_index.?]});
     }
@@ -366,7 +366,7 @@ fn widgets(arena: *oc.Arena) void {
             var log_lines_iter = log_lines.iter();
             while (log_lines_iter.next()) |log_line| {
                 var buf: [15]u8 = undefined;
-                var id = std.fmt.bufPrint(&buf, "{d}", .{i}) catch unreachable;
+                const id = std.fmt.bufPrint(&buf, "{d}", .{i}) catch unreachable;
                 _ = ui.boxBegin(id, .{});
                 defer _ = ui.boxEnd();
 
@@ -430,7 +430,7 @@ fn styling(arena: *oc.Arena) void {
 
         resetNextRadioGroupToDarkTheme(arena);
 
-        var unselected_tag = ui.Tag.make("radio");
+        const unselected_tag = ui.Tag.make("radio");
         var unselected_pattern = ui.Pattern.init();
         unselected_pattern.push(arena, .{ .sel = .{ .tag = unselected_tag } });
         if (!unselected_when_status.empty()) {
@@ -447,7 +447,7 @@ fn styling(arena: *oc.Arena) void {
             .roundness = unselected_roundness,
         });
 
-        var selected_tag = ui.Tag.make("radio_selected");
+        const selected_tag = ui.Tag.make("radio_selected");
         var selected_pattern = ui.Pattern.init();
         selected_pattern.push(arena, .{ .sel = .{ .tag = selected_tag } });
         if (!selected_when_status.empty()) {
@@ -463,7 +463,7 @@ fn styling(arena: *oc.Arena) void {
             .roundness = selected_roundness,
         });
 
-        var label_tag = ui.Tag.make("label");
+        const label_tag = ui.Tag.make("label");
         var label_pattern = ui.Pattern.init();
         label_pattern.push(arena, .{ .sel = .{ .tag = label_tag } });
         ui.styleMatchAfter(label_pattern, .{
@@ -481,7 +481,7 @@ fn styling(arena: *oc.Arena) void {
             .selected_index = styling_selected_radio,
             .options = &options,
         };
-        var result = ui.radioGroup("radio_group", &radio_group_info);
+        const result = ui.radioGroup("radio_group", &radio_group_info);
         styling_selected_radio = result.selected_index;
     }
 
@@ -558,7 +558,7 @@ fn styling(arena: *oc.Arena) void {
                     .selected_index = unselected_status_index,
                     .options = &status_options,
                 };
-                var status_result = ui.radioGroup("status", &status_info);
+                const status_result = ui.radioGroup("status", &status_info);
                 unselected_status_index = status_result.selected_index;
                 unselected_when_status = switch (unselected_status_index.?) {
                     0 => .{},
@@ -636,7 +636,7 @@ fn styling(arena: *oc.Arena) void {
                     .selected_index = selected_status_index,
                     .options = &status_options,
                 };
-                var status_result = ui.radioGroup("status", &status_info);
+                const status_result = ui.radioGroup("status", &status_info);
                 selected_status_index = status_result.selected_index;
                 selected_when_status = switch (selected_status_index.?) {
                     0 => .{},
@@ -675,7 +675,7 @@ fn styling(arena: *oc.Arena) void {
                     "Light green",
                     "Green",
                 };
-                var colors = [_]oc.Color{
+                const colors = [_]oc.Color{
                     ui.dark_theme.text0,
                     ui.dark_theme.palette.red5,
                     ui.dark_theme.palette.orange5,
@@ -689,7 +689,7 @@ fn styling(arena: *oc.Arena) void {
                     .selected_index = label_font_color_selected,
                     .options = &color_names,
                 };
-                var color_result = ui.selectPopup("color", &color_info);
+                const color_result = ui.selectPopup("color", &color_info);
                 label_font_color_selected = color_result.selected_index;
                 label_font_color = colors[label_font_color_selected.?];
             }
@@ -708,7 +708,7 @@ fn styling(arena: *oc.Arena) void {
                     "Regular",
                     "Bold",
                 };
-                var fonts = [_]*oc.Font{
+                const fonts = [_]*oc.Font{
                     &font_regular,
                     &font_bold,
                 };
@@ -716,7 +716,7 @@ fn styling(arena: *oc.Arena) void {
                     .selected_index = label_font_selected,
                     .options = &font_names,
                 };
-                var font_result = ui.selectPopup("font_style", &font_info);
+                const font_result = ui.selectPopup("font_style", &font_info);
                 label_font_selected = font_result.selected_index;
                 label_font = fonts[label_font_selected.?];
             }
@@ -802,14 +802,14 @@ fn logPush(line: []const u8) void {
 }
 
 fn logPushf(comptime fmt: []const u8, args: anytype) void {
-    var str = oc.Str8.pushf(&log_arena, fmt, args);
+    const str = oc.Str8.pushf(&log_arena, fmt, args);
     log_lines.push(&log_arena, str);
 }
 
 /// This makes sure the light theme doesn't break the styling overrides
 /// You won't need it in a real program as long as your colors come from ui_ctx.theme or ui_ctx.theme.palette
 fn resetNextRadioGroupToDarkTheme(arena: *oc.Arena) void {
-    var unselected_tag = ui.Tag.make("radio");
+    const unselected_tag = ui.Tag.make("radio");
     var unselected_pattern = ui.Pattern.init();
     unselected_pattern.push(arena, .{ .sel = .{ .tag = unselected_tag } });
     ui.styleMatchAfter(unselected_pattern, .{
@@ -833,7 +833,7 @@ fn resetNextRadioGroupToDarkTheme(arena: *oc.Arena) void {
         .border_color = ui.dark_theme.primary,
     });
 
-    var selected_tag = ui.Tag.make("radio_selected");
+    const selected_tag = ui.Tag.make("radio_selected");
     var selected_pattern = ui.Pattern.init();
     selected_pattern.push(arena, .{ .sel = .{ .tag = selected_tag } });
     ui.styleMatchAfter(selected_pattern, .{

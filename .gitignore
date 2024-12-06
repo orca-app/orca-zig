@@ -1,1 +1,3 @@
 *.app
+.zig-cache
+zig-out

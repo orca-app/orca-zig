@@ -23,7 +23,7 @@ pub fn getApi(comptime api: Api) type {
     return struct {
         const Helpers = struct {
             fn zigStringsToCStrings(strings: []const [:0]const u8, allocator: std.mem.Allocator) []const [*:0]const GLchar {
-                var c_strings: [][*:0]const GLchar = allocator.alloc([*:0]const GLchar, strings.len) catch {
+                const c_strings: [][*:0]const GLchar = allocator.alloc([*:0]const GLchar, strings.len) catch {
                     debug.abort("Out of memory allocating memory for converting {} zig string pointers to C string pointers.", .{strings.len}, @src());
                 };
 
@@ -468,7 +468,7 @@ pub fn getApi(comptime api: Api) type {
                 var mem: [4096]u8 = undefined;
                 var fba = std.heap.FixedBufferAllocator.init(&mem);
 
-                var c_strings: []const [*:0]const GLchar = Helpers.zigStringsToCStrings(strings, fba.allocator());
+                const c_strings: []const [*:0]const GLchar = Helpers.zigStringsToCStrings(strings, fba.allocator());
 
                 Externs.glShaderSource(shader, @intCast(c_strings.len), c_strings.ptr, null);
             }
@@ -613,9 +613,9 @@ pub fn getApi(comptime api: Api) type {
                 Externs.glTransformFeedbackVaryings(program, c_varyings.len, c_varyings.ptr, buffer_mode);
             }
 
-            fn glGetTransformFeedbackVarying(program: GLuint, index: GLuint, size: *GLsizei, varying_type: *GLenum, name: []u8) []u8 {
+            fn glGetTransformFeedbackVarying(program: GLuint, index: GLuint, varying_type: *GLenum, name: []u8) []u8 {
                 var written: GLsizei = 0;
-                Externs.glGetTransformFeedbackVarying(program, index, name.len, size, varying_type, @ptrCast(name.ptr));
+                Externs.glGetTransformFeedbackVarying(program, index, name.len, &written, varying_type, @ptrCast(name.ptr));
                 return name[0..written];
             }
 

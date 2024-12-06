@@ -205,9 +205,9 @@ pub fn onFrameRefresh() !void {
         var scratch_scope = oc.Arena.scratchBegin();
         defer scratch_scope.end();
 
-        var scratch: *oc.Arena = scratch_scope.arena;
+        const scratch: *oc.Arena = scratch_scope.arena;
 
-        var str1: []const u8 = Str8.collate(scratch, &[_][]const u8{ "Hello", "from", "Zig!" }, ">> ", " ", " <<");
+        const str1: []const u8 = Str8.collate(scratch, &[_][]const u8{ "Hello", "from", "Zig!" }, ">> ", " ", " <<");
 
         var str2_list = oc.Str8List.init();
         str2_list.pushStr(scratch, Str8.fromSlice("All"));
@@ -217,8 +217,8 @@ pub fn onFrameRefresh() !void {
         oc.assert(str2_list.contains("All"), "str2_list should have the string we just pushed", .{}, @src());
 
         {
-            var elt_first = str2_list.list.first;
-            var elt_last = str2_list.list.last;
+            const elt_first = str2_list.list.first;
+            const elt_last = str2_list.list.last;
             oc.assert(elt_first != null, "list checks", .{}, @src());
             oc.assert(elt_last != null, "list checks", .{}, @src());
             oc.assert(elt_first != elt_last, "list checks", .{}, @src());
@@ -230,7 +230,7 @@ pub fn onFrameRefresh() !void {
             oc.assert(elt_last.?.prev != elt_first, "list checks", .{}, @src());
         }
 
-        var str2: []const u8 = str2_list.collate(scratch, "<< ", "-", " >>");
+        const str2: []const u8 = str2_list.collate(scratch, "<< ", "-", " >>");
 
         const font_size = 18;
         const text_metrics = font.textMetrics(font_size, str1);
@@ -256,7 +256,7 @@ pub fn onFrameRefresh() !void {
         var scratch_scope = oc.Arena.scratchBegin();
         defer scratch_scope.end();
 
-        var scratch: *oc.Arena = scratch_scope.arena;
+        const scratch: *oc.Arena = scratch_scope.arena;
 
         var strings_array = std.ArrayList([]const u8).init(allocator);
         defer strings_array.deinit();
@@ -277,7 +277,7 @@ pub fn onFrameRefresh() !void {
         const big_string = Str8.fromSlice(single_string.items);
         const separators = [_][]const u8{ " ", "|", "-" };
         var strings: oc.Str8List = Str8.split(big_string.slice(), scratch, &separators);
-        var collated: []const u8 = strings.join(scratch);
+        const collated: []const u8 = strings.join(scratch);
 
         oc.Canvas.setFontSize(12);
         oc.Canvas.moveTo(0, 170);

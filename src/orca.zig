@@ -38,7 +38,7 @@ pub const ListElt = extern struct {
     next: ?*ListElt,
 
     pub fn entry(self: *ListElt, comptime ParentType: type, comptime field_name_in_parent: []const u8) *ParentType {
-        return @fieldParentPtr(ParentType, field_name_in_parent, self);
+        return @fieldParentPtr(field_name_in_parent, self);
     }
 
     pub fn nextEntry(comptime ParentType: type, comptime field_name_in_parent: []const u8, elt_parent: *ParentType) ?*ParentType {
@@ -98,7 +98,7 @@ pub const List = extern struct {
 
             pub fn next(self: *Self) ?*EltParentType {
                 if (self.item) |elt| {
-                    var entry: *EltParentType = elt.entry(EltParentType, field_name_in_parent);
+                    const entry: *EltParentType = elt.entry(EltParentType, field_name_in_parent);
                     self.item = if (direction == .Forward) elt.next else elt.prev;
                     return entry;
                 }
@@ -216,8 +216,8 @@ pub const List = extern struct {
 //------------------------------------------------------------------------------------------
 
 pub const BaseAllocator = extern struct {
-    const MemReserveFunction = *const fn (context: *BaseAllocator, size: u64) ?[*]u8;
-    const MemModifyFunction = *const fn (context: *BaseAllocator, ptr: ?[*]u8, size: u64) ?[*]u8;
+    const MemReserveFunction = *const fn (context: *BaseAllocator, size: u64) callconv(.C) ?[*]u8;
+    const MemModifyFunction = *const fn (context: *BaseAllocator, ptr: ?[*]u8, size: u64) callconv(.C) ?[*]u8;
 
     func_reserve: MemReserveFunction,
     func_commit: MemModifyFunction,
@@ -291,17 +291,16 @@ pub const Arena = extern struct {
     }
 
     pub fn pushType(arena: *Arena, comptime T: type) *T {
-        var mem: []u8 = arena.pushAligned(@sizeOf(T), @alignOf(T));
+        const mem: []u8 = arena.pushAligned(@sizeOf(T), @alignOf(T));
         assert(mem.len >= @sizeOf(T), "need at least {} bytes, but got {}", .{ mem.len, @sizeOf(T) }, @src());
-        var p: *T = @alignCast(@ptrCast(mem.ptr));
-        return p;
+        return @alignCast(@ptrCast(mem.ptr));
     }
 
     pub fn pushArray(arena: *Arena, comptime T: type, count: usize) []T {
-        var mem: []u8 = arena.pushAligned(@sizeOf(T) * count, @alignOf(T));
+        const mem: []u8 = arena.pushAligned(@sizeOf(T) * count, @alignOf(T));
         const min_bytes = @sizeOf(T) * count;
         assert(mem.len >= min_bytes, "need at least {} bytes, but got {}", .{ mem.len, min_bytes }, @src());
-        var items: [*]T = @alignCast(@ptrCast(mem.ptr));
+        const items: [*]T = @alignCast(@ptrCast(mem.ptr));
         return items[0..count];
     }
 
@@ -359,7 +358,7 @@ fn stringType(comptime CharType: type) type {
             }
 
             pub fn pushf(list: *StrList, arena: *Arena, comptime format: []const u8, args: anytype) void {
-                var str = Str.pushf(arena, format, args);
+                const str = Str.pushf(arena, format, args);
                 list.pushStr(arena, Str.fromSlice(str));
             }
 
@@ -574,7 +573,7 @@ fn stringType(comptime CharType: type) type {
             }
 
             if (offset_substring != offset) {
-                var substr = ptr[offset_substring..offset];
+                const substr = ptr[offset_substring..offset];
                 list.push(arena, substr);
             }
 
@@ -2522,9 +2521,9 @@ pub const ui = struct {
         any,
         owner,
         text,
+        key,
         tag,
         status,
-        key,
     };
 
     pub const Status = packed struct(u8) {
@@ -2615,7 +2614,7 @@ pub const ui = struct {
         pasted: bool,
     };
 
-    pub const BoxDrawProc = *fn (box: *Box, data: ?*anyopaque) callconv(.C) void;
+    pub const BoxDrawProc = *const fn (box: *Box, data: ?*anyopaque) callconv(.C) void;
 
     pub const OverflowAllow = packed struct {
         x: bool = false,
@@ -3165,7 +3164,7 @@ pub const ui = struct {
     }
 
     fn convertSelector(selector: Selector) SelectorInternal {
-        var data: SelectorDataInternal = switch (selector.sel) {
+        const data: SelectorDataInternal = switch (selector.sel) {
             .any, .owner => std.mem.zeroes(SelectorDataInternal),
             .text => |text| .{ .text = Str8.fromSlice(text) },
             .key => |key| .{ .key = key },
@@ -3302,18 +3301,20 @@ pub const ui = struct {
     pub fn selectPopup(name: []const u8, info: *SelectPopupInfo) SelectPopupInfo {
         var scratch = Arena.scratchBegin();
         defer scratch.end();
-        var options_internal = scratch.arena.pushArray(Str8, info.options.len);
+
+        const options_internal = scratch.arena.pushArray(Str8, info.options.len);
         for (info.options, options_internal) |option, *option_internal| {
             option_internal.* = Str8.fromSlice(option);
         }
-        var info_internal = SelectPopupInfoInternal{
+        var info_internal: SelectPopupInfoInternal = .{
             .changed = info.changed,
             .selected_index = if (info.selected_index) |selected_index| @intCast(selected_index) else -1,
             .option_count = @intCast(info.options.len),
             .options = options_internal.ptr,
             .placeholder = Str8.fromSlice(info.placeholder),
         };
-        var result_internal = oc_ui_select_popup_str8(Str8.fromSlice(name), &info_internal);
+        const result_internal = oc_ui_select_popup_str8(Str8.fromSlice(name), &info_internal);
+
         return .{
             .changed = result_internal.changed,
             .selected_index = if (result_internal.selected_index >= 0) @intCast(result_internal.selected_index) else null,
@@ -3331,17 +3332,19 @@ pub const ui = struct {
     pub fn radioGroup(name: []const u8, info: *RadioGroupInfo) RadioGroupInfo {
         var scratch = Arena.scratchBegin();
         defer scratch.end();
-        var options_internal = scratch.arena.pushArray(Str8, info.options.len);
+
+        const options_internal = scratch.arena.pushArray(Str8, info.options.len);
         for (info.options, options_internal) |option, *option_internal| {
             option_internal.* = Str8.fromSlice(option);
         }
-        var info_internal = RadioGroupInfoInternal{
+        const info_internal: RadioGroupInfoInternal = .{
             .changed = info.changed,
             .selected_index = if (info.selected_index) |selected_index| @intCast(selected_index) else -1,
             .option_count = @intCast(info.options.len),
             .options = options_internal.ptr,
         };
-        var result_internal = oc_ui_radio_group_str8(Str8.fromSlice(name), info_internal);
+        const result_internal = oc_ui_radio_group_str8(Str8.fromSlice(name), info_internal);
+
         return .{
             .changed = result_internal.changed,
             .selected_index = if (result_internal.selected_index >= 0) @intCast(result_internal.selected_index) else null,
@@ -3535,7 +3538,7 @@ pub const File = extern struct {
 
     pub const ErrorWrappedIo = struct {
         pub fn write(file: File, buffer: []const u8) io.Error!usize {
-            var written: u64 = file.write(buffer);
+            const written = file.write(buffer);
             try file.lastError();
             return written;
         }
@@ -3609,13 +3612,13 @@ pub const File = extern struct {
     }
 
     pub fn pos(file: File) io.Error!i64 {
-        var position = oc_file_pos(file);
+        const position = oc_file_pos(file);
         try file.lastError();
         return position;
     }
 
     pub fn seek(file: File, offset: i64, whence: Whence) io.Error!i64 {
-        var res = oc_file_seek(file, offset, whence);
+        const res = oc_file_seek(file, offset, whence);
         try file.lastError();
         return res;
     }
@@ -3625,7 +3628,7 @@ pub const File = extern struct {
     }
 
     pub fn write(file: File, buffer: []const u8) io.Error!usize {
-        var written: u64 = oc_file_write(file, buffer.len, buffer.ptr);
+        const written = oc_file_write(file, buffer.len, buffer.ptr);
         try file.lastError();
         const max = std.math.maxInt(usize);
         return if (written > max) max else @intCast(written);
@@ -3636,25 +3639,25 @@ pub const File = extern struct {
     }
 
     pub fn read(file: File, buffer: []u8) io.Error!usize {
-        var num_bytes: u64 = oc_file_read(file, buffer.len, buffer.ptr);
+        const num_bytes = oc_file_read(file, buffer.len, buffer.ptr);
         try file.lastError();
         return @intCast(num_bytes);
     }
 
     pub fn getStatus(file: File) io.Error!Status {
-        var status = oc_file_get_status(file);
+        const status = oc_file_get_status(file);
         try file.lastError();
         return status;
     }
 
     pub fn getSize(file: File) io.Error!u64 {
-        var size = oc_file_size(file);
+        const size = oc_file_size(file);
         try file.lastError();
         return size;
     }
 
     pub fn openWithRequest(path: []const u8, rights: AccessFlags, flags: OpenFlags) io.Error!File {
-        var file = oc_file_open_with_request(Str8.fromSlice(path), rights, flags);
+        const file = oc_file_open_with_request(Str8.fromSlice(path), rights, flags);
         try file.lastError();
         return file;
     }
