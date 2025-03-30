@@ -1,6 +1,13 @@
 const std = @import("std");
+const Build = std.Build;
 
-pub fn build(b: *std.Build) !void {
+// These two should match the same orca version.
+// @Todo verify our api.json and sdk versions match
+// @Cleanup can we combine these?
+const sdk_version = "test-release-4f124dd346";
+const orca_api_commit = "4f124dd3461f48c444518ad48c6337de6bfeb72f";
+
+pub fn build(b: *Build) !void {
     const optimize = b.standardOptimizeOption(.{});
     const wasm_target = b.resolveTargetQuery(.{
         .cpu_arch = .wasm32,
@@ -8,18 +15,11 @@ pub fn build(b: *std.Build) !void {
         .cpu_features_add = std.Target.wasm.featureSet(&.{.bulk_memory}),
     });
 
-    const sdk_version = b.option(
-        []const u8,
-        "sdk-version",
-        "select a specific version of the Orca SDK (default is latest version)",
-    );
-
-    const sdk_path: std.Build.LazyPath = lazypath: {
-        // @Cleanup this feels like overkill...
-        var args: std.BoundedArray([]const u8, 4) = .{};
-        args.appendSliceAssumeCapacity(&.{ "orca", "sdk-path" });
-        if (sdk_version) |v| args.appendSliceAssumeCapacity(&.{ "--version", v });
-        break :lazypath .{ .cwd_relative = b.run(args.slice()) };
+    const sdk_path: Build.LazyPath = .{
+        .cwd_relative = b.run(&.{
+            "orca",      "sdk-path",
+            "--version", sdk_version,
+        }),
     };
 
     const sample_step = b.step("samples", "Build sample Orca applications");
@@ -36,17 +36,23 @@ pub fn build(b: *std.Build) !void {
             .name = "Triangle",
             .root_source_file = "samples/zig-triangle/src/main.zig",
         },
+        // .{
+        //     .name = "Sample",
+        //     .root_source_file = "samples/zig-sample/src/main.zig",
+        //     .icon = "samples/zig-sample/icon.png",
+        //     .resource_dir = "samples/zig-sample/data",
+        // },
         .{
-            .name = "Sample",
-            .root_source_file = "samples/zig-sample/src/main.zig",
-            .icon = "samples/zig-sample/icon.png",
-            .resource_dir = "samples/zig-sample/data",
+            .name = "Clock",
+            .root_source_file = "samples/clock/src/main.zig",
+            .icon = "samples/clock/icon.png",
+            .resource_dir = "samples/clock/data",
         },
-        .{
-            .name = "UI",
-            .root_source_file = "samples/zig-ui/src/main.zig",
-            .resource_dir = "samples/zig-ui/data",
-        },
+        // .{
+        //     .name = "UI",
+        //     .root_source_file = "samples/zig-ui/src/main.zig",
+        //     .resource_dir = "samples/zig-ui/data",
+        // },
     }) |sample| {
         // Module structure:
         //  root = src/orca.zig
@@ -55,27 +61,27 @@ pub fn build(b: *std.Build) !void {
 
         const app_wasm = b.addExecutable(.{
             .name = sample.name,
-            .root_source_file = b.path("src/orca.zig"),
-            .target = wasm_target,
-            .optimize = optimize,
+            .root_module = b.createModule(.{
+                .root_source_file = b.path("src/orca.zig"),
+                .target = wasm_target,
+                .optimize = optimize,
+            }),
         });
-        app_wasm.entry = .disabled; // See https://github.com/ziglang/zig/pull/17815
-        app_wasm.rdynamic = true;
         app_wasm.root_module.addImport("app", b.createModule(.{
             .root_source_file = b.path(sample.root_source_file),
         }));
+        app_wasm.entry = .disabled; // See https://github.com/ziglang/zig/pull/17815
+        app_wasm.rdynamic = true;
         app_wasm.addObjectFile(sdk_path.path(b, "bin/liborca_wasm.a"));
         app_wasm.addObjectFile(sdk_path.path(b, "orca-libc/lib/libc.o"));
         app_wasm.addObjectFile(sdk_path.path(b, "orca-libc/lib/libc.a"));
         app_wasm.addObjectFile(sdk_path.path(b, "orca-libc/lib/crt1.o"));
 
         const run_bundle = b.addSystemCommand(&.{
-            "orca",   "bundle",
-            "--name", sample.name,
+            "orca",      "bundle",
+            "--name",    sample.name,
+            "--version", sdk_version,
         });
-        if (sdk_version) |version| {
-            run_bundle.addArgs(&.{ "--version", version });
-        }
         if (sample.icon) |icon| {
             run_bundle.addArg("--icon");
             run_bundle.addDirectoryArg(b.path(icon));

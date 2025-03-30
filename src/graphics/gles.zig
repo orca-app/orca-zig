@@ -7,7 +7,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 const std = @import("std");
-const debug = @import("debug.zig");
+const debug = @import("../debug.zig");
 
 pub const Api = enum {
     V2_0,
@@ -24,7 +24,7 @@ pub fn getApi(comptime api: Api) type {
         const Helpers = struct {
             fn zigStringsToCStrings(strings: []const [:0]const u8, allocator: std.mem.Allocator) []const [*:0]const GLchar {
                 const c_strings: [][*:0]const GLchar = allocator.alloc([*:0]const GLchar, strings.len) catch {
-                    debug.abort("Out of memory allocating memory for converting {} zig string pointers to C string pointers.", .{strings.len}, @src());
+                    debug.abortMsg("Out of memory allocating memory for converting {} zig string pointers to C string pointers.", .{strings.len}, @src());
                 };
 
                 for (strings, c_strings) |source, *dest| {
@@ -446,8 +446,8 @@ pub fn getApi(comptime api: Api) type {
 
             fn glGetShaderInfoLog(shader: GLuint, info_log: []u8) []u8 {
                 var written: GLsizei = 0;
-                Externs.glGetShaderInfoLog(shader, info_log.len, &written, @ptrCast(info_log.ptr));
-                return info_log[0..written];
+                Externs.glGetShaderInfoLog(shader, @intCast(info_log.len), &written, @ptrCast(info_log.ptr));
+                return info_log[0..@intCast(written)];
             }
 
             fn glGetShaderSource(shader: GLuint, source: []u8) []u8 {
