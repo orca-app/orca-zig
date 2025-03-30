@@ -10,11 +10,11 @@ const std = @import("std");
 const math = std.math;
 
 const oc = @import("root");
-const gles = oc.graphics.gles.getApi(.V3_0);
+const gl = oc.graphics.gles;
 
 var frame_size: oc.math.Vec2 = .{ .x = 100, .y = 100 };
 var surface: oc.graphics.canvas.Surface = undefined;
-var program: gles.GLuint = 0;
+var program: gl.uint = 0;
 
 const vshader_source: [:0]const u8 =
     \\attribute vec4 vPosition;
@@ -33,15 +33,18 @@ const fshader_source: [:0]const u8 =
     \\}
 ;
 
-fn compileShader(shader: gles.GLuint, source: [:0]const u8) void {
-    var sources = [_][:0]const u8{source};
-    gles.glShaderSource(shader, &sources);
-    gles.glCompileShader(shader);
+fn compileShader(shader: gl.uint, source: [:0]const u8) void {
+    var sources = [_][*:0]const u8{source};
+    gl.ShaderSource(shader, 1, &sources, null);
+    gl.CompileShader(shader);
 
-    if (gles.glGetError()) |err| {
+    const err = gl.GetError();
+    if (err != gl.NO_ERROR) {
         oc.log.err("gl error compiling shader: 0x{X}\n{s}", .{ err, source }, @src());
         var buf: [1024]u8 = undefined;
-        oc.log.warn("shader info: {s}", .{gles.glGetShaderInfoLog(shader, &buf)}, @src());
+        var len: gl.sizei = undefined;
+        gl.GetShaderInfoLog(shader, buf.len, &len, &buf);
+        oc.log.warn("shader info: {s}", .{buf[0..@intCast(len)]}, @src());
     }
 }
 
@@ -52,40 +55,36 @@ pub fn onInit() void {
     oc.graphics.glesSurfaceMakeCurrent(surface);
 
     {
-        var major: gles.GLint = undefined;
-        var minor: gles.GLint = undefined;
-        gles.glGetIntegerv(gles.GL_MAJOR_VERSION, @ptrCast(&major));
-        gles.glGetIntegerv(gles.GL_MINOR_VERSION, @ptrCast(&minor));
+        var major: gl.int = undefined;
+        var minor: gl.int = undefined;
+        gl.GetIntegerv(gl.MAJOR_VERSION, @ptrCast(&major));
+        gl.GetIntegerv(gl.MINOR_VERSION, @ptrCast(&minor));
         oc.log.info("GLES version: {d}.{d}", .{ major, minor }, @src());
     }
 
+    var extensionCount: gl.int = 0;
+    gl.GetIntegerv(gl.NUM_EXTENSIONS, @ptrCast(&extensionCount));
+    oc.log.info("GLES extensions: {d}", .{extensionCount}, @src());
+
     // @Bug figure out why glGetString(i) is failing with GL_INVALID_ENUM.
-    // if (gles.glGetString(gles.GL_EXTENSIONS)) |extensions|
-    //     oc.log.info("GLES extensions: {s}", .{extensions}, @src())
-    // else
-    //     oc.log.err("glError: 0x{X}", .{gles.glGetError().?}, @src());
-
-    // var extensionCount = [_]gles.GLint{0};
-    // gles.glGetIntegerv(gles.GL_NUM_EXTENSIONS, &extensionCount);
-
-    // for (0..@intCast(extensionCount[0])) |i| {
-    //     if (gles.glGetStringi(gles.GL_EXTENSIONS, i)) |extension|
-    //         oc.log.info("GLES extension {d}: {s}", .{ i, extension }, @src())
+    // for (0..@intCast(extensionCount)) |i| {
+    //     if (gl.GetStringi(gl.EXTENSIONS, i)) |extension|
+    //         oc.log.info("Extension {d}: {s}", .{ i, extension }, @src())
     //     else
-    //         oc.log.err("glError: 0x{X}", .{gles.glGetError().?}, @src());
+    //         oc.log.err("Extension {d}: failed (0x{X})", .{ i, gl.GetError() }, @src());
     // }
 
-    const vshader = gles.glCreateShader(gles.GL_VERTEX_SHADER);
-    const fshader = gles.glCreateShader(gles.GL_FRAGMENT_SHADER);
-    program = gles.glCreateProgram();
+    const vshader = gl.CreateShader(gl.VERTEX_SHADER);
+    const fshader = gl.CreateShader(gl.FRAGMENT_SHADER);
+    program = gl.CreateProgram();
 
     compileShader(vshader, vshader_source);
     compileShader(fshader, fshader_source);
 
-    gles.glAttachShader(program, vshader);
-    gles.glAttachShader(program, fshader);
-    gles.glLinkProgram(program);
-    gles.glUseProgram(program);
+    gl.AttachShader(program, vshader);
+    gl.AttachShader(program, fshader);
+    gl.LinkProgram(program);
+    gl.UseProgram(program);
 
     const vertices = [_]f32{
         -0.866 / 2.0, -0.5 / 2.0, 0.0,
@@ -93,13 +92,14 @@ pub fn onInit() void {
         0.0,          0.5,        0.0,
     };
 
-    var buffer: [1]gles.GLuint = undefined;
-    gles.glGenBuffers(&buffer);
-    gles.glBindBuffer(gles.GL_ARRAY_BUFFER, buffer[0]);
-    gles.glBufferData(gles.GL_ARRAY_BUFFER, std.mem.sliceAsBytes(&vertices), gles.GL_STATIC_DRAW);
+    var buffer: [1]gl.uint = undefined;
+    gl.GenBuffers(1, &buffer);
+    gl.BindBuffer(gl.ARRAY_BUFFER, buffer[0]);
+    const data = std.mem.sliceAsBytes(&vertices);
+    gl.BufferData(gl.ARRAY_BUFFER, @intCast(data.len), @ptrCast(data), gl.STATIC_DRAW);
 
-    gles.glVertexAttribPointer(0, 3, gles.GL_FLOAT, gles.GL_FALSE, 0, null);
-    gles.glEnableVertexAttribArray(0);
+    gl.VertexAttribPointer(0, 3, gl.FLOAT, gl.FALSE, 0, 0);
+    gl.EnableVertexAttribArray(0);
 }
 
 pub fn onResize(width: u32, height: u32) void {
@@ -113,8 +113,8 @@ pub fn onFrameRefresh() void {
 
     oc.graphics.glesSurfaceMakeCurrent(surface);
 
-    gles.glClearColor(0, 1, 1, 1);
-    gles.glClear(gles.GL_COLOR_BUFFER_BIT);
+    gl.ClearColor(0, 1, 1, 1);
+    gl.Clear(gl.COLOR_BUFFER_BIT);
 
     const S = struct {
         var alpha: f32 = 0;
@@ -122,7 +122,7 @@ pub fn onFrameRefresh() void {
 
     const scaling: oc.math.Vec2 = surface.contentsScaling();
 
-    gles.glViewport(
+    gl.Viewport(
         0,
         0,
         @intFromFloat(frame_size.x * scaling.x),
@@ -137,9 +137,9 @@ pub fn onFrameRefresh() void {
     };
     S.alpha += 2 * math.pi / 120.0;
 
-    gles.glUniformMatrix4fv(0, 1, false, &matrix);
+    gl.UniformMatrix4fv(0, 1, @intFromBool(false), &matrix);
 
-    gles.glDrawArrays(gles.GL_TRIANGLES, 0, 3);
+    gl.DrawArrays(gl.TRIANGLES, 0, 3);
 
     oc.graphics.glesSurfaceSwapBuffers(surface);
 }

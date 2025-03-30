@@ -22,7 +22,19 @@ pub fn build(b: *Build) !void {
         }),
     };
 
+    const gl_gen_step = b.step("gl-api", "Generates GLES bindings to be modified and committed");
+    {
+        const gl_bindings = @import("zigglgen").generateBindingsSourceFile(b, .{
+            .api = .gles,
+            .version = .@"3.0",
+        });
+        const usf = b.addUpdateSourceFiles();
+        usf.addCopyFileToSource(gl_bindings, "src/graphics/gles3_DO_NOT_COMMIT.zig");
+        gl_gen_step.dependOn(&usf.step);
+    }
+
     const sample_step = b.step("samples", "Build sample Orca applications");
+    const sample_check_step = b.step("check", "Check sample Orca applications");
 
     const Sample = struct {
         name: []const u8,
@@ -76,6 +88,8 @@ pub fn build(b: *Build) !void {
         app_wasm.addObjectFile(sdk_path.path(b, "orca-libc/lib/libc.o"));
         app_wasm.addObjectFile(sdk_path.path(b, "orca-libc/lib/libc.a"));
         app_wasm.addObjectFile(sdk_path.path(b, "orca-libc/lib/crt1.o"));
+
+        sample_check_step.dependOn(&app_wasm.step);
 
         const run_bundle = b.addSystemCommand(&.{
             "orca",      "bundle",
