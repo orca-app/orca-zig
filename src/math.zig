@@ -2,8 +2,8 @@
 
 /// A 2D vector type.
 pub const Vec2 = extern struct {
-    x: f32,
-    y: f32,
+    x: f32 = 0,
+    y: f32 = 0,
 
     /// Check if two 2D vectors are equal.
     pub fn eql(v0: Vec2, v1: Vec2) bool {
@@ -22,21 +22,21 @@ pub const Vec2 = extern struct {
 };
 /// A 3D vector type.
 pub const Vec3 = extern struct {
-    x: f32,
-    y: f32,
-    z: f32,
+    x: f32 = 0,
+    y: f32 = 0,
+    z: f32 = 0,
 };
 /// A 2D integer vector type.
 pub const Vec2i = extern struct {
-    x: i32,
-    y: i32,
+    x: i32 = 0,
+    y: i32 = 0,
 };
 /// A 4D vector type.
 pub const Vec4 = extern struct {
-    x: f32,
-    y: f32,
-    z: f32,
-    w: f32,
+    x: f32 = 0,
+    y: f32 = 0,
+    z: f32 = 0,
+    w: f32 = 0,
 };
 /// A 2-by-3 matrix.
 pub const Mat2x3 = extern struct {
@@ -83,11 +83,11 @@ pub const Mat2x3 = extern struct {
 /// An axis-aligned rectangle.
 pub const Rect = extern struct {
     /// The x-coordinate of the top-left corner.
-    x: f32,
+    x: f32 = 0,
     /// The y-coordinate of the top-left corner.
-    y: f32,
+    y: f32 = 0,
     /// The width of the rectangle.
-    w: f32,
+    w: f32 = 0,
     /// The height of the rectangle.
-    h: f32,
+    h: f32 = 0,
 };

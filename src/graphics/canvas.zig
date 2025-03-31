@@ -25,6 +25,7 @@ extern fn oc_canvas_surface_create(
     renderer: Renderer,
 ) callconv(.C) Surface;
 
+// @Api @Cleanup should this be in graphics.zig?
 /// An opaque handle to a graphics surface.
 pub const Surface = enum(u64) {
     _,
@@ -109,58 +110,122 @@ pub const Context = enum(u64) {
 // @Api font and color types don't belong in the canvas namespace
 
 /// An opaque font handle.
-pub const font = enum(u64) {
+pub const Font = enum(u64) {
     _,
-};
-/// An opaque image handle.
-pub const image = enum(u64) {
-    _,
-};
-/// This enum describes possible blending modes for color gradient.
-pub const gradient_blend_space = enum(u32) {
-    /// The gradient colors are interpolated in linear space.
-    GRADIENT_BLEND_LINEAR = 0,
-    /// The gradient colors are interpolated in sRGB space.
-    GRADIENT_BLEND_SRGB = 1,
-};
-/// An enum identifying possible color spaces.
-pub const color_space = enum(u32) {
-    /// A linear RGB color space.
-    COLOR_SPACE_RGB = 0,
-    /// An sRGB color space.
-    COLOR_SPACE_SRGB = 1,
-};
-/// A struct representing a color.
-pub const color = extern struct {
-    /// The red component of the color.
-    r: f32,
-    /// The green component of the color.
-    g: f32,
-    /// The blue component of the color.
-    b: f32,
-    /// The alpha component of the color.
-    a: f32,
-    /// The color space of that color.
-    colorSpace: color_space,
-};
-/// Stroke joint types.
-pub const joint_type = enum(u32) {
-    /// Miter joint.
-    JOINT_MITER = 0,
-    /// Bevel joint.
-    JOINT_BEVEL = 1,
-    /// Don't join path segments.
-    JOINT_NONE = 2,
-};
-/// Cap types.
-pub const cap_type = enum(u32) {
-    /// Don't draw caps.
-    CAP_NONE = 0,
-    /// Square caps.
-    CAP_SQUARE = 1,
+
+    /// Return a `nil` font handle.
+    pub const nil = oc_font_nil;
+    extern fn oc_font_nil() callconv(.C) Font;
+    /// Check if a font handle is `nil`.
+    pub const isNil = oc_font_is_nil;
+    extern fn oc_font_is_nil(font: Font) callconv(.C) bool;
+    /// Create a font from in-memory TrueType data.
+    pub const createFromMemory = oc_font_create_from_memory;
+    extern fn oc_font_create_from_memory(
+        /// A block of memory containing TrueType data (e.g. as loaded from a ttf file).
+        mem: oc.strings.Str8,
+        /// The number of unicode ranges to load.
+        rangeCount: u32,
+        /// An array of unicode ranges to load.
+        ranges: [*c]oc.unicode_range,
+    ) callconv(.C) Font;
+    /// Create a font from a TrueType font file.
+    pub const createFromFile = oc_font_create_from_file;
+    extern fn oc_font_create_from_file(
+        /// A handle to a TrueType font file.
+        file: oc.file,
+        /// The number of unicode ranges to load.
+        rangeCount: u32,
+        /// An array of unicode ranges to load.
+        ranges: [*c]oc.unicode_range,
+    ) callconv(.C) Font;
+    /// Create a font from a TrueType font file path.
+    pub const createFromPath = oc_font_create_from_path;
+    extern fn oc_font_create_from_path(
+        /// The path of a ttf file.
+        path: oc.strings.Str8,
+        /// The number of unicode ranges to load.
+        rangeCount: u32,
+        /// An array of unicode ranges to load.
+        ranges: [*c]oc.unicode_range,
+    ) callconv(.C) Font;
+    /// Destroy a font.
+    pub const destroy = oc_font_destroy;
+    extern fn oc_font_destroy(
+        font: Font,
+    ) callconv(.C) void;
+    /// Get the glyph indices of a run of unicode code points in a given font.
+    pub const getGlyphIndices = oc_font_get_glyph_indices;
+    extern fn oc_font_get_glyph_indices(
+        /// The font handle.
+        font: Font,
+        /// A slice of unicode code points.
+        codePoints: oc.str32,
+        /// Backing memory for the result indices.
+        backing: oc.str32,
+    ) callconv(.C) oc.str32;
+    /// Get the glyph indices of a run of unicode code points in a given font and push them on an arena.
+    pub const pushGlyphIndices = oc_font_push_glyph_indices;
+    extern fn oc_font_push_glyph_indices(
+        /// A memory arena on which to allocate the result indices.
+        arena: [*c]oc.arena,
+        /// The font handle
+        font: Font,
+        /// A slice of unicode code points.
+        codePoints: oc.str32,
+    ) callconv(.C) oc.str32;
+    /// Get the glyp index of a single codepoint in a given font.
+    pub const getGlyphIndex = oc_font_get_glyph_index;
+    extern fn oc_font_get_glyph_index(
+        /// The font handle.
+        font: Font,
+        /// A unicode codepoint.
+        codePoint: oc.utf32,
+    ) callconv(.C) u32;
+    /// Get a font's metrics for a given font size.
+    pub const getMetrics = oc_font_get_metrics;
+    extern fn oc_font_get_metrics(
+        /// The font handle
+        font: Font,
+        /// The desired size of an `m` character, in points.
+        emSize: f32,
+    ) callconv(.C) FontMetrics;
+    /// Get a font's unscaled metrics.
+    pub const getMetricsUnscaled = oc_font_get_metrics_unscaled;
+    extern fn oc_font_get_metrics_unscaled(
+        font: Font,
+    ) callconv(.C) FontMetrics;
+    /// Get a scale factor to apply to unscaled font metrics to obtain a given 'm' size.
+    pub const getScaleForEmPixels = oc_font_get_scale_for_em_pixels;
+    extern fn oc_font_get_scale_for_em_pixels(
+        /// The font handle.
+        font: Font,
+        /// The desired size for the 'm' character.
+        emSize: f32,
+    ) callconv(.C) f32;
+    /// Get text metrics for a run of unicode code points.
+    pub const textMetricsUtf32 = oc_font_text_metrics_utf32;
+    extern fn oc_font_text_metrics_utf32(
+        /// The font handle.
+        font: Font,
+        /// The desired font size.
+        fontSize: f32,
+        /// A slice of unicode code points.
+        codepoints: oc.str32,
+    ) callconv(.C) TextMetrics;
+    /// Get the text metrics for a utf8 string.
+    pub const textMetrics = oc_font_text_metrics;
+    extern fn oc_font_text_metrics(
+        /// The font handle.
+        font: Font,
+        /// The desired font size.
+        fontSize: f32,
+        /// A utf8 encoded string.
+        text: oc.strings.Str8,
+    ) callconv(.C) TextMetrics;
 };
 /// A struct describing the metrics of a font.
-pub const font_metrics = extern struct {
+pub const FontMetrics = extern struct {
     /// The ascent from the baseline to the top of the line (a positive value means the top line is above the baseline).
     ascent: f32,
     /// The descent from the baseline to the bottom line (a positive value means the bottom line is below the baseline).
@@ -175,13 +240,13 @@ pub const font_metrics = extern struct {
     width: f32,
 };
 /// A struct describing the metrics of a single glyph.
-pub const glyph_metrics = extern struct {
+pub const GlyphMetrics = extern struct {
     ink: oc.math.Rect,
     /// The default amount from which to advance the cursor after drawing this glyph.
     advance: oc.math.Vec2,
 };
 /// A struct describing the metrics of a run of glyphs.
-pub const text_metrics = extern struct {
+pub const TextMetrics = extern struct {
     /// The bounding box of the inked portion of the text.
     ink: oc.math.Rect,
     /// The logical bounding box of the text (including ascents, descents, and line gaps).
@@ -189,222 +254,146 @@ pub const text_metrics = extern struct {
     /// The amount from which to advance the cursor after drawing the text.
     advance: oc.math.Vec2,
 };
-/// Create a color using RGBA values.
-pub const colorRgba = oc_color_rgba;
-extern fn oc_color_rgba(
-    r: f32,
-    g: f32,
-    b: f32,
-    a: f32,
-) callconv(.C) color;
-/// Create a current color using sRGBA values.
-pub const colorSrgba = oc_color_srgba;
-extern fn oc_color_srgba(
-    r: f32,
-    g: f32,
-    b: f32,
-    a: f32,
-) callconv(.C) color;
-/// Convert a color from one color space to another.
-pub const colorConvert = oc_color_convert;
-extern fn oc_color_convert(
-    /// The color to convert
-    color: color,
-    /// The color space of the new color.
-    colorSpace: color_space,
-) callconv(.C) color;
-/// Return a `nil` font handle.
-pub const fontNil = oc_font_nil;
-extern fn oc_font_nil() callconv(.C) font;
-/// Check if a font handle is `nil`.
-pub const fontIsNil = oc_font_is_nil;
-extern fn oc_font_is_nil(
-    font: font,
-) callconv(.C) bool;
-/// Create a font from in-memory TrueType data.
-pub const fontCreateFromMemory = oc_font_create_from_memory;
-extern fn oc_font_create_from_memory(
-    /// A block of memory containing TrueType data (e.g. as loaded from a ttf file).
-    mem: oc.str8,
-    /// The number of unicode ranges to load.
-    rangeCount: u32,
-    /// An array of unicode ranges to load.
-    ranges: [*c]oc.unicode_range,
-) callconv(.C) font;
-/// Create a font from a TrueType font file.
-pub const fontCreateFromFile = oc_font_create_from_file;
-extern fn oc_font_create_from_file(
-    /// A handle to a TrueType font file.
-    file: oc.file,
-    /// The number of unicode ranges to load.
-    rangeCount: u32,
-    /// An array of unicode ranges to load.
-    ranges: [*c]oc.unicode_range,
-) callconv(.C) font;
-/// Create a font from a TrueType font file path.
-pub const fontCreateFromPath = oc_font_create_from_path;
-extern fn oc_font_create_from_path(
-    /// The path of a ttf file.
-    path: oc.str8,
-    /// The number of unicode ranges to load.
-    rangeCount: u32,
-    /// An array of unicode ranges to load.
-    ranges: [*c]oc.unicode_range,
-) callconv(.C) font;
-/// Destroy a font.
-pub const fontDestroy = oc_font_destroy;
-extern fn oc_font_destroy(
-    font: font,
-) callconv(.C) void;
-/// Get the glyph indices of a run of unicode code points in a given font.
-pub const fontGetGlyphIndices = oc_font_get_glyph_indices;
-extern fn oc_font_get_glyph_indices(
-    /// The font handle.
-    font: font,
-    /// A slice of unicode code points.
-    codePoints: oc.str32,
-    /// Backing memory for the result indices.
-    backing: oc.str32,
-) callconv(.C) oc.str32;
-/// Get the glyph indices of a run of unicode code points in a given font and push them on an arena.
-pub const fontPushGlyphIndices = oc_font_push_glyph_indices;
-extern fn oc_font_push_glyph_indices(
-    /// A memory arena on which to allocate the result indices.
-    arena: [*c]oc.arena,
-    /// The font handle
-    font: font,
-    /// A slice of unicode code points.
-    codePoints: oc.str32,
-) callconv(.C) oc.str32;
-/// Get the glyp index of a single codepoint in a given font.
-pub const fontGetGlyphIndex = oc_font_get_glyph_index;
-extern fn oc_font_get_glyph_index(
-    /// The font handle.
-    font: font,
-    /// A unicode codepoint.
-    codePoint: oc.utf32,
-) callconv(.C) u32;
-/// Get a font's metrics for a given font size.
-pub const fontGetMetrics = oc_font_get_metrics;
-extern fn oc_font_get_metrics(
-    /// The font handle
-    font: font,
-    /// The desired size of an `m` character, in points.
-    emSize: f32,
-) callconv(.C) font_metrics;
-/// Get a font's unscaled metrics.
-pub const fontGetMetricsUnscaled = oc_font_get_metrics_unscaled;
-extern fn oc_font_get_metrics_unscaled(
-    font: font,
-) callconv(.C) font_metrics;
-/// Get a scale factor to apply to unscaled font metrics to obtain a given 'm' size.
-pub const fontGetScaleForEmPixels = oc_font_get_scale_for_em_pixels;
-extern fn oc_font_get_scale_for_em_pixels(
-    /// The font handle.
-    font: font,
-    /// The desired size for the 'm' character.
-    emSize: f32,
-) callconv(.C) f32;
-/// Get text metrics for a run of unicode code points.
-pub const fontTextMetricsUtf32 = oc_font_text_metrics_utf32;
-extern fn oc_font_text_metrics_utf32(
-    /// The font handle.
-    font: font,
-    /// The desired font size.
-    fontSize: f32,
-    /// A slice of unicode code points.
-    codepoints: oc.str32,
-) callconv(.C) text_metrics;
-/// Get the text metrics for a utf8 string.
-pub const fontTextMetrics = oc_font_text_metrics;
-extern fn oc_font_text_metrics(
-    /// The font handle.
-    font: font,
-    /// The desired font size.
-    fontSize: f32,
-    /// A utf8 encoded string.
-    text: oc.str8,
-) callconv(.C) text_metrics;
-/// Returns a `nil` image handle.
-pub const imageNil = oc_image_nil;
-extern fn oc_image_nil() callconv(.C) image;
-/// Check if an image handle is `nil`.
-pub const imageIsNil = oc_image_is_nil;
-extern fn oc_image_is_nil(
-    a: image,
-) callconv(.C) bool;
-/// Create an uninitialized image.
-pub const imageCreate = oc_image_create;
-extern fn oc_image_create(
-    /// The canvas renderer.
-    renderer: Renderer,
-    /// Width of the image, in pixels.
-    width: u32,
-    /// Height of the image, in pixels.
-    height: u32,
-) callconv(.C) image;
-/// Create an image from an array of 8 bit per channel rgba values.
-pub const imageCreateFromRgba8 = oc_image_create_from_rgba8;
-extern fn oc_image_create_from_rgba8(
-    /// The canvas renderer.
-    renderer: Renderer,
-    /// Width of the image, in pixels.
-    width: u32,
-    /// Height of the image, in pixels.
-    height: u32,
-    /// An array of packed rgba color values, with 8 bits per channel.
-    pixels: [*c]u8,
-) callconv(.C) image;
-/// Create an image from in-memory png, jpeg or bmp data.
-pub const imageCreateFromMemory = oc_image_create_from_memory;
-extern fn oc_image_create_from_memory(
-    /// The canvas renderer.
-    renderer: Renderer,
-    /// A block of memory containing the image data.
-    mem: oc.str8,
-    /// If true, flip the y-axis of the image while loading.
-    flip: bool,
-) callconv(.C) image;
-/// Create an image from an image file. Supported formats are: png, jpeg or bmp.
-pub const imageCreateFromFile = oc_image_create_from_file;
-extern fn oc_image_create_from_file(
-    /// The canvas renderer.
-    renderer: Renderer,
-    /// A handle to the image file.
-    file: oc.file,
-    /// If true, flip the y-axis of the image while loading.
-    flip: bool,
-) callconv(.C) image;
-/// Create an image from an image file path. Supported formats are: png, jpeg or bmp.
-pub const imageCreateFromPath = oc_image_create_from_path;
-extern fn oc_image_create_from_path(
-    /// The canvas renderer
-    renderer: Renderer,
-    /// A path to the image file.
-    path: oc.str8,
-    /// If true, flip the y-axis of the image while loading.
-    flip: bool,
-) callconv(.C) image;
-/// Destroy an image.
-pub const imageDestroy = oc_image_destroy;
-extern fn oc_image_destroy(
-    image: image,
-) callconv(.C) void;
-/// Upload pixels to an image.
-pub const imageUploadRegionRgba8 = oc_image_upload_region_rgba8;
-extern fn oc_image_upload_region_rgba8(
-    /// The image handle.
-    image: image,
-    /// The rectangular region of the image to update.
-    region: oc.math.Rect,
-    /// A buffer containing the pixel values to upload. Each pixel value is a packed 8-bit per channel RGBA color. The buffer must hold `region.w * region.h` pixel values.
-    pixels: [*c]u8,
-) callconv(.C) void;
-/// Get the size of an image.
-pub const imageSize = oc_image_size;
-extern fn oc_image_size(
-    image: image,
-) callconv(.C) oc.math.Vec2;
+
+/// An opaque image handle.
+pub const Image = enum(u64) {
+    _,
+    /// Returns a `nil` image handle.
+    pub const nil = oc_image_nil;
+    extern fn oc_image_nil() callconv(.C) Image;
+    /// Check if an image handle is `nil`.
+    pub const isNil = oc_image_is_nil;
+    extern fn oc_image_is_nil(a: Image) callconv(.C) bool;
+    /// Create an uninitialized image.
+    pub const create = oc_image_create;
+    extern fn oc_image_create(
+        /// The canvas renderer.
+        renderer: Renderer,
+        /// Width of the Image, in pixels.
+        width: u32,
+        /// Height of the Image, in pixels.
+        height: u32,
+    ) callconv(.C) Image;
+    /// Create an image from an array of 8 bit per channel rgba values.
+    pub const createFromRgba8 = oc_image_create_from_rgba8;
+    extern fn oc_image_create_from_rgba8(
+        /// The canvas renderer.
+        renderer: Renderer,
+        /// Width of the Image, in pixels.
+        width: u32,
+        /// Height of the Image, in pixels.
+        height: u32,
+        /// An array of packed rgba color values, with 8 bits per channel.
+        pixels: [*c]u8,
+    ) callconv(.C) Image;
+    /// Create an image from in-memory png, jpeg or bmp data.
+    pub const createFromMemory = oc_image_create_from_memory;
+    extern fn oc_image_create_from_memory(
+        /// The canvas renderer.
+        renderer: Renderer,
+        /// A block of memory containing the image data.
+        mem: oc.strings.Str8,
+        /// If true, flip the y-axis of the image while loading.
+        flip: bool,
+    ) callconv(.C) Image;
+    /// Create an image from an image file. Supported formats are: png, jpeg or bmp.
+    pub const createFromFile = oc_image_create_from_file;
+    extern fn oc_image_create_from_file(
+        /// The canvas renderer.
+        renderer: Renderer,
+        /// A handle to the image file.
+        file: oc.file,
+        /// If true, flip the y-axis of the image while loading.
+        flip: bool,
+    ) callconv(.C) Image;
+    /// Create an image from an image file path. Supported formats are: png, jpeg or bmp.
+    pub const createFromPath = oc_image_create_from_path;
+    extern fn oc_image_create_from_path(
+        /// The canvas renderer
+        renderer: Renderer,
+        /// A path to the image file.
+        path: oc.strings.Str8,
+        /// If true, flip the y-axis of the image while loading.
+        flip: bool,
+    ) callconv(.C) Image;
+    /// Destroy an image.
+    pub const destroy = oc_image_destroy;
+    extern fn oc_image_destroy(image: Image) callconv(.C) void;
+    /// Upload pixels to an image.
+    pub const uploadRegionRgba8 = oc_image_upload_region_rgba8;
+    extern fn oc_image_upload_region_rgba8(
+        /// The image handle.
+        image: Image,
+        /// The rectangular region of the image to update.
+        region: oc.math.Rect,
+        /// A buffer containing the pixel values to upload. Each pixel value is a packed 8-bit per channel RGBA color. The buffer must hold `region.w * region.h` pixel values.
+        pixels: [*c]u8,
+    ) callconv(.C) void;
+    /// Get the size of an image.
+    pub const size = oc_image_size;
+    extern fn oc_image_size(image: Image) callconv(.C) oc.math.Vec2;
+};
+/// This enum describes possible blending modes for color gradient.
+pub const gradient_blend_space = enum(u32) {
+    /// The gradient colors are interpolated in linear space.
+    GRADIENT_BLEND_LINEAR = 0,
+    /// The gradient colors are interpolated in sRGB space.
+    GRADIENT_BLEND_SRGB = 1,
+};
+
+/// A struct representing a color.
+pub const Color = extern struct {
+    /// The red component of the color.
+    r: f32 = 0,
+    /// The green component of the color.
+    g: f32 = 0,
+    /// The blue component of the color.
+    b: f32 = 0,
+    /// The alpha component of the color.
+    a: f32 = 1,
+    /// The color space of that color.
+    color_space: Space = .rgb,
+
+    /// An enum identifying possible color spaces.
+    pub const Space = enum(u32) {
+        /// A linear RGB color space.
+        rgb = 0,
+        /// An sRGB color space.
+        srgb = 1,
+    };
+
+    /// Create a color using RGBA values.
+    pub const rgba = oc_color_rgba;
+    extern fn oc_color_rgba(r: f32, g: f32, b: f32, a: f32) callconv(.C) Color;
+    /// Create a current color using sRGBA values.
+    pub const srgba = oc_color_srgba;
+    extern fn oc_color_srgba(r: f32, g: f32, b: f32, a: f32) callconv(.C) Color;
+    /// Convert a color from one color space to another.
+    pub const convert = oc_color_convert;
+    extern fn oc_color_convert(
+        /// The color to convert
+        color: Color,
+        /// The color space of the new color.
+        color_space: Space,
+    ) callconv(.C) Color;
+};
+/// Stroke joint types.
+pub const JointType = enum(u32) {
+    /// Miter joint.
+    miter = 0,
+    /// Bevel joint.
+    bevel = 1,
+    /// Don't join path segments.
+    none = 2,
+};
+/// Cap types.
+pub const CapType = enum(u32) {
+    /// Don't draw caps.
+    none = 0,
+    /// Square caps.
+    square = 1,
+};
+
 /// An opaque struct representing a rectangle atlas. This is used to allocate rectangular regions of an image to make texture atlases.
 pub const rect_atlas = opaque {};
 /// Create a rectangle atlas.
@@ -438,7 +427,7 @@ extern fn oc_rect_atlas_recycle(
 /// A struct describing a rectangular sub-region of an image.
 pub const image_region = extern struct {
     /// The image handle.
-    image: image,
+    image: Image,
     /// The rectangular region of the image.
     rect: oc.math.Rect,
 };
@@ -448,7 +437,7 @@ extern fn oc_image_atlas_alloc_from_rgba8(
     /// A pointer to the texture atlas.
     atlas: [*c]rect_atlas,
     /// The backing image from which to allocate a region.
-    backingImage: image,
+    backingImage: Image,
     /// The width of the region to allocate.
     width: u32,
     /// The height of the region to allocate.
@@ -462,9 +451,9 @@ extern fn oc_image_atlas_alloc_from_memory(
     /// A pointer to the atlas.
     atlas: [*c]rect_atlas,
     /// The backing image from which to allocate an image region.
-    backingImage: image,
+    backingImage: Image,
     /// A block of memory containing the image data. Supported format are the same as `oc_image_create_from_memory()`.
-    mem: oc.str8,
+    mem: oc.strings.Str8,
     /// If true, flip the y-axis of the image while loading.
     flip: bool,
 ) callconv(.C) image_region;
@@ -474,7 +463,7 @@ extern fn oc_image_atlas_alloc_from_file(
     /// A pointer to the atlas.
     atlas: [*c]rect_atlas,
     /// The backing image from which to allocate an image region.
-    backingImage: image,
+    backingImage: Image,
     /// The image file.
     file: oc.file,
     /// If true, flip the y-axis of the image while loading.
@@ -486,9 +475,9 @@ extern fn oc_image_atlas_alloc_from_path(
     /// A pointer to the atlas.
     atlas: [*c]rect_atlas,
     /// The backing image from which to allocate an image region.
-    backingImage: image,
+    backingImage: Image,
     /// The path to the image file.
-    path: oc.str8,
+    path: oc.strings.Str8,
     /// If true, flip the y-axis of the image while loading.
     flip: bool,
 ) callconv(.C) image_region;
@@ -533,7 +522,7 @@ extern fn oc_clip_top() callconv(.C) oc.math.Rect;
 /// Set the current color.
 pub const setColor = oc_set_color;
 extern fn oc_set_color(
-    color: color,
+    color: Color,
 ) callconv(.C) void;
 /// Set the current color using linear RGBA values.
 pub const setColorRgba = oc_set_color_rgba;
@@ -557,13 +546,13 @@ extern fn oc_set_gradient(
     /// The color space in the gradient's colors are blended.
     blendSpace: gradient_blend_space,
     /// Color at the bottom left of the fill region.
-    bottomLeft: color,
+    bottomLeft: Color,
     /// Color at the bottom right of the fill region.
-    bottomRight: color,
+    bottomRight: Color,
     /// Color at the top right of the fill region.
-    topRight: color,
+    topRight: Color,
     /// Color at the top left of the fill region.
-    topLeft: color,
+    topLeft: Color,
 ) callconv(.C) void;
 /// Set the current line width.
 pub const setWidth = oc_set_width;
@@ -579,7 +568,7 @@ extern fn oc_set_tolerance(
 /// Set the current joint style.
 pub const setJoint = oc_set_joint;
 extern fn oc_set_joint(
-    joint: joint_type,
+    joint: JointType,
 ) callconv(.C) void;
 /// Set the maximum joint excursion. If a joint would extend past this threshold, the renderer falls back to a bevel joint.
 pub const setMaxJointExcursion = oc_set_max_joint_excursion;
@@ -589,12 +578,12 @@ extern fn oc_set_max_joint_excursion(
 /// Set the current cap style.
 pub const setCap = oc_set_cap;
 extern fn oc_set_cap(
-    cap: cap_type,
+    cap: CapType,
 ) callconv(.C) void;
 /// The the current font.
 pub const setFont = oc_set_font;
 extern fn oc_set_font(
-    font: font,
+    font: Font,
 ) callconv(.C) void;
 /// Set the current font size.
 pub const setFontSize = oc_set_font_size;
@@ -609,7 +598,7 @@ extern fn oc_set_text_flip(
 /// Set the current source image.
 pub const setImage = oc_set_image;
 extern fn oc_set_image(
-    image: image,
+    image: Image,
 ) callconv(.C) void;
 /// Set the current source image region.
 pub const setImageSourceRegion = oc_set_image_source_region;
@@ -618,7 +607,7 @@ extern fn oc_set_image_source_region(
 ) callconv(.C) void;
 /// Get the current color
 pub const getColor = oc_get_color;
-extern fn oc_get_color() callconv(.C) color;
+extern fn oc_get_color() callconv(.C) Color;
 /// Get the current line width.
 pub const getWidth = oc_get_width;
 extern fn oc_get_width() callconv(.C) f32;
@@ -627,16 +616,16 @@ pub const getTolerance = oc_get_tolerance;
 extern fn oc_get_tolerance() callconv(.C) f32;
 /// Get the current joint style.
 pub const getJoint = oc_get_joint;
-extern fn oc_get_joint() callconv(.C) joint_type;
+extern fn oc_get_joint() callconv(.C) JointType;
 /// Get the current max joint excursion.
 pub const getMaxJointExcursion = oc_get_max_joint_excursion;
 extern fn oc_get_max_joint_excursion() callconv(.C) f32;
 /// Get the current cap style.
 pub const getCap = oc_get_cap;
-extern fn oc_get_cap() callconv(.C) cap_type;
+extern fn oc_get_cap() callconv(.C) CapType;
 /// Get the current font.
 pub const getFont = oc_get_font;
-extern fn oc_get_font() callconv(.C) font;
+extern fn oc_get_font() callconv(.C) Font;
 /// Get the current font size.
 pub const getFontSize = oc_get_font_size;
 extern fn oc_get_font_size() callconv(.C) f32;
@@ -645,7 +634,7 @@ pub const getTextFlip = oc_get_text_flip;
 extern fn oc_get_text_flip() callconv(.C) bool;
 /// Get the current source image.
 pub const getImage = oc_get_image;
-extern fn oc_get_image() callconv(.C) image;
+extern fn oc_get_image() callconv(.C) Image;
 /// Get the current image source region.
 pub const getImageSourceRegion = oc_get_image_source_region;
 extern fn oc_get_image_source_region() callconv(.C) oc.math.Rect;
@@ -701,7 +690,7 @@ extern fn oc_codepoints_outlines(
 pub const textOutlines = oc_text_outlines;
 extern fn oc_text_outlines(
     /// A utf8 string.
-    string: oc.str8,
+    string: oc.strings.Str8,
 ) callconv(.C) void;
 /// Clear the canvas to the current color.
 pub const clear = oc_clear;
@@ -790,18 +779,18 @@ pub const textFill = oc_text_fill;
 extern fn oc_text_fill(
     x: f32,
     y: f32,
-    text: oc.str8,
+    text: oc.strings.Str8,
 ) callconv(.C) void;
 /// Draw an image.
 pub const imageDraw = oc_image_draw;
 extern fn oc_image_draw(
-    image: image,
+    image: Image,
     rect: oc.math.Rect,
 ) callconv(.C) void;
 /// Draw a sub-region of an image.
 pub const imageDrawRegion = oc_image_draw_region;
 extern fn oc_image_draw_region(
-    image: image,
+    image: Image,
     srcRegion: oc.math.Rect,
     dstRegion: oc.math.Rect,
 ) callconv(.C) void;

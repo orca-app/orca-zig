@@ -48,12 +48,12 @@ pub fn build(b: *Build) !void {
             .name = "Triangle",
             .root_source_file = "samples/zig-triangle/src/main.zig",
         },
-        // .{
-        //     .name = "Sample",
-        //     .root_source_file = "samples/zig-sample/src/main.zig",
-        //     .icon = "samples/zig-sample/icon.png",
-        //     .resource_dir = "samples/zig-sample/data",
-        // },
+        .{
+            .name = "Sample",
+            .root_source_file = "samples/zig-sample/src/main.zig",
+            .icon = "samples/zig-sample/icon.png",
+            .resource_dir = "samples/zig-sample/data",
+        },
         .{
             .name = "Clock",
             .root_source_file = "samples/clock/src/main.zig",

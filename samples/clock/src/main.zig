@@ -5,16 +5,13 @@ const canvas = oc.graphics.canvas;
 var renderer: canvas.Renderer = undefined;
 var surface: canvas.Surface = undefined;
 var context: canvas.Context = undefined;
-var font: canvas.font = undefined;
+var font: canvas.Font = undefined;
 var frameSize: oc.math.Vec2 = .{ .x = 100, .y = 100 };
 var lastSeconds: f64 = 0;
 
 pub fn onInit() void {
-    oc.windowSetTitle(oc.toStr8("clock"));
-    oc.windowSetSize(.{ .x = 400, .y = 400 });
-
-    // oc.debug.assertMsg(lastSeconds != 0,"foobar {}", .{lastSeconds}, @src());
-    std.debug.assert(lastSeconds != 0);
+    oc.app.windowSetTitle(oc.toStr8("clock"));
+    oc.app.windowSetSize(.{ .x = 400, .y = 400 });
 
     renderer = canvas.Renderer.create();
     surface = canvas.surfaceCreate(renderer);
@@ -28,7 +25,7 @@ pub fn onInit() void {
         .{ .firstCodePoint = 0xfff0, .count = 15 }, //  SPECIALS
     };
 
-    font = canvas.fontCreateFromPath(oc.toStr8("/segoeui.ttf"), ranges.len, @constCast(&ranges));
+    font = canvas.Font.createFromPath(oc.toStr8("/segoeui.ttf"), ranges.len, @constCast(&ranges));
 }
 
 pub fn onResize(width: u32, height: u32) void {
@@ -88,7 +85,7 @@ pub fn onFrameRefresh() void {
 
     // clock face
     for (
-        comptime [_]oc.str8{
+        comptime [_]oc.strings.Str8{
             oc.toStr8("12"),
             oc.toStr8("1"),
             oc.toStr8("2"),
@@ -104,7 +101,7 @@ pub fn onFrameRefresh() void {
         },
         0..,
     ) |num_txt, i| {
-        const textRect = canvas.fontTextMetrics(font, fontSize, num_txt).ink;
+        const textRect = font.textMetrics(fontSize, num_txt).ink;
 
         const j: f32 = @floatFromInt(i);
         const angle: f32 = j * ((std.math.pi * 2) / 12.0) - (std.math.pi / 2.0);

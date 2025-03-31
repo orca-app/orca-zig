@@ -36,7 +36,7 @@ pub const log = struct {
     /// Log a message to the console.
     pub fn ext(comptime level: Level, comptime fmt: []const u8, args: anytype, source: SourceLocation) void {
         var format_buf: [512:0]u8 = undefined;
-        _ = std.fmt.bufPrintZ(&format_buf, fmt, args) catch 0; // @Cleanup just discard NoSpaceLeft error for now
+        _ = std.fmt.bufPrintZ(&format_buf, fmt, args) catch {}; // @Cleanup just discard NoSpaceLeft error for now
         oc_log_ext(
             level,
             @constCast(source.fn_name),
@@ -63,8 +63,10 @@ pub const log = struct {
 };
 
 /// Test a given condition, and abort the application if it is false.
-pub fn assert(condition: bool, source: SourceLocation) void {
+pub fn assert(condition: bool, comptime fmt: []const u8, args: anytype, source: SourceLocation) void {
     if (builtin.mode == .Debug and !condition) {
+        var format_buf: [512:0]u8 = undefined;
+        _ = std.fmt.bufPrintZ(&format_buf, fmt, args) catch {}; // @Cleanup just discard NoSpaceLeft error for now
         oc_assert_fail(
             @constCast(source.file),
             @constCast(source.fn_name),
@@ -72,22 +74,6 @@ pub fn assert(condition: bool, source: SourceLocation) void {
             // @Improvement if the bindings are modified to not take over the root,
             // we can conditionally embed the source file and include the exact line here
             // since `source` is comptime known.
-            @constCast(""),
-            @constCast(""),
-        );
-        unreachable;
-    }
-}
-
-/// Test a given condition, and abort the application with an error message if it is false.
-pub fn assertMsg(condition: bool, comptime fmt: []const u8, args: anytype, source: SourceLocation) void {
-    if (builtin.mode == .Debug and !condition) {
-        var format_buf: [512:0]u8 = undefined;
-        _ = std.fmt.bufPrintZ(&format_buf, fmt, args) catch 0; // @Cleanup just discard NoSpaceLeft error for now
-        oc_assert_fail(
-            @constCast(source.file),
-            @constCast(source.fn_name),
-            @intCast(source.line),
             @constCast(""),
             format_buf[0..],
         );
@@ -114,21 +100,10 @@ extern fn oc_assert_fail(
     ...,
 ) callconv(.C) void;
 
-/// Abort the application.
-pub fn abort(source: SourceLocation) noreturn {
-    oc_abort_ext(
-        @constCast(source.file),
-        @constCast(source.fn_name),
-        @intCast(source.line),
-        @constCast(""),
-    );
-    unreachable;
-}
-
 /// Abort the application, showing an error message.
-pub fn abortMsg(comptime fmt: []const u8, args: anytype, source: SourceLocation) noreturn {
+pub fn abort(comptime fmt: []const u8, args: anytype, source: SourceLocation) noreturn {
     var format_buf: [512:0]u8 = undefined;
-    _ = std.fmt.bufPrintZ(&format_buf, fmt, args) catch 0; // @Cleanup just discard NoSpaceLeft error for now
+    _ = std.fmt.bufPrintZ(&format_buf, fmt, args) catch {}; // @Cleanup just discard NoSpaceLeft error for now
     oc_abort_ext(
         @constCast(source.file),
         @constCast(source.fn_name),
