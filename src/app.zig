@@ -392,6 +392,7 @@ pub const Event = extern struct {
         paths: oc.strings.str8_list,
     },
 };
+// @Api @Cleanup could be moved into io/dialogs namespace
 /// This enum describes the kinds of possible file dialogs.
 pub const FileDialogKind = enum(u32) {
     /// The file dialog is a save dialog.

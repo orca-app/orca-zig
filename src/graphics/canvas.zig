@@ -133,7 +133,7 @@ pub const Font = enum(u64) {
     pub const createFromFile = oc_font_create_from_file;
     extern fn oc_font_create_from_file(
         /// A handle to a TrueType font file.
-        file: oc.file,
+        file: oc.io.File,
         /// The number of unicode ranges to load.
         rangeCount: u32,
         /// An array of unicode ranges to load.
@@ -302,7 +302,7 @@ pub const Image = enum(u64) {
         /// The canvas renderer.
         renderer: Renderer,
         /// A handle to the image file.
-        file: oc.file,
+        file: oc.io.File,
         /// If true, flip the y-axis of the image while loading.
         flip: bool,
     ) callconv(.C) Image;
@@ -465,7 +465,7 @@ extern fn oc_image_atlas_alloc_from_file(
     /// The backing image from which to allocate an image region.
     backingImage: Image,
     /// The image file.
-    file: oc.file,
+    file: oc.io.File,
     /// If true, flip the y-axis of the image while loading.
     flip: bool,
 ) callconv(.C) image_region;

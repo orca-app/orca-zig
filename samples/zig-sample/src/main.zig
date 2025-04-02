@@ -94,7 +94,7 @@ pub fn onInit() !void {
         tmp_image = canvas.Image.nil();
     }
 
-    // try testFileApis(); @Incomplete
+    try testFileApis();
 }
 
 fn toRgba8(c: canvas.Color) u32 {
@@ -453,31 +453,33 @@ pub fn onTerminate() void {
 }
 
 fn testFileApis() !void {
-    var cwd = try oc.File.open("/", oc.File.AccessFlags.readonly(), oc.File.OpenFlags.none());
-    oc.assert(cwd.isNil() == false, "file should be valid", .{}, @src());
+    const File = oc.io.File;
+
+    var cwd = try File.open("/", .{}, .{});
+    oc.assert(!cwd.isNil(), "file should be valid", .{}, @src());
     defer cwd.close();
 
-    var orca_jumping_file = try oc.File.open("/orca_jumping.jpg", oc.File.AccessFlags.readonly(), oc.File.OpenFlags.none());
-    oc.assert(orca_jumping_file.isNil() == false, "file should be valid", .{}, @src());
+    var orca_jumping_file = try File.open("/orca_jumping.jpg", .{}, .{});
+    oc.assert(!orca_jumping_file.isNil(), "file should be valid", .{}, @src());
     orca_jumping_file.close();
 
-    orca_jumping_file = try oc.File.openAt(cwd, "orca_jumping.jpg", oc.File.AccessFlags.readonly(), oc.File.OpenFlags.none());
-    oc.assert((try orca_jumping_file.getStatus()).type == .Regular, "status API works", .{}, @src());
+    orca_jumping_file = try File.openAt(cwd, "orca_jumping.jpg", .{}, .{});
+    oc.assert((try orca_jumping_file.getStatus()).type == .regular, "status API works", .{}, @src());
     oc.assert(try orca_jumping_file.getSize() > 0, "size API works", .{}, @src());
-    oc.assert(orca_jumping_file.isNil() == false, "file should be valid", .{}, @src());
+    oc.assert(!orca_jumping_file.isNil(), "file should be valid", .{}, @src());
 
-    var tmp_image = canvas.Image.createFromFile(surface, orca_jumping_file, .NoFlip);
-    oc.assert(tmp_image.isNil() == false, "image loaded from file should not be nil", .{}, @src());
+    var tmp_image = canvas.Image.createFromFile(renderer, orca_jumping_file, false);
+    oc.assert(!tmp_image.isNil(), "image loaded from file should not be nil", .{}, @src());
     tmp_image.destroy();
     orca_jumping_file.close();
 
     const temp_file_contents = "hello world!";
     const temp_file_path = "/temp_file.txt";
     {
-        var tmp_file = try oc.File.open(temp_file_path, oc.File.AccessFlags.readwrite(), oc.File.OpenFlags{ .create = true });
+        var tmp_file = try File.open(temp_file_path, .{ .write = true }, .{ .create = true });
         defer tmp_file.close();
 
-        oc.assert(tmp_file.isNil() == false, "file should be valid", .{}, @src());
+        oc.assert(!tmp_file.isNil(), "file should be valid", .{}, @src());
         oc.assert(try tmp_file.pos() == 0, "new file shouldn't have anything in it yet", .{}, @src());
 
         var writer = tmp_file.writer();
@@ -486,15 +488,20 @@ fn testFileApis() !void {
     }
 
     {
-        var tmp_file = try oc.File.open(temp_file_path, oc.File.AccessFlags.readwrite(), oc.File.OpenFlags{ .create = true });
+        var tmp_file = try File.open(temp_file_path, .{ .write = true }, .{ .create = true });
         defer tmp_file.close();
 
-        _ = try tmp_file.seek(0, .Set);
+        _ = try tmp_file.seek(0, .set);
         oc.assert(try tmp_file.pos() == 0, "should be back at the beginning of the file", .{}, @src());
 
         var buffer: [temp_file_contents.len]u8 = undefined;
         var reader = tmp_file.reader();
         _ = try reader.read(&buffer);
-        oc.assert(std.mem.eql(u8, temp_file_contents, &buffer), "should have read what was in the original buffer", .{}, @src());
+        oc.assert(
+            std.mem.eql(u8, temp_file_contents, &buffer),
+            "should have read what was in the original buffer",
+            .{},
+            @src(),
+        );
     }
 }
