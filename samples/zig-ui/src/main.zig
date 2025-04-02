@@ -9,6 +9,8 @@ var surface: canvas.Surface = undefined;
 var context: canvas.Context = undefined;
 var renderer: canvas.Renderer = undefined;
 
+var ui_ctx: ?*ui.Context = undefined;
+
 var font_regular: canvas.Font = undefined;
 var font_bold: canvas.Font = undefined;
 
@@ -53,7 +55,7 @@ pub fn onInit() !void {
         font.* = canvas.Font.createFromMemory(oc.toStr8(buffer[0..size]), ranges.len, @constCast(&ranges)); // @Cleanup
     }
 
-    _ = ui.contextCreate(font_regular);
+    ui_ctx = ui.contextCreate(font_regular);
 
     text_arena.init();
     log_arena.init();
@@ -61,7 +63,7 @@ pub fn onInit() !void {
 }
 
 pub fn onRawEvent(event: *oc.app.Event) void {
-    // oc.ui.processCEvent(event.c_event);
+    ui.setContext(ui_ctx);
     ui.processEvent(event);
 }
 
