@@ -39,6 +39,10 @@ pub fn StringList(comptime Str: type) type {
             /// The string for this element.
             string: Str,
         };
+
+        pub const StrList = @This();
+
+        pub const empty: StrList = .{ .list = .empty, .elt_count = 0, .len = 0 };
     };
 }
 

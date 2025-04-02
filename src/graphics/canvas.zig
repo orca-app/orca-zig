@@ -363,11 +363,13 @@ pub const Color = extern struct {
     };
 
     /// Create a color using RGBA values.
-    pub const rgba = oc_color_rgba;
-    extern fn oc_color_rgba(r: f32, g: f32, b: f32, a: f32) callconv(.C) Color;
+    pub fn rgba(r: f32, g: f32, b: f32, a: f32) Color {
+        return .{ .r = r, .g = g, .b = b, .a = a, .color_space = .rgb };
+    }
     /// Create a current color using sRGBA values.
-    pub const srgba = oc_color_srgba;
-    extern fn oc_color_srgba(r: f32, g: f32, b: f32, a: f32) callconv(.C) Color;
+    pub fn srgba(r: f32, g: f32, b: f32, a: f32) Color {
+        return .{ .r = r, .g = g, .b = b, .a = a, .color_space = .srgb };
+    }
     /// Convert a color from one color space to another.
     pub const convert = oc_color_convert;
     extern fn oc_color_convert(

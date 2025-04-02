@@ -1,72 +1,68 @@
 const std = @import("std");
 const oc = @import("root");
 const ui = oc.ui;
+const canvas = oc.graphics.canvas;
 
-// Unfortunately needed to force the comptime code in orca.zig to be run
-comptime {
-    _ = oc;
-}
+var frame_size: oc.math.Vec2 = .{ .x = 1200, .y = 838 };
 
-var frame_size: oc.Vec2 = .{ .x = 1200, .y = 838 };
+var surface: canvas.Surface = undefined;
+var context: canvas.Context = undefined;
+var renderer: canvas.Renderer = undefined;
 
-var surface: oc.Surface = undefined;
-var canvas: oc.Canvas = undefined;
-var font_regular: oc.Font = undefined;
-var font_bold: oc.Font = undefined;
-var ui_ctx: ui.Context = undefined;
-var text_arena: oc.Arena = undefined;
-var log_arena: oc.Arena = undefined;
-var log_lines: oc.Str8List = undefined;
+var font_regular: canvas.Font = undefined;
+var font_bold: canvas.Font = undefined;
 
-const Cmd = enum {
-    None,
-    SetDarkTheme,
-    SetLightTheme,
-};
-var cmd: Cmd = .None;
+var text_arena: oc.mem.Arena = undefined;
+var log_arena: oc.mem.Arena = undefined;
+var log_lines: oc.strings.str8_list = undefined;
+
+var theme: enum { dark, light } = .dark;
 
 pub fn onInit() !void {
-    oc.windowSetTitle("Orca Zig UI Demo");
-    oc.windowSetSize(frame_size);
+    oc.app.windowSetTitle(oc.toStr8("Orca Zig UI Demo"));
+    oc.app.windowSetSize(frame_size);
 
-    surface = oc.Surface.canvas();
-    canvas = oc.Canvas.create();
-    ui.init(&ui_ctx);
+    renderer = canvas.Renderer.create();
+    surface = canvas.surfaceCreate(renderer);
+    context = canvas.Context.create();
 
-    const fonts = [_]*oc.Font{ &font_regular, &font_bold };
+    const fonts = [_]*canvas.Font{ &font_regular, &font_bold };
     const font_names = [_][]const u8{ "/OpenSans-Regular.ttf", "/OpenSans-Bold.ttf" };
     for (fonts, font_names) |font, name| {
-        var scratch = oc.Arena.scratchBegin();
+        var scratch = oc.mem.scratchBegin();
         defer scratch.end();
 
-        var file = oc.File.open(name, .{ .read = true }, .{}) catch |e| {
+        const file = oc.io.File.open(name, .{}, .{}) catch |e| {
             oc.log.err("Couldn't open file {s}", .{name}, @src());
             return e;
         };
 
-        const size = try file.getSize();
-        const buffer = scratch.arena.push(@intCast(size));
-        _ = try file.read(buffer);
+        const size: usize = @intCast(try file.getSize());
+        const buffer: [*]u8 = @ptrCast(scratch.arena.*.push(size) orelse @panic("OOM"));
+        _ = try file.read(buffer[0..size]);
         file.close();
 
-        var ranges = oc.UnicodeRange.range(&[_]oc.UnicodeRange.Enum{
-            .BasicLatin,
-            .C1ControlsAndLatin1Supplement,
-            .LatinExtendedA,
-            .LatinExtendedB,
-            .Specials,
-        });
+        const ranges = [5]oc.unicode_range{
+            .{ .firstCodePoint = 0x0000, .count = 127 }, // BASIC_LATIN
+            .{ .firstCodePoint = 0x0080, .count = 127 }, // C1_CONTROLS_AND_LATIN_1_SUPPLEMENT
+            .{ .firstCodePoint = 0x0100, .count = 127 }, // LATIN_EXTENDED_A
+            .{ .firstCodePoint = 0x0180, .count = 207 }, // LATIN_EXTENDED_B
+            .{ .firstCodePoint = 0xfff0, .count = 15 }, //  SPECIALS
+        };
 
-        font.* = oc.Font.createFromMemory(buffer, &ranges);
+        font.* = canvas.Font.createFromMemory(oc.toStr8(buffer[0..size]), ranges.len, @constCast(&ranges)); // @Cleanup
     }
 
-    text_arena = oc.Arena.init();
-    log_arena = oc.Arena.init();
-    log_lines = oc.Str8List.init();
+    _ = ui.contextCreate(font_regular);
+
+    text_arena.init();
+    log_arena.init();
+    log_lines = .{ .eltCount = 0, .len = 0, .list = .empty }; // @Cleanup
 }
 
-pub fn onRawEvent(event: *const oc.Event) void {
-    oc.ui.processCEvent(event.c_event);
+pub fn onRawEvent(event: *oc.app.Event) void {
+    // oc.ui.processCEvent(event.c_event);
+    ui.processEvent(event);
 }
 
 pub fn onResize(width: u32, height: u32) void {
@@ -75,68 +71,67 @@ pub fn onResize(width: u32, height: u32) void {
 }
 
 pub fn onFrameRefresh() void {
-    var scratch = oc.Arena.scratchBegin();
+    var scratch = oc.mem.scratchBegin();
     defer scratch.end();
 
-    switch (cmd) {
-        .SetDarkTheme => ui.setTheme(ui.dark_theme),
-        .SetLightTheme => ui.setTheme(ui.light_theme),
-        .None => {},
-    }
-    cmd = .None;
-
-    var default_style = ui.Style{ .font = font_regular };
     {
-        ui.beginFrame(frame_size, &default_style);
-        defer ui.endFrame();
+        ui.frameBegin(frame_size);
+        defer ui.frameEnd();
+
+        switch (theme) {
+            .dark => ui.setThemeDark(),
+            .light => ui.setThemeLight(),
+        }
+
+        ui.styleSetVar(.bg_color, "bg-0"); // @Api missing theme strings
+        ui.styleSetI32(.constrain_y, 1);
 
         //--------------------------------------------------------------------------------------------
         // Menu bar
         //--------------------------------------------------------------------------------------------
         {
-            ui.menuBarBegin("menu_bar");
+            ui.menuBarBegin(@constCast("menu_bar"));
             defer ui.menuBarEnd();
 
             {
-                ui.menuBegin("File");
+                ui.menuBegin(@constCast("file-menu"), @constCast("File"));
                 defer ui.menuEnd();
 
-                if (ui.menuButton("Quit").pressed) {
-                    oc.requestQuit();
+                if (ui.menuButton(@constCast("quit"), @constCast("Quit")).pressed) {
+                    oc.app.requestQuit();
                 }
             }
 
             {
-                ui.menuBegin("Theme");
+                ui.menuBegin(@constCast("theme-menu"), @constCast("Theme"));
                 defer ui.menuEnd();
 
-                if (ui.menuButton("Dark theme").pressed) {
-                    cmd = .SetDarkTheme;
+                if (ui.menuButton(@constCast("dark"), @constCast("Dark theme")).pressed) {
+                    theme = .dark;
                 }
-                if (ui.menuButton("Light theme").pressed) {
-                    cmd = .SetLightTheme;
+                if (ui.menuButton(@constCast("light"), @constCast("Light theme")).pressed) {
+                    theme = .light;
                 }
             }
         }
 
         {
-            ui.panelBegin("main panel", .{});
-            defer ui.panelEnd();
+            _ = ui.boxBeginStr8(oc.toStr8("main panel"));
+            defer _ = ui.boxEnd();
+
+            ui.styleSetSize(.width, .{ .kind = .parent, .value = 1 });
+            ui.styleSetSize(.height, .{ .kind = .parent, .value = 1, .relax = 1 });
 
             {
-                ui.styleNext(.{
-                    .size = .{
-                        .width = .fill_parent,
-                        .height = .{ .custom = .{ .kind = .Parent, .value = 1, .relax = 1 } },
-                    },
-                    .layout = .{
-                        .axis = .X,
-                        .margin = .{ .x = 16, .y = 16 },
-                        .spacing = 16,
-                    },
-                });
-                _ = ui.boxBegin("Background", .{ .draw_background = true });
+                _ = ui.boxBeginStr8(oc.toStr8("background"));
                 defer _ = ui.boxEnd();
+
+                ui.styleSetSize(.width, .{ .kind = .parent, .value = 1 });
+                ui.styleSetSize(.height, .{ .kind = .parent, .value = 1, .relax = 1 });
+                ui.styleSetI32(.axis, @intFromEnum(ui.Axis.x));
+                ui.styleSetF32(.margin_x, 16);
+                ui.styleSetF32(.margin_y, 16);
+                ui.styleSetF32(.spacing, 16);
 
                 widgets(scratch.arena);
 
@@ -145,77 +140,64 @@ pub fn onFrameRefresh() void {
         }
     }
 
-    _ = canvas.select();
-    surface.select();
-
-    oc.Canvas.setColor(ui_ctx.theme.bg0);
-    oc.Canvas.clear();
+    _ = context.select();
 
     ui.draw();
-    canvas.render();
-    surface.present();
+    canvas.render(renderer, context, surface);
+    canvas.present(renderer, surface);
 }
 
 var checkbox_checked: bool = false;
 var v_slider_value: f32 = 0;
 var v_slider_logged_value: f32 = 0;
 var v_slider_log_time: f64 = 0;
-var radio_selected: usize = 0;
+var radio_selected: i32 = 0;
 var h_slider_value: f32 = 0;
 var h_slider_logged_value: f32 = 0;
 var h_slider_log_time: f64 = 0;
-var text: []const u8 = "Text box";
-var selected: ?usize = null;
+var text_info: ui.TextBoxInfo = .{ .defaultText = oc.toStr8("Type here") };
+var selected: i32 = 0;
 
-fn widgets(arena: *oc.Arena) void {
+fn widgets(arena: *oc.mem.Arena) void {
     columnBegin("Widgets", 1.0 / 3.0);
     defer columnEnd();
 
     {
-        ui.styleNext(.{
-            .size = .{
-                .width = .fill_parent,
-            },
-            .layout = .{
-                .axis = .X,
-                .spacing = 32,
-            },
-        });
-        _ = ui.boxBegin("top", .{});
+        _ = ui.boxBeginStr8(oc.toStr8("top"));
         defer _ = ui.boxEnd();
 
+        ui.styleSetSize(.width, .{ .kind = .parent, .value = 1 });
+        ui.styleSetI32(.axis, @intFromEnum(ui.Axis.x));
+        ui.styleSetF32(.spacing, 32);
+
         {
-            ui.styleNext(.{
-                .layout = .{
-                    .axis = .Y,
-                    .spacing = 24,
-                },
-            });
-            _ = ui.boxBegin("top_left", .{});
+            _ = ui.boxBeginStr8(oc.toStr8("top_left"));
             defer _ = ui.boxEnd();
+
+            ui.styleSetI32(.axis, @intFromEnum(ui.Axis.y));
+            ui.styleSetF32(.spacing, 24);
 
             //-----------------------------------------------------------------------------
             // Label
             //-----------------------------------------------------------------------------
-            _ = ui.makeLabel("Label");
+            _ = ui.label("label", "Label");
 
             //-----------------------------------------------------------------------------
             // Button
             //-----------------------------------------------------------------------------
-            if (ui.button("Button").clicked) {
+            if (ui.button("button", "Button").clicked) {
                 logPush("Button clicked");
             }
 
             {
-                ui.styleNext(.{
-                    .layout = .{
-                        .axis = .X,
-                        .alignment = .{ .y = .Center },
-                        .spacing = 8,
-                    },
-                });
-                _ = ui.boxBegin("checkbox", .{});
+                _ = ui.boxBeginStr8(oc.toStr8("checkbox"));
                 defer _ = ui.boxEnd();
+
+                // @Cleanup add set axis/align fns
+                ui.styleSetI32(.axis, @intFromEnum(ui.Axis.x));
+                ui.styleSetI32(.align_y, @intFromEnum(ui.Align.center));
+                ui.styleSetF32(.spacing, 8);
+                ui.styleSetF32(.margin_x, 2);
 
                 //-------------------------------------------------------------------------
                 // Checkbox
@@ -228,17 +210,24 @@ fn widgets(arena: *oc.Arena) void {
                     }
                 }
 
-                _ = ui.makeLabel("Checkbox");
+                _ = ui.label("label", "Checkbox");
             }
         }
 
         //---------------------------------------------------------------------------------
         // Vertical slider
         //---------------------------------------------------------------------------------
-        ui.styleNext(.{ .size = .{ .height = .{ .pixels = 130 } } });
+
+        {
+            ui.styleRuleBegin(oc.toStr8("v_slider"));
+            defer ui.styleRuleEnd();
+            ui.styleSetSize(.width, .{ .kind = .pixels, .value = 24 });
+            ui.styleSetSize(.height, .{ .kind = .pixels, .value = 130 });
+        }
+
         _ = ui.slider("v_slider", &v_slider_value);
 
-        const now = oc.clock.time(.Monotonic);
+        const now = oc.clock.time(.monotonic);
         if ((now - v_slider_log_time) >= 0.2 and v_slider_value != v_slider_logged_value) {
             logPushf("Vertical slider moved to {d:.3}", .{v_slider_value});
             v_slider_logged_value = v_slider_value;
@@ -246,43 +235,48 @@ fn widgets(arena: *oc.Arena) void {
         }
 
         {
-            ui.styleNext(.{
-                .layout = .{
-                    .axis = .Y,
-                    .spacing = 24,
-                },
-            });
-            _ = ui.boxBegin("top right", .{});
+            _ = ui.boxBeginStr8(oc.toStr8("top right"));
             defer _ = ui.boxEnd();
+
+            ui.styleSetI32(.axis, @intFromEnum(ui.Axis.y));
+            ui.styleSetF32(.spacing, 24);
 
             //-----------------------------------------------------------------------------
             // Tooltip
             //-----------------------------------------------------------------------------
-            if (ui.makeLabel("Tooltip").hovering) {
-                ui.tooltip("Hi");
+            if (ui.label("label", "Tooltip").hover) {
+                ui.tooltip("tooltip", "Hi");
             }
 
             //-----------------------------------------------------------------------------
             // Radio group
             //-----------------------------------------------------------------------------
-            var options = [_][]const u8{
-                "Radio 1",
-                "Radio 2",
+            var options = [_]oc.strings.Str8{
+                oc.toStr8("Radio 1"),
+                oc.toStr8("Radio 2"),
             };
             var radio_group_info = ui.RadioGroupInfo{
                 .selected_index = radio_selected,
+                .option_count = @intCast(options.len),
                 .options = &options,
             };
             const result = ui.radioGroup("radio_group", &radio_group_info);
-            radio_selected = result.selected_index.?;
+            radio_selected = result.selected_index;
             if (result.changed) {
-                logPushf("Selected {s}", .{options[radio_selected]});
+                logPushf("Selected {s}", .{options[@intCast(radio_selected)].toSlice()});
             }
 
             //-----------------------------------------------------------------------------
             // Horizontal slider
             //-----------------------------------------------------------------------------
-            ui.styleNext(.{ .size = .{ .width = .{ .pixels = 130 } } });
+
+            {
+                ui.styleRuleBegin(oc.toStr8("h_slider"));
+                defer ui.styleRuleEnd();
+
+                ui.styleSetSize(.width, .{ .kind = .pixels, .value = 130 });
+                ui.styleSetSize(.height, .{ .kind = .pixels, .value = 24 });
+            }
             _ = ui.slider("h_slider", &h_slider_value);
 
             if ((now - h_slider_log_time) >= 0.2 and h_slider_value != h_slider_logged_value) {
@@ -296,189 +290,186 @@ fn widgets(arena: *oc.Arena) void {
     //-------------------------------------------------------------------------------------
     // Text box
     //-------------------------------------------------------------------------------------
-    ui.styleNext(.{
-        .size = .{
-            .width = .{ .pixels = 305 },
-            .height = .text,
-        },
-    });
-    const textResult = ui.textBox("text", arena, text);
-    if (textResult.changed) {
-        text_arena.clear();
-        text = text_arena.pushStr(textResult.text);
-    }
-    if (textResult.accepted) {
-        logPushf("Entered text {s}", .{text});
+    {
+        {
+            ui.styleRuleBegin(oc.toStr8("text"));
+            defer ui.styleRuleEnd();
+            ui.styleSetSize(.width, .{ .kind = .pixels, .value = 305 });
+        }
+
+        const result = ui.textBoxStr8(oc.toStr8("text"), arena, &text_info);
+        if (result.changed) {
+            text_arena.clear();
+            text_info.text = oc.strings.str8PushCopy(&text_arena, result.text);
+        }
+        if (result.accepted) {
+            // @Bug this code never seems to run?
+            logPushf("Entered text {s}", .{text_info.text.toSlice()});
+        }
     }
 
     //-------------------------------------------------------------------------------------
     // Select
     //-------------------------------------------------------------------------------------
-    var options = [_][]const u8{
-        "Option 1",
-        "Option 2",
-    };
-    var select_popup_info = ui.SelectPopupInfo{
-        .selected_index = selected,
-        .options = &options,
-        .placeholder = "Select",
-    };
-    const selectResult = ui.selectPopup("select", &select_popup_info);
-    if (selectResult.selected_index != selected) {
-        logPushf("Selected {s}", .{options[selectResult.selected_index.?]});
+    {
+        var options = [_]oc.strings.Str8{
+            oc.toStr8("Option 1"),
+            oc.toStr8("Option 2"),
+        };
+        var info = ui.SelectPopupInfo{
+            .selected_index = selected,
+            .option_count = @intCast(options.len),
+            .options = &options,
+            .placeholder = oc.toStr8("Select"),
+        };
+        const result = ui.selectPopup("select", &info);
+        if (result.selected_index != selected) {
+            logPushf("Selected {s}", .{options[@intCast(result.selected_index)].toSlice()});
+        }
+        selected = result.selected_index;
     }
-    selected = selectResult.selected_index;
 
     //-------------------------------------------------------------------------------------
     // Scrollable panel
     //-------------------------------------------------------------------------------------
     {
-        ui.styleNext(.{
-            .size = .{
-                .width = .fill_parent,
-                .height = .{
-                    .custom = .{ .kind = .Parent, .value = 1, .relax = 1, .min_size = 200 },
-                },
-            },
-            .bg_color = ui_ctx.theme.bg2,
-            .border_color = ui_ctx.theme.border,
-            .border_size = 1,
-            .roundness = ui_ctx.theme.roundness_small,
-        });
-        _ = ui.panelBegin("log", .{ .draw_background = true, .draw_border = true });
-        defer ui.panelEnd();
+        _ = ui.boxBeginStr8(oc.toStr8("log"));
+        defer _ = ui.boxEnd();
+
+        ui.styleSetSize(.width, .{ .kind = .parent, .value = 1 });
+        ui.styleSetSize(.height, .{ .kind = .parent, .value = 1, .relax = 1, .minSize = 200 });
+        ui.styleSetVar(.bg_color, "bg-2"); // @Api missing themes
+        ui.styleSetVar(.border_color, "border"); // @Api missing themes
+        ui.styleSetF32(.border_size, 1);
+        ui.styleSetVar(.roundness, "roundness-small"); // @Api missing themes
+
+        ui.styleSetI32(.overflow_y, @intFromEnum(ui.Overflow.scroll));
 
         {
-            ui.styleNext(.{
-                .layout = .{
-                    .margin = .{ .x = 16, .y = 16 },
-                },
-            });
-            _ = ui.boxBegin("contents", .{});
+            _ = ui.boxBeginStr8(oc.toStr8("contents"));
             defer _ = ui.boxEnd();
 
-            if (log_lines.list.empty()) {
-                ui.styleNext(.{ .color = ui_ctx.theme.text2 });
-                _ = ui.makeLabel("Log");
+            ui.styleSetF32(.margin_x, 16);
+            ui.styleSetF32(.margin_y, 16);
+            ui.styleSetI32(.axis, @intFromEnum(ui.Axis.y));
+
+            if (log_lines.list.isEmpty()) {
+                {
+                    ui.styleRuleBegin(oc.toStr8("label"));
+                    defer ui.styleRuleEnd();
+                    ui.styleSetVar(.color, "text-2"); // @Api missing themes
+                }
+                _ = ui.label("label", "Log");
             }
 
-            var i: i32 = 0;
-            var log_lines_iter = log_lines.iter();
-            while (log_lines_iter.next()) |log_line| {
-                var buf: [15]u8 = undefined;
-                const id = std.fmt.bufPrint(&buf, "{d}", .{i}) catch unreachable;
-                _ = ui.boxBegin(id, .{});
-                defer _ = ui.boxEnd();
-
-                _ = ui.makeLabel(log_line.string.slice());
-
-                i += 1;
+            var i: u32 = 0;
+            var id: [15]u8 = undefined;
+            std.debug.assert(log_lines.eltCount < 100000000000000); // 15 digits
+            var iter = log_lines.list.iterate(oc.strings.str8_elt, .{});
+            while (iter.next()) |log_line| : (i += 1) {
+                _ = ui.labelStr8(
+                    oc.toStr8(std.fmt.bufPrintIntToSlice(&id, i, 10, .lower, .{})),
+                    log_line.string,
+                );
             }
         }
     }
 }
 
-var styling_selected_radio: ?usize = 0;
+var styling_selected_radio: i32 = 0;
 var unselected_width: f32 = 16;
 var unselected_height: f32 = 16;
 var unselected_roundness: f32 = 8;
-var unselected_bg_color: oc.Color = oc.Color.rgba(0.086, 0.086, 0.102, 1);
-var unselected_border_color: oc.Color = oc.Color.rgba(0.976, 0.976, 0.976, 0.35);
+var unselected_bg_color: canvas.Color = canvas.Color.rgba(0.086, 0.086, 0.102, 1);
+var unselected_border_color: canvas.Color = canvas.Color.rgba(0.976, 0.976, 0.976, 0.35);
 var unselected_border_size: f32 = 1;
-var unselected_when_status: ui.Status = .{};
-var unselected_status_index: ?usize = 0;
+var unselected_when_status: oc.strings.Str8 = oc.toStr8("");
+var unselected_status_index: i32 = 0;
 var selected_width: f32 = 16;
 var selected_height: f32 = 16;
 var selected_roundness: f32 = 8;
-var selected_center_color: oc.Color = oc.Color.rgba(1, 1, 1, 1);
-var selected_bg_color: oc.Color = oc.Color.rgba(0.33, 0.66, 1, 1);
-var selected_when_status: ui.Status = .{};
-var selected_status_index: ?usize = 0;
-var label_font_color: oc.Color = oc.Color.rgba(0.976, 0.976, 0.976, 1);
-var label_font_color_selected: ?usize = 0;
-var label_font: *oc.Font = &font_regular;
-var label_font_selected: ?usize = 0;
+var selected_center_color: canvas.Color = canvas.Color.rgba(1, 1, 1, 1);
+var selected_bg_color: canvas.Color = canvas.Color.rgba(0.33, 0.66, 1, 1);
+var selected_when_status: oc.strings.Str8 = oc.toStr8("");
+var selected_status_index: i32 = 0;
+var label_font_color: canvas.Color = canvas.Color.rgba(0.976, 0.976, 0.976, 1);
+var label_font_color_selected: i32 = 0;
+var label_font: *canvas.Font = &font_regular;
+var label_font_selected: i32 = 0;
 var label_font_size: f32 = 14;
 
-fn styling(arena: *oc.Arena) void {
-    //-----------------------------------------------------------------------------------------
-    // Styling
-    //-----------------------------------------------------------------------------------------
-    // Initial values here are hardcoded from the dark theme and everything is overridden all
-    // the time. In a real program you'd only override what you need and supply the values from
-    // ui_ctx.theme or ui_ctx.theme.palette.
-    //
-    // Rule-based styling is described at
-    // https://www.forkingpaths.dev/posts/23-03-10/rule_based_styling_imgui_ctx.html
+fn styling(arena: *oc.mem.Arena) void {
     columnBegin("Styling", 2.0 / 3.0);
     defer columnEnd();
 
     {
-        ui.styleNext(.{
-            .size = .{
-                .width = .fill_parent,
-                .height = .{ .pixels = 152 },
-            },
-            .layout = .{
-                .margin = .{ .x = 310, .y = 16 },
-            },
-            .bg_color = ui.dark_theme.bg0,
-            .roundness = ui.dark_theme.roundness_small,
-        });
-        _ = ui.boxBegin("styled_radios", .{ .draw_background = true, .draw_border = true });
+        _ = ui.boxBeginStr8(oc.toStr8("styled_radios"));
         defer _ = ui.boxEnd();
 
-        resetNextRadioGroupToDarkTheme(arena);
+        ui.styleSetSize(.width, .{ .kind = .parent, .value = 1 });
+        ui.styleSetSize(.height, .{ .kind = .pixels, .value = 152 });
+        ui.styleSetColor(.bg_color, .{ .r = 0.086, .g = 0.086, .b = 0.102 });
+        ui.styleSetVar(.roundness, "roundness-small"); // @Api missing themes
 
-        const unselected_tag = ui.Tag.make("radio");
-        var unselected_pattern = ui.Pattern.init();
-        unselected_pattern.push(arena, .{ .sel = .{ .tag = unselected_tag } });
-        if (!unselected_when_status.empty()) {
-            unselected_pattern.push(arena, .{ .op = .And, .sel = .{ .status = unselected_when_status } });
+        ui.styleSetI32(.align_x, @intFromEnum(ui.Align.center));
+        ui.styleSetI32(.align_y, @intFromEnum(ui.Align.center));
+
+        {
+            var list: oc.strings.str8_list = .{ .eltCount = 0, .len = 0, .list = .empty }; // @Cleanup
+            oc.strings.str8ListPush(arena, &list, oc.toStr8("radio_group .radio-row"));
+            oc.strings.str8ListPush(arena, &list, unselected_when_status);
+            oc.strings.str8ListPush(arena, &list, oc.toStr8(" .radio"));
+            const unselected_pattern = oc.strings.str8ListJoin(arena, list);
+
+            {
+                ui.styleRuleBegin(unselected_pattern);
+                defer ui.styleRuleEnd();
+
+                ui.styleSetSize(.width, .{ .kind = .pixels, .value = unselected_width });
+                ui.styleSetSize(.height, .{ .kind = .pixels, .value = unselected_height });
+                ui.styleSetColor(.bg_color, unselected_bg_color);
+                ui.styleSetColor(.border_color, unselected_border_color);
+                ui.styleSetF32(.border_size, unselected_border_size);
+                ui.styleSetF32(.roundness, unselected_roundness);
+            }
         }
-        ui.styleMatchAfter(unselected_pattern, .{
-            .size = .{
-                .width = .{ .pixels = unselected_width },
-                .height = .{ .pixels = unselected_height },
-            },
-            .bg_color = unselected_bg_color,
-            .border_color = unselected_border_color,
-            .border_size = unselected_border_size,
-            .roundness = unselected_roundness,
-        });
 
-        const selected_tag = ui.Tag.make("radio_selected");
-        var selected_pattern = ui.Pattern.init();
-        selected_pattern.push(arena, .{ .sel = .{ .tag = selected_tag } });
-        if (!selected_when_status.empty()) {
-            selected_pattern.push(arena, .{ .op = .And, .sel = .{ .status = selected_when_status } });
+        {
+            var list: oc.strings.str8_list = .{ .eltCount = 0, .len = 0, .list = .empty }; // @Cleanup
+            oc.strings.str8ListPush(arena, &list, oc.toStr8("radio_group .radio-row"));
+            oc.strings.str8ListPush(arena, &list, selected_when_status);
+            oc.strings.str8ListPush(arena, &list, oc.toStr8(" .radio_selected"));
+            const selected_pattern = oc.strings.str8ListJoin(arena, list);
+
+            {
+                ui.styleRuleBegin(selected_pattern);
+                defer ui.styleRuleEnd();
+
+                ui.styleSetSize(.width, .{ .kind = .pixels, .value = selected_width });
+                ui.styleSetSize(.height, .{ .kind = .pixels, .value = selected_height });
+                ui.styleSetColor(.bg_color, selected_bg_color);
+                ui.styleSetColor(.color, selected_center_color);
+                ui.styleSetF32(.roundness, selected_roundness);
+            }
         }
-        ui.styleMatchAfter(selected_pattern, .{
-            .size = .{
-                .width = .{ .pixels = selected_width },
-                .height = .{ .pixels = selected_height },
-            },
-            .color = selected_center_color,
-            .bg_color = selected_bg_color,
-            .roundness = selected_roundness,
-        });
 
-        const label_tag = ui.Tag.make("label");
-        var label_pattern = ui.Pattern.init();
-        label_pattern.push(arena, .{ .sel = .{ .tag = label_tag } });
-        ui.styleMatchAfter(label_pattern, .{
-            .color = label_font_color,
-            .font = label_font.*,
-            .font_size = label_font_size,
-        });
+        {
+            ui.styleRuleBegin(oc.toStr8("radio_group label"));
+            defer ui.styleRuleEnd();
 
-        var options = [_][]const u8{
-            "I",
-            "Am",
-            "Stylish",
+            ui.styleSetColor(.color, label_font_color);
+            ui.styleSetFont(.font, label_font.*);
+            ui.styleSetF32(.font_size, label_font_size);
+        }
+
+        var options = [_]oc.strings.Str8{
+            oc.toStr8("I"),
+            oc.toStr8("Am"),
+            oc.toStr8("Stylish"),
         };
         var radio_group_info = ui.RadioGroupInfo{
             .selected_index = styling_selected_radio,
+            .option_count = @intCast(options.len),
             .options = &options,
         };
         const result = ui.radioGroup("radio_group", &radio_group_info);
@@ -486,22 +477,33 @@ fn styling(arena: *oc.Arena) void {
     }
 
     {
-        ui.styleNext(.{ .layout = .{ .axis = .X, .spacing = 32 } });
-        _ = ui.boxBegin("controls", .{});
+        _ = ui.boxBeginStr8(oc.toStr8("controls"));
         defer _ = ui.boxEnd();
 
+        ui.styleSetI32(.axis, @intFromEnum(ui.Axis.x));
+        ui.styleSetF32(.spacing, 32);
+
         {
-            ui.styleNext(.{ .layout = .{ .axis = .Y, .spacing = 16 } });
-            _ = ui.boxBegin("unselected", .{});
+            _ = ui.boxBeginStr8(oc.toStr8("unselected"));
             defer _ = ui.boxEnd();
 
-            ui.styleNext(.{ .font_size = 16 });
-            _ = ui.makeLabel("Radio style");
+            ui.styleSetI32(.axis, @intFromEnum(ui.Axis.y));
+            ui.styleSetF32(.spacing, 16);
 
             {
-                ui.styleNext(.{ .layout = .{ .spacing = 4 } });
-                _ = ui.boxBegin("size", .{});
+                ui.styleRuleBegin(oc.toStr8("radio-label"));
+                defer ui.styleRuleEnd();
+
+                ui.styleSetF32(.font_size, 16);
+            }
+            _ = ui.label("radio-label", "Radio style");
+
+            {
+                _ = ui.boxBeginStr8(oc.toStr8("size"));
                 defer _ = ui.boxEnd();
+
+                ui.styleSetI32(.axis, @intFromEnum(ui.Axis.y));
+                ui.styleSetF32(.spacing, 4);
 
                 var width_slider = (unselected_width - 8) / 16;
                 labeledSlider("Width", &width_slider);
@@ -517,10 +519,11 @@ fn styling(arena: *oc.Arena) void {
             }
 
             {
-                ui.styleNext(.{ .layout = .{ .spacing = 4 } });
-                _ = ui.boxBegin("background", .{});
+                _ = ui.boxBeginStr8(oc.toStr8("background"));
                 defer _ = ui.boxEnd();
 
+                ui.styleSetI32(.axis, @intFromEnum(ui.Axis.y));
+                ui.styleSetF32(.spacing, 4);
                 labeledSlider("Background R", &unselected_bg_color.r);
                 labeledSlider("Background G", &unselected_bg_color.g);
                 labeledSlider("Background B", &unselected_bg_color.b);
@@ -528,10 +531,11 @@ fn styling(arena: *oc.Arena) void {
             }
 
             {
-                ui.styleNext(.{ .layout = .{ .spacing = 4 } });
-                _ = ui.boxBegin("border", .{});
+                _ = ui.boxBeginStr8(oc.toStr8("border"));
                 defer _ = ui.boxEnd();
 
+                ui.styleSetI32(.axis, @intFromEnum(ui.Axis.y));
+                ui.styleSetF32(.spacing, 4);
                 labeledSlider("Border R", &unselected_border_color.r);
                 labeledSlider("Border G", &unselected_border_color.g);
                 labeledSlider("Border B", &unselected_border_color.b);
@@ -543,44 +547,55 @@ fn styling(arena: *oc.Arena) void {
             unselected_border_size = border_size_slider * 5;
 
             {
-                ui.styleNext(.{ .layout = .{ .spacing = 10 } });
-                _ = ui.boxBegin("status_override", .{});
+                _ = ui.boxBeginStr8(oc.toStr8("status_override"));
                 defer _ = ui.boxEnd();
 
-                _ = ui.makeLabel("Override");
+                ui.styleSetI32(.axis, @intFromEnum(ui.Axis.y));
+                ui.styleSetF32(.spacing, 10);
+                _ = ui.label("label", "Override");
 
-                var status_options = [_][]const u8{
-                    "Always",
-                    "When hovering",
-                    "When active",
+                var status_options = [_]oc.strings.Str8{
+                    oc.toStr8("Always"),
+                    oc.toStr8("When hovering"),
+                    oc.toStr8("When active"),
                 };
                 var status_info = ui.RadioGroupInfo{
                     .selected_index = unselected_status_index,
+                    .option_count = @intCast(status_options.len),
                     .options = &status_options,
                 };
-                const status_result = ui.radioGroup("status", &status_info);
-                unselected_status_index = status_result.selected_index;
-                unselected_when_status = switch (unselected_status_index.?) {
-                    0 => .{},
-                    1 => .{ .hover = true },
-                    2 => .{ .active = true },
+                const result = ui.radioGroup("status", &status_info);
+                unselected_status_index = result.selected_index;
+                unselected_when_status = switch (unselected_status_index) {
+                    0 => oc.toStr8(""),
+                    1 => oc.toStr8(".hover"),
+                    2 => oc.toStr8(".active"),
                     else => unreachable,
                 };
             }
         }
 
         {
-            ui.styleNext(.{ .layout = .{ .axis = .Y, .spacing = 16 } });
-            _ = ui.boxBegin("selected", .{});
+            _ = ui.boxBeginStr8(oc.toStr8("selected"));
             defer _ = ui.boxEnd();
 
-            ui.styleNext(.{ .font_size = 16 });
-            _ = ui.makeLabel("Radio selected style");
+            ui.styleSetI32(.axis, @intFromEnum(ui.Axis.y));
+            ui.styleSetF32(.spacing, 16);
 
             {
-                ui.styleNext(.{ .layout = .{ .spacing = 4 } });
-                _ = ui.boxBegin("size", .{});
+                ui.styleRuleBegin(oc.toStr8("radio-label"));
+                defer ui.styleRuleEnd();
+
+                ui.styleSetF32(.font_size, 16);
+            }
+            _ = ui.label("radio-label", "Radio style");
+
+            {
+                _ = ui.boxBeginStr8(oc.toStr8("size"));
                 defer _ = ui.boxEnd();
+
+                ui.styleSetI32(.axis, @intFromEnum(ui.Axis.y));
+                ui.styleSetF32(.spacing, 4);
 
                 var width_slider = (selected_width - 8) / 16;
                 labeledSlider("Width", &width_slider);
@@ -596,21 +611,11 @@ fn styling(arena: *oc.Arena) void {
             }
 
             {
-                ui.styleNext(.{ .layout = .{ .spacing = 4 } });
-                _ = ui.boxBegin("color", .{});
+                _ = ui.boxBeginStr8(oc.toStr8("background"));
                 defer _ = ui.boxEnd();
 
-                labeledSlider("Center R", &selected_center_color.r);
-                labeledSlider("Center G", &selected_center_color.g);
-                labeledSlider("Center B", &selected_center_color.b);
-                labeledSlider("Center A", &selected_center_color.a);
-            }
-
-            {
-                ui.styleNext(.{ .layout = .{ .spacing = 4 } });
-                _ = ui.boxBegin("background", .{});
-                defer _ = ui.boxEnd();
-
+                ui.styleSetI32(.axis, @intFromEnum(ui.Axis.y));
+                ui.styleSetF32(.spacing, 4);
                 labeledSlider("Background R", &selected_bg_color.r);
                 labeledSlider("Background G", &selected_bg_color.g);
                 labeledSlider("Background B", &selected_bg_color.b);
@@ -618,107 +623,142 @@ fn styling(arena: *oc.Arena) void {
             }
 
             {
-                ui.styleNext(.{ .layout = .{ .spacing = 10 } });
-                _ = ui.boxBegin("status_override", .{});
+                _ = ui.boxBeginStr8(oc.toStr8("center"));
                 defer _ = ui.boxEnd();
 
-                ui.styleNext(.{ .size = .{ .height = .{ .pixels = 30 } } });
-                _ = ui.boxMake("spacer", .{});
+                ui.styleSetI32(.axis, @intFromEnum(ui.Axis.y));
+                ui.styleSetF32(.spacing, 4);
+                labeledSlider("Center R", &selected_center_color.r);
+                labeledSlider("Center G", &selected_center_color.g);
+                labeledSlider("Center B", &selected_center_color.b);
+                labeledSlider("Center A", &selected_center_color.a);
+            }
 
-                _ = ui.makeLabel("Override");
+            {
+                _ = ui.boxBeginStr8(oc.toStr8("spacer"));
+                defer _ = ui.boxEnd();
 
-                var status_options = [_][]const u8{
-                    "Always",
-                    "When hovering",
-                    "When active",
+                ui.styleSetSize(.height, .{ .kind = .pixels, .value = 24 });
+            }
+
+            {
+                _ = ui.boxBeginStr8(oc.toStr8("status_override"));
+                defer _ = ui.boxEnd();
+
+                ui.styleSetI32(.axis, @intFromEnum(ui.Axis.y));
+                ui.styleSetF32(.spacing, 10);
+                _ = ui.label("label", "Override");
+
+                var status_options = [_]oc.strings.Str8{
+                    oc.toStr8("Always"),
+                    oc.toStr8("When hovering"),
+                    oc.toStr8("When active"),
                 };
                 var status_info = ui.RadioGroupInfo{
                     .selected_index = selected_status_index,
+                    .option_count = @intCast(status_options.len),
                     .options = &status_options,
                 };
                 const status_result = ui.radioGroup("status", &status_info);
                 selected_status_index = status_result.selected_index;
-                selected_when_status = switch (selected_status_index.?) {
-                    0 => .{},
-                    1 => .{ .hover = true },
-                    2 => .{ .active = true },
+                selected_when_status = switch (selected_status_index) {
+                    0 => oc.toStr8(""),
+                    1 => oc.toStr8(".hover"),
+                    2 => oc.toStr8(".active"),
                     else => unreachable,
                 };
             }
         }
 
         {
-            ui.styleNext(.{ .layout = .{ .axis = .Y, .spacing = 10 } });
-            _ = ui.boxBegin("label", .{});
+            _ = ui.boxBeginStr8(oc.toStr8("label"));
             defer _ = ui.boxEnd();
 
-            ui.styleNext(.{ .font_size = 16 });
-            _ = ui.makeLabel("Label style");
+            ui.styleSetI32(.axis, @intFromEnum(ui.Axis.y));
+            ui.styleSetF32(.spacing, 16);
 
             {
-                ui.styleNext(.{ .layout = .{ .axis = .X, .spacing = 8 } });
-                _ = ui.boxBegin("font_color", .{});
+                ui.styleRuleBegin(oc.toStr8("label-style"));
+                defer ui.styleRuleEnd();
+
+                ui.styleSetF32(.font_size, 16);
+            }
+            _ = ui.label("label-style", "Label style");
+
+            {
+                _ = ui.boxBeginStr8(oc.toStr8("font_color"));
                 defer _ = ui.boxEnd();
 
-                ui.styleMatchAfter(ui.Pattern.owner(), .{
-                    .size = .{ .width = .{ .pixels = 100 } },
-                });
-                _ = ui.makeLabel("Font color");
+                ui.styleSetF32(.spacing, 8);
 
-                var color_names = [_][]const u8{
-                    "Default",
-                    "Red",
-                    "Orange",
-                    "Amber",
-                    "Yellow",
-                    "Lime",
-                    "Light green",
-                    "Green",
+                {
+                    ui.styleRuleBegin(oc.toStr8("font-color"));
+                    defer ui.styleRuleEnd();
+
+                    ui.styleSetSize(.width, .{ .kind = .pixels, .value = 100 });
+                }
+                _ = ui.label("font-color", "Font color");
+
+                var color_names = [_]oc.strings.Str8{
+                    oc.toStr8("Default"),
+                    oc.toStr8("Red"),
+                    oc.toStr8("Orange"),
+                    oc.toStr8("Amber"),
+                    oc.toStr8("Yellow"),
+                    oc.toStr8("Lime"),
+                    oc.toStr8("Light green"),
+                    oc.toStr8("Green"),
                 };
-                const colors = [_]oc.Color{
-                    ui.dark_theme.text0,
-                    ui.dark_theme.palette.red5,
-                    ui.dark_theme.palette.orange5,
-                    ui.dark_theme.palette.amber5,
-                    ui.dark_theme.palette.yellow5,
-                    ui.dark_theme.palette.lime5,
-                    ui.dark_theme.palette.light_green5,
-                    ui.dark_theme.palette.green5,
+                const colors = [_]canvas.Color{
+                    .srgba(1, 1, 1, 1), // text0,
+                    .srgba(0.988, 0.447, 0.353, 1), // palette.red5,
+                    .srgba(1.000, 0.682, 0.263, 1), // palette.orange5,
+                    .srgba(0.961, 0.792, 0.314, 1), // palette.amber5,
+                    .srgba(0.992, 0.871, 0.263, 1), // palette.yellow5,
+                    .srgba(0.682, 0.863, 0.227, 1), // palette.lime5,
+                    .srgba(0.592, 0.776, 0.373, 1), // palette.light_green5,
+                    .srgba(0.365, 0.761, 0.392, 1), // palette.green5,
                 };
                 var color_info = ui.SelectPopupInfo{
                     .selected_index = label_font_color_selected,
+                    .option_count = @intCast(color_names.len),
                     .options = &color_names,
                 };
                 const color_result = ui.selectPopup("color", &color_info);
                 label_font_color_selected = color_result.selected_index;
-                label_font_color = colors[label_font_color_selected.?];
+                label_font_color = colors[@intCast(label_font_color_selected)];
             }
 
             {
-                ui.styleNext(.{ .layout = .{ .axis = .X, .spacing = 8 } });
-                _ = ui.boxBegin("font", .{});
+                _ = ui.boxBeginStr8(oc.toStr8("font"));
                 defer _ = ui.boxEnd();
 
-                ui.styleMatchAfter(ui.Pattern.owner(), .{
-                    .size = .{ .width = .{ .pixels = 100 } },
-                });
-                _ = ui.makeLabel("Font");
+                ui.styleSetF32(.spacing, 8);
 
-                var font_names = [_][]const u8{
-                    "Regular",
-                    "Bold",
+                {
+                    ui.styleRuleBegin(oc.toStr8("font-label"));
+                    defer ui.styleRuleEnd();
+
+                    ui.styleSetSize(.width, .{ .kind = .pixels, .value = 100 });
+                }
+                _ = ui.label("font-label", "Font");
+
+                var font_names = [_]oc.strings.Str8{
+                    oc.toStr8("Regular"),
+                    oc.toStr8("Bold"),
                 };
-                const fonts = [_]*oc.Font{
+                const fonts = [_]*canvas.Font{
                     &font_regular,
                     &font_bold,
                 };
                 var font_info = ui.SelectPopupInfo{
                     .selected_index = label_font_selected,
+                    .option_count = @intCast(font_names.len),
                     .options = &font_names,
                 };
                 const font_result = ui.selectPopup("font_style", &font_info);
                 label_font_selected = font_result.selected_index;
-                label_font = fonts[label_font_selected.?];
+                label_font = fonts[@intCast(label_font_selected)];
             }
 
             var font_size_slider = (label_font_size - 8) / 16;
@@ -729,51 +769,42 @@ fn styling(arena: *oc.Arena) void {
 }
 
 fn columnBegin(header: []const u8, widthFraction: f32) void {
-    ui.styleNext(.{
-        .size = .{
-            .width = .{
-                .custom = .{ .kind = .Parent, .value = widthFraction, .relax = 1 },
-            },
-            .height = .fill_parent,
-        },
-        .layout = .{
-            .axis = .Y,
-            .margin = .{ .y = 8 },
-            .spacing = 24,
-        },
-        .bg_color = ui_ctx.theme.bg1,
-        .border_color = ui_ctx.theme.border,
-        .border_size = 1,
-        .roundness = ui_ctx.theme.roundness_small,
-    });
-    _ = ui.boxBegin(header, .{ .draw_background = true, .draw_border = true });
+    _ = ui.boxBeginStr8(oc.toStr8(header));
+
+    ui.styleSetSize(.width, .{ .kind = .parent, .value = widthFraction, .relax = 1 });
+    ui.styleSetSize(.height, .{ .kind = .parent, .value = 1 });
+    ui.styleSetI32(.axis, @intFromEnum(ui.Axis.y));
+    ui.styleSetF32(.margin_y, 8);
+    ui.styleSetF32(.spacing, 24);
+    ui.styleSetVar(.bg_color, "bg-1"); // @Api missing themes
+    ui.styleSetVar(.border_color, "border"); // @Api missing themes
+    ui.styleSetF32(.border_size, 1);
+    ui.styleSetVar(.roundness, "roundness-small"); // @Api missing themes
+    ui.styleSetI32(.constrain_y, 1);
 
     {
-        ui.styleNext(.{
-            .size = .{ .width = .fill_parent },
-            .layout = .{ .alignment = .{ .x = .Center } },
-        });
-        _ = ui.boxBegin("header", .{});
+        _ = ui.boxBeginStr8(oc.toStr8("header"));
         defer _ = ui.boxEnd();
 
-        ui.styleNext(.{ .font_size = 18 });
-        _ = ui.makeLabel(header);
+        ui.styleSetSize(.width, .{ .kind = .parent, .value = 1 });
+        ui.styleSetI32(.align_x, @intFromEnum(ui.Align.center));
+
+        {
+            ui.styleRuleBegin(oc.toStr8(".label"));
+            defer ui.styleRuleEnd();
+            ui.styleSetF32(.font_size, 18);
+        }
+        _ = ui.labelStr8(oc.toStr8("label"), oc.toStr8(header));
     }
 
-    ui.styleNext(.{
-        .size = .{
-            .width = .fill_parent,
-            .height = .{
-                .custom = .{ .kind = .Parent, .value = 1, .relax = 1 },
-            },
-        },
-        .layout = .{
-            .alignment = .{ .x = .Start },
-            .margin = .{ .x = 16 },
-            .spacing = 24,
-        },
-    });
-    _ = ui.boxBegin("contents", .{});
+    _ = ui.boxBeginStr8(oc.toStr8("contents"));
+    ui.styleSetSize(.width, .{ .kind = .parent, .value = 1 });
+    ui.styleSetSize(.height, .{ .kind = .parent, .value = 1, .relax = 1 });
+    ui.styleSetI32(.axis, @intFromEnum(ui.Axis.y));
+    ui.styleSetI32(.align_x, @intFromEnum(ui.Align.start));
+    ui.styleSetF32(.margin_x, 16);
+    ui.styleSetF32(.spacing, 24);
+    ui.styleSetI32(.constrain_y, 1);
 }
 
 fn columnEnd() void {
@@ -782,76 +813,34 @@ fn columnEnd() void {
 }
 
 fn labeledSlider(label: []const u8, value: *f32) void {
-    ui.styleNext(.{ .layout = .{ .axis = .X, .spacing = 8 } });
-    _ = ui.boxBegin(label, .{});
+    const s8_label = oc.toStr8(label);
+
+    _ = ui.boxBeginStr8(s8_label);
     defer _ = ui.boxEnd();
 
-    ui.styleMatchAfter(ui.Pattern.owner(), .{
-        .size = .{ .width = .{ .pixels = 100 } },
-    });
-    _ = ui.makeLabel(label);
+    {
+        ui.styleRuleBegin(oc.toStr8("label"));
+        defer ui.styleRuleEnd();
 
-    ui.styleNext(.{
-        .size = .{ .width = .{ .pixels = 100 } },
-    });
+        ui.styleSetSize(.width, .{ .kind = .pixels, .value = 100 });
+    }
+    _ = ui.labelStr8(oc.toStr8("label"), s8_label);
+
+    {
+        ui.styleRuleBegin(oc.toStr8("slider"));
+        defer ui.styleRuleEnd();
+
+        ui.styleSetSize(.width, .{ .kind = .pixels, .value = 100 });
+    }
     _ = ui.slider("slider", value);
 }
 
 fn logPush(line: []const u8) void {
-    log_lines.push(&log_arena, line);
+    oc.strings.str8ListPush(&log_arena, &log_lines, oc.toStr8(line));
 }
 
 fn logPushf(comptime fmt: []const u8, args: anytype) void {
-    const str = oc.Str8.pushf(&log_arena, fmt, args);
-    log_lines.push(&log_arena, str);
-}
-
-/// This makes sure the light theme doesn't break the styling overrides
-/// You won't need it in a real program as long as your colors come from ui_ctx.theme or ui_ctx.theme.palette
-fn resetNextRadioGroupToDarkTheme(arena: *oc.Arena) void {
-    const unselected_tag = ui.Tag.make("radio");
-    var unselected_pattern = ui.Pattern.init();
-    unselected_pattern.push(arena, .{ .sel = .{ .tag = unselected_tag } });
-    ui.styleMatchAfter(unselected_pattern, .{
-        .border_color = ui.dark_theme.text3,
-        .border_size = 1,
-    });
-
-    var unselected_hover_pattern = ui.Pattern.init();
-    unselected_hover_pattern.push(arena, .{ .sel = .{ .tag = unselected_tag } });
-    unselected_hover_pattern.push(arena, .{ .op = .And, .sel = .{ .status = .{ .hover = true } } });
-    ui.styleMatchAfter(unselected_hover_pattern, .{
-        .bg_color = ui.dark_theme.fill0,
-        .border_color = ui.dark_theme.primary,
-    });
-
-    var unselected_active_pattern = ui.Pattern.init();
-    unselected_active_pattern.push(arena, .{ .sel = .{ .tag = unselected_tag } });
-    unselected_active_pattern.push(arena, .{ .op = .And, .sel = .{ .status = .{ .active = true } } });
-    ui.styleMatchAfter(unselected_active_pattern, .{
-        .bg_color = ui.dark_theme.fill1,
-        .border_color = ui.dark_theme.primary,
-    });
-
-    const selected_tag = ui.Tag.make("radio_selected");
-    var selected_pattern = ui.Pattern.init();
-    selected_pattern.push(arena, .{ .sel = .{ .tag = selected_tag } });
-    ui.styleMatchAfter(selected_pattern, .{
-        .color = ui.dark_theme.palette.white,
-        .bg_color = ui.dark_theme.primary,
-    });
-
-    var selected_hover_pattern = ui.Pattern.init();
-    selected_hover_pattern.push(arena, .{ .sel = .{ .tag = selected_tag } });
-    selected_hover_pattern.push(arena, .{ .op = .And, .sel = .{ .status = .{ .hover = true } } });
-    ui.styleMatchAfter(selected_hover_pattern, .{
-        .bg_color = ui.dark_theme.primary_hover,
-    });
-
-    var selected_active_pattern = ui.Pattern.init();
-    selected_active_pattern.push(arena, .{ .sel = .{ .tag = selected_tag } });
-    selected_active_pattern.push(arena, .{ .op = .And, .sel = .{ .status = .{ .active = true } } });
-    ui.styleMatchAfter(selected_active_pattern, .{
-        .bg_color = ui.dark_theme.primary_active,
-    });
+    const size = std.fmt.count(fmt, args);
+    const str = oc.toStr8(log_arena.pushArray(u8, @intCast(size)) orelse @panic("OOM"));
+    oc.strings.str8ListPush(&log_arena, &log_lines, str);
 }

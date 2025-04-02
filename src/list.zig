@@ -20,24 +20,24 @@ pub const List = extern struct {
         pub const init: Elem = .{ .prev = null, .next = null };
 
         /// Get the entry for a given list element.
-        pub fn entry(elt: *Elem, comptime T: type) *T {
-            const info = @typeInfo(T);
+        pub fn entry(elt: *Elem, comptime ParentElem: type) *ParentElem {
+            const info = @typeInfo(ParentElem);
             if (info != .@"struct")
-                @compileError("expected " ++ @typeName(T) ++ " to be of type struct, found " ++ @tagName(info));
+                @compileError("expected " ++ @typeName(ParentElem) ++ " to be of type struct, found " ++ @tagName(info));
 
             const member = inline for (info.@"struct".fields) |field| {
                 // @Note this doesn't account for structures with multiple Elem fields,
                 // though you probably shouldn't be doing that anyway...
                 if (field.type == Elem) break field.name;
-            } else @compileError("expected " ++ @typeName(T) ++ " to have a field of type " ++ @typeName(Elem));
+            } else @compileError("expected " ++ @typeName(ParentElem) ++ " to have a field of type " ++ @typeName(Elem));
 
             return @fieldParentPtr(member, elt);
         }
 
         /// Same as `entry`, but `elt` might be null.
-        pub fn entryChecked(elt: ?*Elem, comptime T: type) ?*T {
+        pub fn entryChecked(elt: ?*Elem, comptime ParentElem: type) ?*ParentElem {
             const e = elt orelse return null;
-            return e.entry(T);
+            return e.entry(ParentElem);
         }
     };
 
@@ -112,28 +112,28 @@ pub const List = extern struct {
     };
 
     /// Loop through a linked list.
-    pub fn iterate(list: List, comptime T: type, options: IterateOptions) Iterator(T) {
+    pub fn iterate(list: List, comptime ParentElem: type, options: IterateOptions) Iterator(ParentElem) {
         return .{
             .elem = if (options.reversed) list.last else list.first,
             .reversed = options.reversed,
         };
     }
 
-    pub fn Iterator(comptime T: type) type {
+    pub fn Iterator(comptime ParentElem: type) type {
         return struct {
             elem: ?*Elem,
             reversed: bool,
 
             // @Incomplete support safely modifying the list while iterating
-            pub fn next(it: *@This()) ?*T {
+            pub fn next(it: *@This()) ?*ParentElem {
                 const elt = it.elem orelse return null;
                 it.elem = if (it.reversed) elt.prev else elt.next;
-                return elt.entry(T);
+                return elt.entry(ParentElem);
             }
 
-            pub fn peek(it: *@This()) ?*T {
+            pub fn peek(it: *@This()) ?*ParentElem {
                 const elt = it.elem orelse return null;
-                return elt.entry(T);
+                return elt.entry(ParentElem);
             }
         };
     }

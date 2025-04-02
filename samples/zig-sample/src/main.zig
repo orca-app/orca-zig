@@ -145,21 +145,10 @@ pub fn onKeyUp(scan: oc.app.ScanCode, key: oc.app.KeyCode) void {
     }
 }
 
-// @Api api.json missing clock stuff
-const ClockKind = enum(c_int) {
-    /// clock that increment monotonically
-    monotonic,
-    /// clock that increment monotonically during uptime
-    uptime,
-    /// clock that is driven by the platform time
-    date,
-};
-extern fn oc_clock_time(clock: ClockKind) f64;
-
 pub fn onFrameRefresh() !void {
     counter += 1;
 
-    const secs: f64 = oc_clock_time(.date);
+    const secs: f64 = oc.clock.time(.date);
 
     if (last_seconds != @floor(secs)) {
         last_seconds = @floor(secs);

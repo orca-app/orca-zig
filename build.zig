@@ -60,11 +60,11 @@ pub fn build(b: *Build) !void {
             .icon = "samples/clock/icon.png",
             .resource_dir = "samples/clock/data",
         },
-        // .{
-        //     .name = "UI",
-        //     .root_source_file = "samples/zig-ui/src/main.zig",
-        //     .resource_dir = "samples/zig-ui/data",
-        // },
+        .{
+            .name = "UI",
+            .root_source_file = "samples/zig-ui/src/main.zig",
+            .resource_dir = "samples/zig-ui/data",
+        },
     }) |sample| {
         // Module structure:
         //  root = src/orca.zig

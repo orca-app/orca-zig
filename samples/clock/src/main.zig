@@ -33,23 +33,12 @@ pub fn onResize(width: u32, height: u32) void {
     frameSize.y = @floatFromInt(height);
 }
 
-// @Api api.json missing clock stuff
-const ClockKind = enum(c_int) {
-    /// clock that increment monotonically
-    monotonic,
-    /// clock that increment monotonically during uptime
-    uptime,
-    /// clock that is driven by the platform time
-    date,
-};
-extern fn oc_clock_time(clock: ClockKind) f64;
-
 pub fn onFrameRefresh() void {
     _ = context.select();
     canvas.setColorRgba(0.05, 0.05, 0.05, 1);
     canvas.clear();
 
-    const timestampSecs: f64 = oc_clock_time(.date);
+    const timestampSecs: f64 = oc.clock.time(.date);
     const secs: f64 = @mod(timestampSecs, 60);
     const minutes: f64 = @mod(timestampSecs, 60 * 60) / 60;
     const hours: f64 = @mod(timestampSecs, 60 * 60 * 24) / (60 * 60);
