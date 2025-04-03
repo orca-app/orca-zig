@@ -389,7 +389,7 @@ pub const Event = extern struct {
         /// Details for a window move or resize event.
         move: MoveEvent,
         /// Details for a drag and drop event.
-        paths: oc.strings.str8_list,
+        paths: oc.strings.Str8List,
     },
 };
 // @Api @Cleanup could be moved into io/dialogs namespace
@@ -429,7 +429,7 @@ pub const FileDialogDesc = extern struct {
     /// Optional. The path of the starting directory of the dialog, relative to its root directory. If set to nil, the dialog starts at its root directory.
     startPath: oc.strings.Str8,
     /// A list of file extensions used to restrict which files can be selected in this dialog. An empty list allows all files to be selected. Extensions should be provided without a leading dot.
-    filters: oc.strings.str8_list,
+    filters: oc.strings.Str8List,
 };
 /// An enum identifying the button clicked by the user when a file dialog returns.
 pub const FileDialogButton = enum(u32) {
@@ -445,7 +445,7 @@ pub const FileDialogResult = extern struct {
     /// The path that was selected when the user clicked the OK button. If the dialog box had the `OC_FILE_DIALOG_MULTIPLE` flag set, this is the first file of the list of selected paths.
     path: oc.strings.Str8,
     /// If the dialog box had the `OC_FILE_DIALOG_MULTIPLE` flag set and the user clicked the OK button, this list contains the selected paths.
-    selection: oc.strings.str8_list,
+    selection: oc.strings.Str8List,
 };
 /// Set the title of the application's window.
 pub const windowSetTitle = oc_window_set_title;

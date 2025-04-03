@@ -13,14 +13,14 @@ extern fn oc_path_split(
     arena: [*c]oc.mem.Arena,
     /// The path to slice.
     path: oc.strings.Str8,
-) callconv(.C) oc.strings.str8_list;
+) callconv(.C) oc.strings.Str8List;
 /// Join path elements to form a path.
 pub const join = oc_path_join;
 extern fn oc_path_join(
     /// An arena on which to allocate the resulting path.
     arena: [*c]oc.mem.Arena,
     /// A string list of path elements.
-    elements: oc.strings.str8_list,
+    elements: oc.strings.Str8List,
 ) callconv(.C) oc.strings.Str8;
 /// Append a path to another path.
 pub const append = oc_path_append;

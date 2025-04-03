@@ -230,51 +230,16 @@ pub fn onFrameRefresh() !void {
 
         const str1 = oc.toStr8(">> Hello from Zig! <<"); // @Incomplete collate with zig std
 
-        // @Incomplete use proper Str8List type instead
-        var str2_list: oc.List = .empty;
-        // pushStr
-        {
-            const str_elt = scratch.pushType(oc.strings.str8_elt) orelse @panic("OOM");
-            str_elt.* = .{
-                .listElt = .init,
-                .string = oc.toStr8("All"),
-            };
-            str2_list.pushBack(&str_elt.listElt);
-        }
+        var str2_list: oc.strings.Str8List = .empty;
+        str2_list.push(scratch, oc.toStr8("All"));
+        str2_list.pushf(scratch, "{s}", .{"your"});
+        str2_list.push(scratch, oc.toStr8("base!!"));
 
-        // pushf
-        {
-            const format = "{s}";
-            const args = .{"your"};
-
-            const len: usize = @intCast(std.fmt.count(format, args));
-            const buf: []u8 = scratch.pushArray(u8, len) orelse @panic("OOM");
-            _ = std.fmt.bufPrint(buf, format, args) catch unreachable;
-
-            const str_elt = scratch.pushType(oc.strings.str8_elt) orelse @panic("OOM");
-            str_elt.* = .{
-                .listElt = .init,
-                .string = oc.toStr8(buf),
-            };
-            str2_list.pushBack(&str_elt.listElt);
-        }
-
-        // push
-        {
-            const str_elt = scratch.pushType(oc.strings.str8_elt) orelse @panic("OOM");
-            str_elt.* = .{
-                .listElt = .init,
-                .string = oc.toStr8("base!!"),
-            };
-            str2_list.pushBack(&str_elt.listElt);
-        }
-
-        // @Incomplete
-        // oc.assert(str2_list.contains("All"), "str2_list should have the string we just pushed", .{}, @src());
+        // @Incomplete oc.assert(str2_list.contains("All"), "str2_list should have the string we just pushed", .{}, @src());
 
         {
-            const elt_first = str2_list.first;
-            const elt_last = str2_list.last;
+            const elt_first = str2_list.list.first;
+            const elt_last = str2_list.list.last;
             oc.assert(elt_first != null, "list checks", .{}, @src());
             oc.assert(elt_last != null, "list checks", .{}, @src());
             oc.assert(elt_first != elt_last, "list checks", .{}, @src());
@@ -286,35 +251,13 @@ pub fn onFrameRefresh() !void {
             oc.assert(elt_last.?.prev != elt_first, "list checks", .{}, @src());
         }
 
-        // @Incomplete
-        // const str2: []const u8 = str2_list.collate(scratch, "<< ", "-", " >>");
-        const str2: Str8 = blk: {
-            var count: usize = 0;
-            var size: usize = 0;
-            var iter = str2_list.iterate(oc.strings.str8_elt, .{});
-            while (iter.next()) |elt| {
-                count += 1;
-                size += elt.string.len;
-            }
-
-            const prefix = "<< ";
-            const midfix = "--";
-            const suffix = " >>";
-            const len = size + prefix.len + ((count - 1) * midfix.len) + suffix.len;
-            const buf: [*]u8 = @ptrCast(scratch.push(len) orelse @panic("OOM"));
-
-            var array: std.ArrayListUnmanaged(u8) = .initBuffer(buf[0..len]);
-            iter = str2_list.iterate(oc.strings.str8_elt, .{});
-
-            array.appendSliceAssumeCapacity(prefix);
-            while (iter.next()) |elt| {
-                array.appendSliceAssumeCapacity(elt.string.toSlice());
-                if (iter.peek() != null) array.appendSliceAssumeCapacity(midfix);
-            }
-            array.appendSliceAssumeCapacity(suffix);
-
-            break :blk oc.toStr8(array.items);
-        };
+        const str2: Str8 = oc.strings.str8ListCollate(
+            scratch,
+            str2_list,
+            oc.toStr8("<< "),
+            oc.toStr8("-"),
+            oc.toStr8(" >>"),
+        );
 
         const font_size = 18;
         const text_metrics = font.textMetrics(font_size, str1);
@@ -359,10 +302,6 @@ pub fn onFrameRefresh() !void {
         }
 
         const separators = [_]u8{ ' ', '|', '-' };
-        // @Incomplete use proper Str8List type instead
-        // const big_string = Str8.fromSlice(single_string.items);
-        // var strings: oc.Str8List = Str8.split(big_string.toSlice(), scratch, &separators);
-        // const collated: []const u8 = strings.join(scratch);
         const collated: Str8 = blk: {
             var size: usize = 0;
             var iter = std.mem.tokenizeAny(u8, single_string.items, &separators);
@@ -417,7 +356,7 @@ pub fn onFrameRefresh() !void {
             const gradient_size = gradient_image.size();
 
             const trans = Mat2x3.translation(x_offset, 200);
-            // const scale = Mat2x3.scaleUniform((orca_size.y * 0.25) / gradient_size.y);
+            // const scale = Mat2x3.scaleUniform((orca_size.y * 0.25) / gradient_size.y); // @Api see above
             const scale_val = (orca_size.y * 0.25) / gradient_size.y;
             const scale: Mat2x3 = .{ .m = .{
                 scale_val, 0,         0,

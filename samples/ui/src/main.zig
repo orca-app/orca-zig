@@ -16,7 +16,7 @@ var font_bold: canvas.Font = undefined;
 
 var text_arena: oc.mem.Arena = undefined;
 var log_arena: oc.mem.Arena = undefined;
-var log_lines: oc.strings.str8_list = undefined;
+var log_lines: oc.strings.Str8List = undefined;
 
 var theme: enum { dark, light } = .dark;
 
@@ -59,7 +59,7 @@ pub fn onInit() !void {
 
     text_arena.init();
     log_arena.init();
-    log_lines = .{ .eltCount = 0, .len = 0, .list = .empty }; // @Cleanup
+    log_lines = .empty;
 }
 
 pub fn onRawEvent(event: *oc.app.Event) void {
@@ -366,8 +366,8 @@ fn widgets(arena: *oc.mem.Arena) void {
 
             var i: u32 = 0;
             var id: [15]u8 = undefined;
-            std.debug.assert(log_lines.eltCount < 100000000000000); // 15 digits
-            var iter = log_lines.list.iterate(oc.strings.str8_elt, .{});
+            std.debug.assert(log_lines.elt_count < 100000000000000); // 15 digits
+            var iter = log_lines.iterate(.{});
             while (iter.next()) |log_line| : (i += 1) {
                 _ = ui.labelStr8(
                     oc.toStr8(std.fmt.bufPrintIntToSlice(&id, i, 10, .lower, .{})),
@@ -417,11 +417,11 @@ fn styling(arena: *oc.mem.Arena) void {
         ui.styleSetI32(.align_y, @intFromEnum(ui.Align.center));
 
         {
-            var list: oc.strings.str8_list = .{ .eltCount = 0, .len = 0, .list = .empty }; // @Cleanup
-            oc.strings.str8ListPush(arena, &list, oc.toStr8("radio_group .radio-row"));
-            oc.strings.str8ListPush(arena, &list, unselected_when_status);
-            oc.strings.str8ListPush(arena, &list, oc.toStr8(" .radio"));
-            const unselected_pattern = oc.strings.str8ListJoin(arena, list);
+            var list: oc.strings.Str8List = .empty;
+            list.push(arena, oc.toStr8("radio_group .radio-row"));
+            list.push(arena, unselected_when_status);
+            list.push(arena, oc.toStr8(" .radio"));
+            const unselected_pattern = list.join(arena);
 
             {
                 ui.styleRuleBegin(unselected_pattern);
@@ -437,11 +437,11 @@ fn styling(arena: *oc.mem.Arena) void {
         }
 
         {
-            var list: oc.strings.str8_list = .{ .eltCount = 0, .len = 0, .list = .empty }; // @Cleanup
-            oc.strings.str8ListPush(arena, &list, oc.toStr8("radio_group .radio-row"));
-            oc.strings.str8ListPush(arena, &list, selected_when_status);
-            oc.strings.str8ListPush(arena, &list, oc.toStr8(" .radio_selected"));
-            const selected_pattern = oc.strings.str8ListJoin(arena, list);
+            var list: oc.strings.Str8List = .empty;
+            list.push(arena, oc.toStr8("radio_group .radio-row"));
+            list.push(arena, selected_when_status);
+            list.push(arena, oc.toStr8(" .radio_selected"));
+            const selected_pattern = list.join(arena);
 
             {
                 ui.styleRuleBegin(selected_pattern);
@@ -838,11 +838,11 @@ fn labeledSlider(label: []const u8, value: *f32) void {
 }
 
 fn logPush(line: []const u8) void {
-    oc.strings.str8ListPush(&log_arena, &log_lines, oc.toStr8(line));
+    log_lines.push(&log_arena, oc.toStr8(line));
 }
 
 fn logPushf(comptime fmt: []const u8, args: anytype) void {
     const size = std.fmt.count(fmt, args);
     const str = oc.toStr8(log_arena.pushArray(u8, @intCast(size)) orelse @panic("OOM"));
-    oc.strings.str8ListPush(&log_arena, &log_lines, str);
+    log_lines.push(&log_arena, str);
 }
