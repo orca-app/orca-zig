@@ -46,13 +46,13 @@ pub fn build(b: *Build) !void {
     for ([_]Sample{
         .{
             .name = "Triangle",
-            .root_source_file = "samples/zig-triangle/src/main.zig",
+            .root_source_file = "samples/triangle/src/main.zig",
         },
         .{
-            .name = "Sample",
-            .root_source_file = "samples/zig-sample/src/main.zig",
-            .icon = "samples/zig-sample/icon.png",
-            .resource_dir = "samples/zig-sample/data",
+            .name = "General",
+            .root_source_file = "samples/general/src/main.zig",
+            .icon = "samples/general/icon.png",
+            .resource_dir = "samples/general/data",
         },
         .{
             .name = "Clock",
@@ -62,8 +62,8 @@ pub fn build(b: *Build) !void {
         },
         .{
             .name = "UI",
-            .root_source_file = "samples/zig-ui/src/main.zig",
-            .resource_dir = "samples/zig-ui/data",
+            .root_source_file = "samples/ui/src/main.zig",
+            .resource_dir = "samples/ui/data",
         },
     }) |sample| {
         // Module structure:

@@ -23,7 +23,7 @@ var frame_size: Vec2 = .{};
 var rotation_demo: f32 = 0;
 
 pub fn onInit() !void {
-    oc.app.windowSetTitle(oc.toStr8("generic sample"));
+    oc.app.windowSetTitle(oc.toStr8("general sample"));
     oc.app.windowSetSize(.{ .x = 480, .y = 640 });
 
     renderer = canvas.Renderer.create();
