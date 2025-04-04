@@ -28,7 +28,26 @@ pub fn OrcaSlice(comptime T: type) type {
             return s.ptr[0..s.len];
         }
 
-        pub fn subSlice(s: Self, start: usize, end: usize) Self {
+        pub fn subSlice(
+            s: Self,
+            /// Inclusive, must be <= end
+            start: usize,
+            /// Exclusive, must be <= s.len
+            end: usize,
+        ) Self {
+            // @Cleanup these asserts will be redundant when panic traces are implemented
+            oc.assert(
+                start <= end,
+                "start ({d}) must be <= end ({d})",
+                .{ start, end },
+                @src(),
+            );
+            oc.assert(
+                end <= s.len,
+                "end ({d}) must be <= s.len ({d})",
+                .{ end, s.len },
+                @src(),
+            );
             const slice = s.ptr[start..end];
             return .{ .ptr = slice.ptr, .len = slice.len };
         }
