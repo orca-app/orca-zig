@@ -17,7 +17,7 @@ pub fn onInit() void {
     surface = canvas.surfaceCreate(renderer);
     context = canvas.Context.create();
 
-    const ranges = [5]oc.unicode_range{
+    const ranges = [5]oc.utf8.Range{
         .{ .firstCodePoint = 0x0000, .count = 127 }, // BASIC_LATIN
         .{ .firstCodePoint = 0x0080, .count = 127 }, // C1_CONTROLS_AND_LATIN_1_SUPPLEMENT
         .{ .firstCodePoint = 0x0100, .count = 127 }, // LATIN_EXTENDED_A

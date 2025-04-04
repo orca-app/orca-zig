@@ -347,7 +347,7 @@ pub const KeyEvent = extern struct {
 /// A structure describing a character input event.
 pub const CharEvent = extern struct {
     /// The unicode codepoint of the character.
-    codepoint: oc.utf32,
+    codepoint: oc.utf8.Utf32,
     /// The utf8 sequence of the character.
     sequence: [8]u8,
     /// The utf8 sequence length.

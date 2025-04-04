@@ -38,7 +38,7 @@ pub fn onInit() !void {
     oc.assert(canvas.Renderer.nil().isNil(), "nil renderer should be nil", .{}, @src());
     oc.assert(!renderer.isNil(), "created renderer should not be nil", .{}, @src());
 
-    const ranges = [5]oc.unicode_range{
+    const ranges = [5]oc.utf8.Range{
         .{ .firstCodePoint = 0x0000, .count = 127 }, // BASIC_LATIN
         .{ .firstCodePoint = 0x0080, .count = 127 }, // C1_CONTROLS_AND_LATIN_1_SUPPLEMENT
         .{ .firstCodePoint = 0x0100, .count = 127 }, // LATIN_EXTENDED_A

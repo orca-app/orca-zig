@@ -127,7 +127,7 @@ pub const Font = enum(u64) {
         /// The number of unicode ranges to load.
         rangeCount: u32,
         /// An array of unicode ranges to load.
-        ranges: [*c]oc.unicode_range,
+        ranges: [*c]oc.utf8.Range,
     ) callconv(.C) Font;
     /// Create a font from a TrueType font file.
     pub const createFromFile = oc_font_create_from_file;
@@ -137,7 +137,7 @@ pub const Font = enum(u64) {
         /// The number of unicode ranges to load.
         rangeCount: u32,
         /// An array of unicode ranges to load.
-        ranges: [*c]oc.unicode_range,
+        ranges: [*c]oc.utf8.Range,
     ) callconv(.C) Font;
     /// Create a font from a TrueType font file path.
     pub const createFromPath = oc_font_create_from_path;
@@ -147,7 +147,7 @@ pub const Font = enum(u64) {
         /// The number of unicode ranges to load.
         rangeCount: u32,
         /// An array of unicode ranges to load.
-        ranges: [*c]oc.unicode_range,
+        ranges: [*c]oc.utf8.Range,
     ) callconv(.C) Font;
     /// Destroy a font.
     pub const destroy = oc_font_destroy;
