@@ -232,7 +232,7 @@ pub fn onFrameRefresh() !void {
 
         var str2_list: oc.strings.Str8List = .empty;
         str2_list.push(scratch, oc.toStr8("All"));
-        str2_list.pushf(scratch, "{s}", .{"your"});
+        try str2_list.pushf(scratch, "{s}", .{"your"});
         str2_list.push(scratch, oc.toStr8("base!!"));
 
         // @Incomplete oc.assert(str2_list.contains("All"), "str2_list should have the string we just pushed", .{}, @src());
@@ -283,9 +283,9 @@ pub fn onFrameRefresh() !void {
         var scratch_scope = oc.mem.scratchBegin();
         defer scratch_scope.end();
 
-        const scratch: *oc.mem.Arena = scratch_scope.arena;
+        const scratch = scratch_scope.arena.allocator();
 
-        var strings_array = std.ArrayList([]const u8).init(allocator);
+        var strings_array = std.ArrayList([]const u8).init(scratch);
         defer strings_array.deinit();
         try strings_array.append("This ");
         try strings_array.append("is");
@@ -296,9 +296,9 @@ pub fn onFrameRefresh() !void {
         try strings_array.append("    spaces i");
         try strings_array.append("n it");
 
-        var single_string = std.ArrayList(u8).init(allocator);
+        var single_string: std.ArrayListUnmanaged(u8) = .empty;
         for (strings_array.items) |str| {
-            try single_string.appendSlice(str);
+            try single_string.appendSlice(scratch, str);
         }
 
         const separators = [_]u8{ ' ', '|', '-' };
@@ -309,10 +309,9 @@ pub fn onFrameRefresh() !void {
                 size += tok.len;
             }
 
-            const buf = scratch.pushArray(u8, size) orelse @panic("OOM");
-            var array: std.ArrayListUnmanaged(u8) = .initBuffer(buf);
-
+            var array: std.ArrayListUnmanaged(u8) = try .initCapacity(scratch, size);
             iter.reset();
+
             while (iter.next()) |tok| {
                 array.appendSliceAssumeCapacity(tok);
             }

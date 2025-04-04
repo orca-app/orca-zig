@@ -18,12 +18,19 @@ pub fn OrcaSlice(comptime T: type) type {
         /// The length of the buffer.
         len: usize,
 
-        pub fn fromSlice(s: []T) @This() {
+        pub const Self = @This();
+
+        pub fn fromSlice(s: []T) Self {
             return .{ .ptr = s.ptr, .len = s.len };
         }
 
-        pub fn toSlice(s: @This()) []T {
+        pub fn toSlice(s: Self) []T {
             return s.ptr[0..s.len];
+        }
+
+        pub fn subSlice(s: Self, start: usize, end: usize) Self {
+            const slice = s.ptr[start..end];
+            return .{ .ptr = slice.ptr, .len = slice.len };
         }
     };
 }
@@ -100,11 +107,11 @@ fn StringList(comptime Str: type) type {
             arena: *oc.mem.Arena,
             comptime fmt: []const u8,
             args: anytype,
-        ) void {
+        ) oc.mem.Arena.Error!void {
             if (Str != Str8) @compileError("pushf only available for " ++ @typeName(Str8List));
 
             const len: usize = @intCast(std.fmt.count(fmt, args));
-            const buf: []u8 = arena.pushArray(u8, len) orelse @panic("OOM"); // @Incomplete return error
+            const buf = try arena.push(len);
             slist.push(
                 arena,
                 .fromSlice(std.fmt.bufPrint(buf, fmt, args) catch unreachable),
@@ -127,22 +134,6 @@ const std = @import("std");
 
 // @Incomplete move str*Push* functions into orca.mem or make them redundant.
 
-/// Pushes a copy of a buffer to an arena, and makes a string refering to that copy.
-pub const str8PushBuffer = oc_str8_push_buffer;
-extern fn oc_str8_push_buffer(
-    arena: [*c]oc.mem.Arena,
-    /// The length of the buffer.
-    len: u64,
-    /// The buffer to copy.
-    buffer: [*c]u8,
-) callconv(.C) Str8;
-/// Pushes a copy of a C null-terminated string to an arena, and makes a string referring to that copy.
-pub const str8PushCstring = oc_str8_push_cstring;
-extern fn oc_str8_push_cstring(
-    arena: [*c]oc.mem.Arena,
-    /// A null-terminated string.
-    str: [*c]u8,
-) callconv(.C) Str8;
 /// Copy the contents of a string on an arena and make a new string referring to the copied bytes.
 pub const str8PushCopy = oc_str8_push_copy;
 extern fn oc_str8_push_copy(
@@ -150,37 +141,6 @@ extern fn oc_str8_push_copy(
     arena: [*c]oc.mem.Arena,
     /// The input string.
     s: Str8,
-) callconv(.C) Str8;
-/// Make a copy of a string slice. This function copies a subsequence of the input string onto an arena, and returns a new string referring to the copied content.
-pub const str8PushSlice = oc_str8_push_slice;
-extern fn oc_str8_push_slice(
-    /// The arena on which to copy the slice of the input string.
-    arena: [*c]oc.mem.Arena,
-    /// The input string.
-    s: Str8,
-    /// The inclusive start index of the slice.
-    start: u64,
-    /// The exclusive end index of the slice.
-    end: u64,
-) callconv(.C) Str8;
-/// Build a string from a null-terminated format string and a variadic argument list, similar to `vasprintf()`.
-pub const str8Pushfv = oc_str8_pushfv;
-extern fn oc_str8_pushfv(
-    /// The arena on which to allocate the contents of the string.
-    arena: [*c]oc.mem.Arena,
-    /// A null-terminated format string. The format of that string is the same as that of the C `sprintf()` family of functions.
-    format: [*c]u8,
-    /// A variadic argument list or arguments referenced by the format string.
-    args: @compileError("TODO: handle va_list type"),
-) callconv(.C) Str8;
-/// Build a string from a null-terminated format string and variadic arguments, similar to `asprintf()`.
-pub const str8Pushf = oc_str8_pushf;
-extern fn oc_str8_pushf(
-    /// The arena on which to allocate the contents of the string.
-    arena: [*c]oc.mem.Arena,
-    format: [*c]u8,
-    /// Additional arguments referenced by the format string.
-    ...,
 ) callconv(.C) Str8;
 /// Lexicographically compare the contents of two strings.
 /// This function returns `-1` if `s1` is less than `s2`, `+1` if `s1` is greater than `s2`, and `0` if `s1` and `s2` are equal.
@@ -227,16 +187,6 @@ extern fn oc_str8_split(
     separators: Str8List,
 ) callconv(.C) Str8List;
 
-/// Copy the content of a 16-bit character buffer on an arena and make a new `oc_str16` referencing the copied contents.
-pub const str16PushBuffer = oc_str16_push_buffer;
-extern fn oc_str16_push_buffer(
-    /// The arena on which to copy the input buffer.
-    arena: [*c]oc.mem.Arena,
-    /// The length of the buffer.
-    len: u64,
-    /// An input buffer of 16-bit characters.
-    buffer: [*c]u16,
-) callconv(.C) Str16;
 /// Copy the contents of an `oc_str16` string and make a new string referencing the copied contents.
 pub const str16PushCopy = oc_str16_push_copy;
 extern fn oc_str16_push_copy(
@@ -244,18 +194,6 @@ extern fn oc_str16_push_copy(
     arena: [*c]oc.mem.Arena,
     /// The input string.
     s: Str16,
-) callconv(.C) Str16;
-/// Copy a slice of an `oc_str16` string an make a new string referencing the copies contents.
-pub const str16PushSlice = oc_str16_push_slice;
-extern fn oc_str16_push_slice(
-    /// The arena on which to copy the slice of the input string's contents.
-    arena: [*c]oc.mem.Arena,
-    /// The input string.
-    s: Str16,
-    /// The inclusive start index of the slice.
-    start: u64,
-    /// The exclusive end index of the slice.
-    end: u64,
 ) callconv(.C) Str16;
 /// Split a list into a string list according to separators.
 ///
@@ -270,16 +208,6 @@ extern fn oc_str16_split(
     separators: Str16List,
 ) callconv(.C) Str16List;
 
-/// Copy the content of a 32-bit character buffer on an arena and make a new `oc_str32` referencing the copied contents.
-pub const str32PushBuffer = oc_str32_push_buffer;
-extern fn oc_str32_push_buffer(
-    /// The arena on which to copy the input buffer.
-    arena: [*c]oc.mem.Arena,
-    /// The length of the buffer.
-    len: u64,
-    /// An input buffer of 32-bit characters.
-    buffer: [*c]u32,
-) callconv(.C) Str32;
 /// Copy the contents of an `oc_str32` string and make a new string referencing the copied contents.
 pub const str32PushCopy = oc_str32_push_copy;
 extern fn oc_str32_push_copy(
@@ -287,18 +215,6 @@ extern fn oc_str32_push_copy(
     arena: [*c]oc.mem.Arena,
     /// The input string.
     s: Str32,
-) callconv(.C) Str32;
-/// Copy a slice of an `oc_str32` string an make a new string referencing the copies contents.
-pub const str32PushSlice = oc_str32_push_slice;
-extern fn oc_str32_push_slice(
-    /// The arena on which to copy the slice of the input string's contents.
-    arena: [*c]oc.mem.Arena,
-    /// The input string.
-    s: Str32,
-    /// The inclusive start index of the slice.
-    start: u64,
-    /// The exclusive end index of the slice.
-    end: u64,
 ) callconv(.C) Str32;
 /// Split a list into a string list according to separators.
 ///

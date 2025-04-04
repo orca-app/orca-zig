@@ -40,8 +40,8 @@ pub fn onInit() !void {
         };
 
         const size: usize = @intCast(try file.getSize());
-        const buffer: [*]u8 = @ptrCast(scratch.arena.*.push(size) orelse @panic("OOM"));
-        _ = try file.read(buffer[0..size]);
+        const buffer = try scratch.arena.push(size);
+        _ = try file.read(buffer);
         file.close();
 
         const ranges = [5]oc.unicode_range{
@@ -52,13 +52,13 @@ pub fn onInit() !void {
             .{ .firstCodePoint = 0xfff0, .count = 15 }, //  SPECIALS
         };
 
-        font.* = canvas.Font.createFromMemory(oc.toStr8(buffer[0..size]), ranges.len, @constCast(&ranges)); // @Cleanup
+        font.* = canvas.Font.createFromMemory(oc.toStr8(buffer), ranges.len, @constCast(&ranges)); // @Cleanup
     }
 
     ui_ctx = ui.contextCreate(font_regular);
 
-    text_arena.init();
-    log_arena.init();
+    text_arena = .init();
+    log_arena = .init();
     log_lines = .empty;
 }
 
@@ -72,7 +72,7 @@ pub fn onResize(width: u32, height: u32) void {
     frame_size.y = @floatFromInt(height);
 }
 
-pub fn onFrameRefresh() void {
+pub fn onFrameRefresh() !void {
     var scratch = oc.mem.scratchBegin();
     defer scratch.end();
 
@@ -135,7 +135,7 @@ pub fn onFrameRefresh() void {
                 ui.styleSetF32(.margin_y, 16);
                 ui.styleSetF32(.spacing, 16);
 
-                widgets(scratch.arena);
+                try widgets(scratch.arena);
 
                 styling(scratch.arena);
             }
@@ -160,7 +160,7 @@ var h_slider_log_time: f64 = 0;
 var text_info: ui.TextBoxInfo = .{ .defaultText = oc.toStr8("Type here") };
 var selected: i32 = 0;
 
-fn widgets(arena: *oc.mem.Arena) void {
+fn widgets(arena: *oc.mem.Arena) !void {
     columnBegin("Widgets", 1.0 / 3.0);
     defer columnEnd();
 
@@ -231,7 +231,7 @@ fn widgets(arena: *oc.mem.Arena) void {
 
         const now = oc.clock.time(.monotonic);
         if ((now - v_slider_log_time) >= 0.2 and v_slider_value != v_slider_logged_value) {
-            logPushf("Vertical slider moved to {d:.3}", .{v_slider_value});
+            try logPushf("Vertical slider moved to {d:.3}", .{v_slider_value});
             v_slider_logged_value = v_slider_value;
             v_slider_log_time = now;
         }
@@ -265,7 +265,7 @@ fn widgets(arena: *oc.mem.Arena) void {
             const result = ui.radioGroup("radio_group", &radio_group_info);
             radio_selected = result.selected_index;
             if (result.changed) {
-                logPushf("Selected {s}", .{options[@intCast(radio_selected)].toSlice()});
+                try logPushf("Selected {s}", .{options[@intCast(radio_selected)].toSlice()});
             }
 
             //-----------------------------------------------------------------------------
@@ -282,7 +282,7 @@ fn widgets(arena: *oc.mem.Arena) void {
             _ = ui.slider("h_slider", &h_slider_value);
 
             if ((now - h_slider_log_time) >= 0.2 and h_slider_value != h_slider_logged_value) {
-                logPushf("Slider moved to {d:.3}", .{h_slider_value});
+                try logPushf("Slider moved to {d:.3}", .{h_slider_value});
                 h_slider_logged_value = h_slider_value;
                 h_slider_log_time = now;
             }
@@ -306,7 +306,7 @@ fn widgets(arena: *oc.mem.Arena) void {
         }
         if (result.accepted) {
             // @Bug this code never seems to run?
-            logPushf("Entered text {s}", .{text_info.text.toSlice()});
+            try logPushf("Entered text {s}", .{text_info.text.toSlice()});
         }
     }
 
@@ -326,7 +326,7 @@ fn widgets(arena: *oc.mem.Arena) void {
         };
         const result = ui.selectPopup("select", &info);
         if (result.selected_index != selected) {
-            logPushf("Selected {s}", .{options[@intCast(result.selected_index)].toSlice()});
+            try logPushf("Selected {s}", .{options[@intCast(result.selected_index)].toSlice()});
         }
         selected = result.selected_index;
     }
@@ -841,8 +841,8 @@ fn logPush(line: []const u8) void {
     log_lines.push(&log_arena, oc.toStr8(line));
 }
 
-fn logPushf(comptime fmt: []const u8, args: anytype) void {
-    const size = std.fmt.count(fmt, args);
-    const str = oc.toStr8(log_arena.pushArray(u8, @intCast(size)) orelse @panic("OOM"));
+fn logPushf(comptime fmt: []const u8, args: anytype) oc.mem.Arena.Error!void {
+    const size: usize = @intCast(std.fmt.count(fmt, args));
+    const str = oc.toStr8(try log_arena.push(size));
     log_lines.push(&log_arena, str);
 }
