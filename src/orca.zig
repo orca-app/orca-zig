@@ -41,7 +41,7 @@ pub fn toStr8(buf: []const u8) strings.Str8 {
 // [Orca hooks]
 //------------------------------------------------------------------------------------------
 
-const user_root = @import("app");
+const user_root = @import("user_root");
 
 // TODO: document callbacks
 comptime {
@@ -283,7 +283,7 @@ pub const unicode_range = extern struct {
     count: u32,
 };
 
-// @Api api.json missing clock stuff
+// @Api missing clock stuff
 pub const clock = struct {
     const Kind = enum(c_int) {
         /// clock that increment monotonically

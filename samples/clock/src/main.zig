@@ -1,5 +1,5 @@
 const std = @import("std");
-const oc = @import("root"); // @Todo expose "orca" import instead
+const oc = @import("orca");
 const canvas = oc.graphics.canvas;
 
 var renderer: canvas.Renderer = undefined;

@@ -9,7 +9,7 @@
 const std = @import("std");
 const math = std.math;
 
-const oc = @import("root");
+const oc = @import("orca");
 const gl = oc.graphics.gles;
 
 var frame_size: oc.math.Vec2 = .{ .x = 100, .y = 100 };

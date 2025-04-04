@@ -1,5 +1,5 @@
 const std = @import("std");
-const oc = @import("root");
+const oc = @import("orca");
 const ui = oc.ui;
 const canvas = oc.graphics.canvas;
 
@@ -712,14 +712,14 @@ fn styling(arena: *oc.mem.Arena) void {
                     oc.toStr8("Green"),
                 };
                 const colors = [_]canvas.Color{
-                    .srgba(1, 1, 1, 1), // text0,
-                    .srgba(0.988, 0.447, 0.353, 1), // palette.red5,
-                    .srgba(1.000, 0.682, 0.263, 1), // palette.orange5,
-                    .srgba(0.961, 0.792, 0.314, 1), // palette.amber5,
-                    .srgba(0.992, 0.871, 0.263, 1), // palette.yellow5,
-                    .srgba(0.682, 0.863, 0.227, 1), // palette.lime5,
-                    .srgba(0.592, 0.776, 0.373, 1), // palette.light_green5,
-                    .srgba(0.365, 0.761, 0.392, 1), // palette.green5,
+                    .srgba(1, 1, 1, 1), // Default
+                    .srgba(0.988, 0.447, 0.353, 1), // Red
+                    .srgba(1.000, 0.682, 0.263, 1), // Orange
+                    .srgba(0.961, 0.792, 0.314, 1), // Amber
+                    .srgba(0.992, 0.871, 0.263, 1), // Yellow
+                    .srgba(0.682, 0.863, 0.227, 1), // Lime
+                    .srgba(0.592, 0.776, 0.373, 1), // Light green
+                    .srgba(0.365, 0.761, 0.392, 1), // Green
                 };
                 var color_info = ui.SelectPopupInfo{
                     .selected_index = label_font_color_selected,

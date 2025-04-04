@@ -1,5 +1,5 @@
 const std = @import("std");
-const oc = @import("root");
+const oc = @import("orca");
 const canvas = oc.graphics.canvas;
 
 const Vec2 = oc.math.Vec2;

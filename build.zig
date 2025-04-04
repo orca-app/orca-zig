@@ -2,7 +2,7 @@ const std = @import("std");
 const Build = std.Build;
 
 // These two should match the same orca version.
-// @Todo verify our api.json and sdk versions match
+// @Incomplete verify our api.json and sdk versions match
 // @Cleanup can we combine these?
 const sdk_version = "test-release-4f124dd346";
 const orca_api_commit = "4f124dd3461f48c444518ad48c6337de6bfeb72f";
@@ -69,19 +69,23 @@ pub fn build(b: *Build) !void {
         // Module structure:
         //  root = src/orca.zig
         //  app = sample/src/main.zig
-        // TODO: modify orca.zig so it can be used as a module instead of taking over the root
+        // @Incomplete: modify orca.zig so it can be used as a module instead of taking over the root
+
+        const root = b.createModule(.{
+            .root_source_file = b.path("src/orca.zig"),
+            .target = wasm_target,
+            .optimize = optimize,
+        });
+        const user_root = b.createModule(.{
+            .root_source_file = b.path(sample.root_source_file),
+        });
+        root.addImport("user_root", user_root);
+        user_root.addImport("orca", root);
 
         const app_wasm = b.addExecutable(.{
             .name = sample.name,
-            .root_module = b.createModule(.{
-                .root_source_file = b.path("src/orca.zig"),
-                .target = wasm_target,
-                .optimize = optimize,
-            }),
+            .root_module = root,
         });
-        app_wasm.root_module.addImport("app", b.createModule(.{
-            .root_source_file = b.path(sample.root_source_file),
-        }));
         app_wasm.entry = .disabled; // See https://github.com/ziglang/zig/pull/17815
         app_wasm.rdynamic = true;
         app_wasm.addObjectFile(sdk_path.path(b, "bin/liborca_wasm.a"));
