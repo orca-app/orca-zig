@@ -1,8 +1,7 @@
 const std = @import("std");
 
 // @Cleanup convert @Api tags into issues in the orca repository
-// @Incomplete add return doc comments
-// @Incomplete replace all unnamed_* fields
+// @Incomplete add doc comments for return values
 
 // @Api api.json wishlist (in order of importance):
 // - format documentation

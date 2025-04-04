@@ -57,13 +57,13 @@ pub const Request = extern struct {
     offset: i64,
     /// A size indicating the capacity of the buffer pointed to by `buffer`, in bytes.
     size: u64,
-    unnamed_0: extern union {
+    data: extern union {
         /// A buffer used to pass data to the request or get back results.
         buffer: [*c]u8,
         /// reserved
         unused: u64,
     },
-    unnamed_1: extern union {
+    options: extern union {
         /// Holds options for the open operations.
         open: extern struct {
             /// The access permissions requested on the file to open.
@@ -213,10 +213,10 @@ pub const Completion = extern struct {
     /// The request ID as passed in the `oc_io_req` request that generated this completion.
     id: Request.Id,
     /// The error value for the operation.
-    @"error": ErrorEnum,
-    unnamed_0: extern union {
+    err: ErrorEnum,
+    result: extern union {
         /// This member is used to return integer results.
-        result: i64,
+        int: i64,
         /// This member is used to return size results.
         size: u64,
         /// This member is used to return offset results.
