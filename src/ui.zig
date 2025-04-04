@@ -1,6 +1,7 @@
 //! Graphical User Interface API.
 
 // @Api UI namespace contents (not Core or Widgets) should be moved under the Application namespace
+// @Api missing documentation
 
 pub const KeyState = extern struct {
     lastUpdate: u64,

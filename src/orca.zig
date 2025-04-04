@@ -1,5 +1,9 @@
 const std = @import("std");
 
+// @Cleanup convert @Api tags into issues in the orca repository
+// @Incomplete add return doc comments
+// @Incomplete replace all unnamed_* fields
+
 // @Api api.json wishlist (in order of importance):
 // - format documentation
 // - format and api versioning!!!
@@ -21,7 +25,7 @@ const std = @import("std");
 pub const panic = std.debug.FullPanic(panicImpl);
 fn panicImpl(msg: []const u8, first_trace_addr: ?usize) noreturn {
     @branchHint(.cold);
-    _ = first_trace_addr; // @Incomplete: stack traces
+    _ = first_trace_addr; // @Incomplete: stack trace
     debug.abort("panic: {s}", .{msg}, @src());
 }
 
@@ -151,14 +155,11 @@ fn oc_on_terminate() callconv(.C) void {
     callHandler(user_root.onTerminate, .{}, @src());
 }
 
-fn fatal(err: anyerror, source: std.builtin.SourceLocation) noreturn {
-    debug.abort("Caught fatal {}", .{err}, source);
-}
-
 fn callHandler(func: anytype, params: anytype, source: std.builtin.SourceLocation) void {
     switch (@typeInfo(@typeInfo(@TypeOf(func)).@"fn".return_type.?)) {
         .void => @call(.auto, func, params),
-        .error_union => @call(.auto, func, params) catch |e| fatal(e, source),
+        .error_union => @call(.auto, func, params) catch |e|
+            debug.abort("Caught error: {}", .{e}, source), // @Incomplete error return trace
         else => @compileError("Orca event handler must have void return type"),
     }
 }

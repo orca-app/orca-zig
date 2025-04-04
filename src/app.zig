@@ -379,7 +379,7 @@ pub const Event = extern struct {
     window: window,
     /// The type of the event. This determines which member of the event union is active.
     type: EventType,
-    unnamed_0: extern union {
+    ev: extern union {
         /// Details for a key or mouse button event.
         key: KeyEvent,
         /// Details for a character input event.
