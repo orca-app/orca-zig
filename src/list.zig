@@ -10,7 +10,8 @@ pub const List = extern struct {
     /// Points to the last element in the list.
     last: ?*Elem,
 
-    /// An element of an intrusive doubly-linked list.
+    /// An element of the doubly-linked list. Doesn't contain any payload data.
+    /// Intended to be embedded intrusively into another data structure which can be accessed with `@fieldParentPtr()`
     pub const Elem = extern struct {
         /// Points to the previous element in the list.
         prev: ?*Elem,
@@ -19,25 +20,18 @@ pub const List = extern struct {
 
         pub const init: Elem = .{ .prev = null, .next = null };
 
-        /// Get the entry for a given list element.
+        /// Get the entry for a given list element. This only works if `ParentElem` has one `Elem` field.
+        /// For more complex cases use `@fieldParentPtr()` directly.
         pub fn entry(elt: *Elem, comptime ParentElem: type) *ParentElem {
             const info = @typeInfo(ParentElem);
             if (info != .@"struct")
                 @compileError("expected " ++ @typeName(ParentElem) ++ " to be of type struct, found " ++ @tagName(info));
 
             const member = inline for (info.@"struct".fields) |field| {
-                // @Note this doesn't account for structures with multiple Elem fields,
-                // though you probably shouldn't be doing that anyway...
                 if (field.type == Elem) break field.name;
             } else @compileError("expected " ++ @typeName(ParentElem) ++ " to have a field of type " ++ @typeName(Elem));
 
             return @fieldParentPtr(member, elt);
-        }
-
-        /// Same as `entry`, but `elt` might be null.
-        pub fn entryChecked(elt: ?*Elem, comptime ParentElem: type) ?*ParentElem {
-            const e = elt orelse return null;
-            return e.entry(ParentElem);
         }
     };
 
