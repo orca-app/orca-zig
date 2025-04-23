@@ -24,12 +24,22 @@ pub fn build(b: *Build) !void {
 
     const gl_gen_step = b.step("gl-api", "Generates GLES bindings to be modified and committed");
     {
-        const gl_bindings = @import("zigglgen").generateBindingsSourceFile(b, .{
+        const zglgen = @import("zigglgen");
+        const version = b.option(
+            zglgen.GeneratorOptions.Version,
+            "gles-version",
+            "Generate API bindings for a specific version of GLES (default: 3.0)",
+        ) orelse .@"3.0";
+
+        const gl_bindings = zglgen.generateBindingsSourceFile(b, .{
             .api = .gles,
-            .version = .@"3.0",
+            .version = version,
         });
         const usf = b.addUpdateSourceFiles();
-        usf.addCopyFileToSource(gl_bindings, "src/graphics/gles3_DO_NOT_COMMIT.zig");
+        usf.addCopyFileToSource(
+            gl_bindings,
+            b.fmt("src/graphics/gles{s}_DO_NOT_COMMIT.zig", .{@tagName(version)}),
+        );
         gl_gen_step.dependOn(&usf.step);
     }
 

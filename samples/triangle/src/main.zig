@@ -10,7 +10,7 @@ const std = @import("std");
 const math = std.math;
 
 const oc = @import("orca");
-const gl = oc.graphics.gles;
+const gl = oc.graphics.gles_3_0;
 
 var frame_size: oc.math.Vec2 = .{ .x = 100, .y = 100 };
 var surface: oc.graphics.canvas.Surface = undefined;

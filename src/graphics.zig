@@ -1,7 +1,12 @@
 //! 2D/3D rendering APIs.
 
 pub const canvas = @import("graphics/canvas.zig"); // [Canvas API]
-pub const gles = @import("graphics/gles3.zig");
+
+// These bindings are provided to interface with some versions of the GLES API.
+// Your app should only target one of these versions.
+pub const gles_1_1 = @import("graphics/gles1.1.zig");
+pub const gles_2_0 = @import("graphics/gles2.0.zig");
+pub const gles_3_0 = @import("graphics/gles3.0.zig");
 
 // @Api missing OpenGL, Metal, Cocoa, WGPU, and Win32 surface/graphics APIs.
 // @Cleanup should this (and future APIs) be moved into the graphics subfolder? Should gles surface should be included in `graphics/gles.zig`?
