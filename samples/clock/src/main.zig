@@ -39,10 +39,10 @@ pub fn onFrameRefresh() void {
     canvas.clear();
 
     const timestampSecs: f64 = oc.clock.time(.date);
-    const secs: f64 = @mod(timestampSecs, 60);
-    const minutes: f64 = @mod(timestampSecs, 60 * 60) / 60;
-    const hours: f64 = @mod(timestampSecs, 60 * 60 * 24) / (60 * 60);
-    const hoursAs12Format: f64 = @mod(hours, 12.0);
+    const secs = @mod(timestampSecs, 60);
+    const minutes = @mod(timestampSecs, 60 * 60) / 60;
+    const hours = @mod(timestampSecs, 60 * 60 * 24) / (60 * 60);
+    const hoursAs12Format = @mod(hours, 12.0);
 
     if (lastSeconds != @floor(secs)) {
         lastSeconds = @floor(secs);
@@ -57,9 +57,9 @@ pub fn onFrameRefresh() void {
     const minutesRotation: f32 = @floatCast((std.math.pi * 2) * (minutes / 60.0) - (std.math.pi / 2.0));
     const hoursRotation: f32 = @floatCast((std.math.pi * 2) * (hoursAs12Format / 12.0) - (std.math.pi / 2.0));
 
-    const centerX: f32 = frameSize.x / 2;
-    const centerY: f32 = frameSize.y / 2;
-    const clockRadius: f32 = @min(frameSize.x, frameSize.y) * 0.5 * 0.85;
+    const centerX = frameSize.x / 2;
+    const centerY = frameSize.y / 2;
+    const clockRadius = @min(frameSize.x, frameSize.y) * 0.5 * 0.85;
 
     const DEFAULT_CLOCK_RADIUS: f32 = 260;
     const uiScale: f32 = clockRadius / DEFAULT_CLOCK_RADIUS;
@@ -73,23 +73,21 @@ pub fn onFrameRefresh() void {
     canvas.circleFill(centerX, centerY, clockRadius);
 
     // clock face
-    for (
-        comptime [_]oc.strings.Str8{
-            oc.toStr8("12"),
-            oc.toStr8("1"),
-            oc.toStr8("2"),
-            oc.toStr8("3"),
-            oc.toStr8("4"),
-            oc.toStr8("5"),
-            oc.toStr8("6"),
-            oc.toStr8("7"),
-            oc.toStr8("8"),
-            oc.toStr8("9"),
-            oc.toStr8("10"),
-            oc.toStr8("11"),
-        },
-        0..,
-    ) |num_txt, i| {
+    const numbers = comptime [_]oc.strings.Str8{
+        oc.toStr8("12"),
+        oc.toStr8("1"),
+        oc.toStr8("2"),
+        oc.toStr8("3"),
+        oc.toStr8("4"),
+        oc.toStr8("5"),
+        oc.toStr8("6"),
+        oc.toStr8("7"),
+        oc.toStr8("8"),
+        oc.toStr8("9"),
+        oc.toStr8("10"),
+        oc.toStr8("11"),
+    };
+    for (numbers, 0..) |num_txt, i| {
         const textRect = font.textMetrics(fontSize, num_txt).ink;
 
         const j: f32 = @floatFromInt(i);
