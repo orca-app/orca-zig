@@ -53,6 +53,7 @@ pub const EventType = enum(u32) {
     /// A quit event. This event is sent when the application has been requested to quit.
     quit = 19,
 };
+
 /// This enum describes the actions that can happen to a key.
 pub const KeyAction = enum(u32) {
     /// No action happened on that key.
@@ -64,6 +65,7 @@ pub const KeyAction = enum(u32) {
     /// The key was maintained pressed at least for the system's key repeat period.
     repeat = 3,
 };
+
 /// A code representing a key's physical location. This is independent of the system's keyboard layout.
 pub const ScanCode = enum(u32) {
     unknown = 0,
@@ -188,6 +190,7 @@ pub const ScanCode = enum(u32) {
     right_super = 347,
     menu = 348,
 };
+
 /// A code identifying a key. The physical location of the key corresponding to a given key code depends on the system's keyboard layout.
 pub const KeyCode = enum(u32) {
     unknown = 0,
@@ -312,6 +315,7 @@ pub const KeyCode = enum(u32) {
     right_super = 347,
     menu = 348,
 };
+
 // @Api should mark this as a bitflag type
 pub const KeymodFlags = packed struct(u32) {
     alt: bool = false,
@@ -322,6 +326,7 @@ pub const KeymodFlags = packed struct(u32) {
 
     _padding: u27 = 0,
 };
+
 /// A code identifying a mouse button.
 pub const MouseButton = enum(u32) {
     left = 0,
@@ -331,6 +336,7 @@ pub const MouseButton = enum(u32) {
     ext2 = 4,
     button_count = 5,
 };
+
 /// A structure describing a key event or a mouse button event.
 pub const KeyEvent = extern struct {
     /// The action that was done on the key.
@@ -346,6 +352,7 @@ pub const KeyEvent = extern struct {
     /// The number of clicks that where detected for the button. Only valid for mouse button events.
     clickCount: u8,
 };
+
 /// A structure describing a character input event.
 pub const CharEvent = extern struct {
     /// The unicode codepoint of the character.
@@ -355,6 +362,7 @@ pub const CharEvent = extern struct {
     /// The utf8 sequence length.
     seqLen: u8,
 };
+
 /// A structure describing a mouse move or a mouse wheel event. Mouse coordinates have their origin at the top-left corner of the window, with the y axis going down.
 pub const MouseEvent = extern struct {
     /// The x coordinate of the mouse.
@@ -368,6 +376,7 @@ pub const MouseEvent = extern struct {
     /// Modifier flags indicating which modifier keys where pressed at the time of the event.
     mods: KeymodFlags,
 };
+
 /// A structure describing a window move or resize event.
 pub const MoveEvent = extern struct {
     /// The position and dimension of the frame rectangle, i.e. including the window title bar and border.
@@ -375,6 +384,7 @@ pub const MoveEvent = extern struct {
     /// The position and dimension of the content rectangle, relative to the frame rectangle.
     content: oc.math.Rect,
 };
+
 /// A structure describing an event sent to the application.
 pub const Event = extern struct {
     /// The window in which this event happened.
@@ -394,6 +404,7 @@ pub const Event = extern struct {
         paths: oc.strings.Str8List,
     },
 };
+
 // @Api @Cleanup could be moved into io/dialogs namespace
 /// This enum describes the kinds of possible file dialogs.
 pub const FileDialogKind = enum(u32) {
@@ -402,6 +413,7 @@ pub const FileDialogKind = enum(u32) {
     /// The file dialog is an open dialog.
     open = 1,
 };
+
 // @Api this should be marked as a bitflag type
 /// A type for flags describing various file dialog options.
 pub const FileDialogFlags = packed struct(u32) {
@@ -416,6 +428,7 @@ pub const FileDialogFlags = packed struct(u32) {
 
     _padding: u28 = 0,
 };
+
 /// A structure describing a file dialog.
 pub const FileDialogDesc = extern struct {
     /// The kind of file dialog, see `oc_file_dialog_kind`.
@@ -433,6 +446,7 @@ pub const FileDialogDesc = extern struct {
     /// A list of file extensions used to restrict which files can be selected in this dialog. An empty list allows all files to be selected. Extensions should be provided without a leading dot.
     filters: oc.strings.Str8List,
 };
+
 /// An enum identifying the button clicked by the user when a file dialog returns.
 pub const FileDialogButton = enum(u32) {
     /// The user clicked the "Cancel" button, or closed the dialog box.
@@ -440,6 +454,7 @@ pub const FileDialogButton = enum(u32) {
     /// The user clicked the "OK" button.
     ok = 1,
 };
+
 /// A structure describing the result of a file dialog.
 pub const FileDialogResult = extern struct {
     /// The button clicked by the user.
@@ -449,27 +464,32 @@ pub const FileDialogResult = extern struct {
     /// If the dialog box had the `OC_FILE_DIALOG_MULTIPLE` flag set and the user clicked the OK button, this list contains the selected paths.
     selection: oc.strings.Str8List,
 };
+
 /// Set the title of the application's window.
 pub const windowSetTitle = oc_window_set_title;
 extern fn oc_window_set_title(
     /// The title to display in the title bar of the application.
     title: oc.strings.Str8,
 ) callconv(.C) void;
+
 /// Set the size of the application's window.
 pub const windowSetSize = oc_window_set_size;
 extern fn oc_window_set_size(
     /// The new size of the application's window.
     size: oc.math.Vec2,
 ) callconv(.C) void;
+
 /// Request the system to quit the application.
 pub const requestQuit = oc_request_quit;
 extern fn oc_request_quit() callconv(.C) void;
+
 /// Convert a scancode to a keycode, according to current keyboard layout.
 pub const scancodeToKeycode = oc_scancode_to_keycode;
 extern fn oc_scancode_to_keycode(
     /// The scan code to convert.
     scanCode: ScanCode,
 ) callconv(.C) KeyCode;
+
 /// Put a string in the clipboard.
 pub const clipboardSetString = oc_clipboard_set_string;
 extern fn oc_clipboard_set_string(

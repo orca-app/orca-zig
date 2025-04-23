@@ -46,12 +46,14 @@ pub const List = extern struct {
     /// Check if a list is empty.
     pub const isEmpty = oc_list_empty;
     extern fn oc_list_empty(list: List) callconv(.C) bool;
+
     /// Zero-initializes a linked list.
     pub const init = oc_list_init;
     extern fn oc_list_init(
         /// A pointer to the list to initialize.
         list: [*c]List,
     ) callconv(.C) void;
+
     /// Insert an element in a list after a given element.
     pub const insert = oc_list_insert;
     extern fn oc_list_insert(
@@ -60,6 +62,7 @@ pub const List = extern struct {
         /// The element to insert in the list.
         elt: [*c]Elem,
     ) callconv(.C) void;
+
     /// Insert an element in a list before a given element.
     pub const insertBefore = oc_list_insert_before;
     extern fn oc_list_insert_before(
@@ -70,6 +73,7 @@ pub const List = extern struct {
         /// The element to insert in the list.
         elt: [*c]Elem,
     ) callconv(.C) void;
+
     /// Remove an element from a list.
     pub const remove = oc_list_remove;
     extern fn oc_list_remove(
@@ -78,6 +82,7 @@ pub const List = extern struct {
         /// The element to remove from the list.
         elt: [*c]Elem,
     ) callconv(.C) void;
+
     /// Add an element at the end of a list.
     pub const pushBack = oc_list_push_back;
     extern fn oc_list_push_back(
@@ -86,12 +91,14 @@ pub const List = extern struct {
         /// The element to add to the list.
         elt: [*c]Elem,
     ) callconv(.C) void;
+
     /// Remove the last element from a list.
     pub const popBack = oc_list_pop_back;
     extern fn oc_list_pop_back(
         /// The list to remove an element from.
         list: [*c]List,
     ) callconv(.C) [*c]Elem;
+
     /// Add an element at the beginning of a list.
     pub const pushFront = oc_list_push_front;
     extern fn oc_list_push_front(
@@ -100,6 +107,7 @@ pub const List = extern struct {
         /// The element to add to the list.
         elt: [*c]Elem,
     ) callconv(.C) void;
+
     /// Remove the first element from a list.
     pub const popFront = oc_list_pop_front;
     extern fn oc_list_pop_front(

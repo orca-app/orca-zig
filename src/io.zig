@@ -47,6 +47,7 @@ pub const Op = enum(u32) {
     ///     - `handle` is the handle of the file.
     err = 6,
 };
+
 /// A structure describing an I/O request.
 pub const Request = extern struct {
     /// An identifier for the request. You can set this to any value you want. It is passed back in the `oc_io_cmp` completion and can be used to match requests and completions.
@@ -57,7 +58,7 @@ pub const Request = extern struct {
     handle: File,
     /// An offset used by some operations.
     offset: i64,
-    /// A size indicating the capacity of the buffer pointed to by `buffer`, in bytes.
+    /// A size indicating the capacity of the buffer pointed to by `data.buffer`, in bytes.
     size: u64,
     data: extern union {
         /// A buffer used to pass data to the request or get back results.
@@ -210,6 +211,7 @@ pub const ErrorEnum = enum(i32) {
         };
     }
 };
+
 /// A structure describing the completion of an I/O operation.
 pub const Completion = extern struct {
     /// The request ID as passed in the `oc_io_req` request that generated this completion.
@@ -227,6 +229,7 @@ pub const Completion = extern struct {
         handle: File,
     },
 };
+
 /// Send a single I/O request and wait for its completion.
 pub const ioWaitSingleReq = oc_io_wait_single_req;
 extern fn oc_io_wait_single_req(
@@ -243,6 +246,7 @@ pub const FileOpenWithDialogElem = extern struct {
     listElt: oc.List.Elem,
     file: File,
 };
+
 /// A structure describing the result of a call to `oc_file_open_with_dialog()`.
 pub const FileOpenWithDialogResult = extern struct {
     /// The button of the file dialog clicked by the user.
@@ -252,6 +256,7 @@ pub const FileOpenWithDialogResult = extern struct {
     /// If the dialog had the `OC_FILE_DIALOG_MULTIPLE` flag set, this list of `FileOpenWithDialogElem` contains the handles of the opened files.
     selection: oc.List,
 };
+
 // @Cleanup this could be moved into File. Not sure about the other structs (including those in app).
 /// Open files through a file dialog. This allows the user to select files outside the root directories currently accessible to the applications, giving them a way to provide new file capabilities to the application.
 pub const fileOpenWithDialog = oc_file_open_with_dialog;

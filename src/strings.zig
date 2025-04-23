@@ -161,6 +161,7 @@ extern fn oc_str8_push_copy(
     /// The input string.
     s: Str8,
 ) callconv(.C) Str8;
+
 /// Lexicographically compare the contents of two strings.
 /// This function returns `-1` if `s1` is less than `s2`, `+1` if `s1` is greater than `s2`, and `0` if `s1` and `s2` are equal.
 pub const str8Cmp = oc_str8_cmp;
@@ -170,6 +171,7 @@ extern fn oc_str8_cmp(
     /// The second string to compare.
     s2: Str8,
 ) callconv(.C) i32;
+
 /// Create a null-terminated C-string from an `oc_str8` string.
 pub const str8ToCstring = oc_str8_to_cstring;
 extern fn oc_str8_to_cstring(
@@ -193,6 +195,7 @@ extern fn oc_str8_list_collate(
     /// A suffix that is pasted at the end of the string.
     suffix: Str8,
 ) callconv(.C) Str8;
+
 /// Split a list into a string list according to separators.
 ///
 /// No string copies are made. The elements of the resulting string list refer to subsequences of the input string.
@@ -214,6 +217,7 @@ extern fn oc_str16_push_copy(
     /// The input string.
     s: Str16,
 ) callconv(.C) Str16;
+
 /// Split a list into a string list according to separators.
 ///
 /// No string copies are made. The elements of the resulting string list refer to subsequences of the input string.
@@ -235,6 +239,7 @@ extern fn oc_str32_push_copy(
     /// The input string.
     s: Str32,
 ) callconv(.C) Str32;
+
 /// Split a list into a string list according to separators.
 ///
 /// No string copies are made. The elements of the resulting string list refer to subsequences of the input string.

@@ -12,11 +12,13 @@ pub const gles = @import("graphics/gles3.zig");
 /// Create a graphics surface for GLES rendering.
 pub const glesSurfaceCreate = oc_gles_surface_create;
 extern fn oc_gles_surface_create() callconv(.C) canvas.Surface;
+
 /// Make the GL context of the surface current.
 pub const glesSurfaceMakeCurrent = oc_gles_surface_make_current;
 extern fn oc_gles_surface_make_current(
     surface: canvas.Surface,
 ) callconv(.C) void;
+
 /// Swap the buffers of a GLES surface.
 pub const glesSurfaceSwapBuffers = oc_gles_surface_swap_buffers;
 extern fn oc_gles_surface_swap_buffers(

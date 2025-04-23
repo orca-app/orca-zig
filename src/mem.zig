@@ -172,6 +172,7 @@ pub const Arena = extern struct {
 /// - Use `oc_scratch_begin_next()` and pass it the result arena, to get a scratch arena that does not conflict with it.
 pub const scratchBegin = oc_scratch_begin;
 extern fn oc_scratch_begin() callconv(.C) Arena.Scope;
+
 /// Begin a scratch scope that does not conflict with a given arena. See `oc_scratch_begin()` for more details about when to use this function.
 pub const scratchBeginNext = oc_scratch_begin_next;
 extern fn oc_scratch_begin_next(
