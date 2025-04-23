@@ -1,5 +1,7 @@
 //! A 2D Vector Graphics API.
 
+const oc = @import("../orca.zig");
+
 /// Render canvas commands onto a surface.
 pub const render = oc_canvas_render;
 extern fn oc_canvas_render(
@@ -796,5 +798,3 @@ extern fn oc_image_draw_region(
     srcRegion: oc.math.Rect,
     dstRegion: oc.math.Rect,
 ) callconv(.C) void;
-
-const oc = @import("../orca.zig");

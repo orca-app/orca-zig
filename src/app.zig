@@ -1,5 +1,7 @@
 //! Input, windowing, dialogs.
 
+const oc = @import("orca.zig");
+
 pub const window = u64;
 
 // @Cleanup events should be in their own namespace
@@ -474,5 +476,3 @@ extern fn oc_clipboard_set_string(
     /// A string to put in the clipboard.
     string: oc.strings.Str8,
 ) callconv(.C) void;
-
-const oc = @import("orca.zig");

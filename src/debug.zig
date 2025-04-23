@@ -1,5 +1,9 @@
 //! Helpers for logging, asserting and aborting.
 
+const std = @import("std");
+const builtin = @import("builtin");
+const SourceLocation = std.builtin.SourceLocation;
+
 pub const log = struct {
     /// Constants allowing to specify the level of logging verbosity.
     pub const Level = enum(u32) {
@@ -128,7 +132,3 @@ extern fn oc_abort_ext(
     /// Additional arguments for the abort message.
     ...,
 ) callconv(.C) void;
-
-const std = @import("std");
-const builtin = @import("builtin");
-const SourceLocation = std.builtin.SourceLocation;

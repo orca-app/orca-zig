@@ -1,5 +1,8 @@
 //! String slices and string lists.
 
+const oc = @import("orca.zig");
+const std = @import("std");
+
 /// A type representing a string of bytes.
 pub const Str8 = OrcaSlice(u8);
 /// A type describing a string of 16-bits characters (typically used for UTF-16).
@@ -145,9 +148,6 @@ extern fn oc_str32_list_push(arena: [*c]oc.mem.Arena, list: [*c]Str32List, str: 
 extern fn oc_str8_list_join(arena: [*c]oc.mem.Arena, list: Str8List) callconv(.C) Str8;
 extern fn oc_str16_list_join(arena: [*c]oc.mem.Arena, list: Str16List) callconv(.C) Str16;
 extern fn oc_str32_list_join(arena: [*c]oc.mem.Arena, list: Str32List) callconv(.C) Str32;
-
-const oc = @import("orca.zig");
-const std = @import("std");
 
 // @Incomplete: forget all the string stuff, zig can do that better, just use tiny converters instead. The real star of the show are the list types! Focus on those instead.
 

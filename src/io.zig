@@ -1,5 +1,7 @@
 //! File input/output.
 
+const oc = @import("orca.zig");
+
 pub const File = @import("io/file.zig").File; // [File API]
 pub const path = @import("io/path.zig"); // [Paths]
 
@@ -263,5 +265,3 @@ extern fn oc_file_open_with_dialog(
     /// A structure controlling the options of the file dialog window.
     desc: [*c]oc.app.FileDialogDesc,
 ) callconv(.C) FileOpenWithDialogResult;
-
-const oc = @import("orca.zig");

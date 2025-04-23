@@ -1,5 +1,10 @@
 //! Base allocator and memory arenas.
 
+const oc = @import("orca.zig");
+const std = @import("std");
+const Allocator = std.mem.Allocator;
+const Alignment = std.mem.Alignment;
+
 /// A structure that defines how to allocate memory from the system.
 pub const BaseAllocator = extern struct {
     /// A procedure to reserve memory from the system.
@@ -173,8 +178,3 @@ extern fn oc_scratch_begin_next(
     /// A pointer to a memory arena that the scratch scope shouldn't interfere with.
     used: *Arena,
 ) callconv(.C) Arena.Scope;
-
-const oc = @import("orca.zig");
-const std = @import("std");
-const Allocator = std.mem.Allocator;
-const Alignment = std.mem.Alignment;

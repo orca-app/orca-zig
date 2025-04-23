@@ -1,5 +1,8 @@
 //! API for opening, reading and writing files.
 
+const oc = @import("../orca.zig");
+const std = @import("std");
+
 /// An opaque handle identifying an opened file.
 pub const File = enum(u64) {
     _,
@@ -232,6 +235,3 @@ pub const File = enum(u64) {
     extern fn oc_file_size(file: File) callconv(.C) u64;
     extern fn oc_file_last_error(handle: File) callconv(.C) oc.io.ErrorEnum;
 };
-
-const oc = @import("../orca.zig");
-const std = @import("std");

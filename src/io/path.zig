@@ -1,5 +1,7 @@
 //! API for handling filesystem paths.
 
+const oc = @import("../orca.zig");
+
 /// Get a string slice of the directory part of a path.
 pub const dirname = oc_path_slice_directory;
 extern fn oc_path_slice_directory(path: oc.strings.Str8) callconv(.C) oc.strings.Str8;
@@ -35,5 +37,3 @@ extern fn oc_path_append(
 /// Test wether a path is an absolute path.
 pub const isAbsolute = oc_path_is_absolute;
 extern fn oc_path_is_absolute(path: oc.strings.Str8) callconv(.C) bool;
-
-const oc = @import("../orca.zig");

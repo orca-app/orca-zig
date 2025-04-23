@@ -1,6 +1,8 @@
 // @Incomplete
 //! UTF8 encoding/decoding.
 
+const oc = @import("orca.zig");
+
 /// A unicode codepoint.
 pub const Utf32 = u32;
 /// This enum declares the possible return status of UTF8 decoding/encoding operations.
@@ -136,5 +138,3 @@ pub const Range = extern struct {
     /// The number of codepoints in the range.
     count: u32,
 };
-
-const oc = @import("orca.zig");

@@ -1,5 +1,7 @@
 //! Graphical User Interface API.
 
+const oc = @import("orca.zig");
+
 // @Api UI namespace contents (not Core or Widgets) should be moved under the Application namespace
 // @Api missing documentation
 
@@ -848,5 +850,3 @@ extern fn oc_ui_radio_group_str8(
     key: oc.strings.Str8,
     info: [*c]RadioGroupInfo,
 ) callconv(.C) RadioGroupInfo;
-
-const oc = @import("orca.zig");
