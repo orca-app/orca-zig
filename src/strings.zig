@@ -54,6 +54,15 @@ pub fn OrcaSlice(comptime T: type) type {
             const slice = s.ptr[start..end];
             return .{ .ptr = slice.ptr, .len = slice.len };
         }
+
+        /// Copy the contents of a string on an arena and make a new string referring to the copied bytes.
+        pub fn pushCopy(
+            s: Self,
+            /// The arena on which to copy the contents of the input string.
+            arena: *oc.mem.Arena,
+        ) oc.mem.Arena.Error!Self {
+            return .fromSlice(try arena.pushCopy(T, s.toSlice()));
+        }
     };
 }
 
@@ -151,17 +160,6 @@ extern fn oc_str32_list_join(arena: [*c]oc.mem.Arena, list: Str32List) callconv(
 
 // @Incomplete: forget all the string stuff, zig can do that better, just use tiny converters instead. The real star of the show are the list types! Focus on those instead.
 
-// @Incomplete move str*Push* functions into orca.mem or make them redundant.
-
-/// Copy the contents of a string on an arena and make a new string referring to the copied bytes.
-pub const str8PushCopy = oc_str8_push_copy;
-extern fn oc_str8_push_copy(
-    /// The arena on which to copy the contents of the input string.
-    arena: [*c]oc.mem.Arena,
-    /// The input string.
-    s: Str8,
-) callconv(.C) Str8;
-
 /// Lexicographically compare the contents of two strings.
 /// This function returns `-1` if `s1` is less than `s2`, `+1` if `s1` is greater than `s2`, and `0` if `s1` and `s2` are equal.
 pub const str8Cmp = oc_str8_cmp;
@@ -209,15 +207,6 @@ extern fn oc_str8_split(
     separators: Str8List,
 ) callconv(.C) Str8List;
 
-/// Copy the contents of an `oc_str16` string and make a new string referencing the copied contents.
-pub const str16PushCopy = oc_str16_push_copy;
-extern fn oc_str16_push_copy(
-    /// The arena on which to copy the contents of the input string.
-    arena: [*c]oc.mem.Arena,
-    /// The input string.
-    s: Str16,
-) callconv(.C) Str16;
-
 /// Split a list into a string list according to separators.
 ///
 /// No string copies are made. The elements of the resulting string list refer to subsequences of the input string.
@@ -230,15 +219,6 @@ extern fn oc_str16_split(
     /// A list of separators used to split the input string.
     separators: Str16List,
 ) callconv(.C) Str16List;
-
-/// Copy the contents of an `oc_str32` string and make a new string referencing the copied contents.
-pub const str32PushCopy = oc_str32_push_copy;
-extern fn oc_str32_push_copy(
-    /// The arena on which to copy the contents of the input string.
-    arena: [*c]oc.mem.Arena,
-    /// The input string.
-    s: Str32,
-) callconv(.C) Str32;
 
 /// Split a list into a string list according to separators.
 ///

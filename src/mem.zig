@@ -118,13 +118,13 @@ pub const Arena = extern struct {
     /// Allocate a type from an arena. This macro takes care of the memory alignment and type cast.
     pub fn pushType(arena: *Arena, comptime T: type) Error!*T {
         const ptr = try arena.pushAligned(@sizeOf(T), @alignOf(T));
-        return std.mem.bytesAsValue(T, ptr);
+        return @alignCast(std.mem.bytesAsValue(T, ptr));
     }
 
     /// Allocate an array from an arena. This macro takes care of the size calculation, memory alignment and type cast.
     pub fn pushArray(arena: *Arena, comptime T: type, count: usize) Error![]T {
         const ptr = try arena.pushAligned(@sizeOf(T) * count, @alignOf(T));
-        return std.mem.bytesAsSlice(T, ptr);
+        return @alignCast(std.mem.bytesAsSlice(T, ptr));
     }
 
     /// Copies `m` to newly allocated memory.

@@ -302,7 +302,7 @@ fn widgets(arena: *oc.mem.Arena) !void {
         const result = ui.textBoxStr8(oc.toStr8("text"), arena, &text_info);
         if (result.changed) {
             text_arena.clear();
-            text_info.text = oc.strings.str8PushCopy(&text_arena, result.text);
+            text_info.text = try result.text.pushCopy(&text_arena);
         }
         if (result.accepted) {
             // @Bug this code never seems to run?
