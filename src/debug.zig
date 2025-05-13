@@ -40,7 +40,7 @@ pub const log = struct {
     /// Log a message to the console.
     pub fn ext(comptime level: Level, comptime fmt: []const u8, args: anytype, source: SourceLocation) void {
         var format_buf: [512:0]u8 = undefined;
-        _ = std.fmt.bufPrintZ(&format_buf, fmt, args) catch {}; // @Cleanup just discard NoSpaceLeft error for now
+        formatLog(&format_buf, fmt, args);
         oc_log_ext(
             level,
             @constCast(source.fn_name),
@@ -70,7 +70,7 @@ pub const log = struct {
 pub fn assert(condition: bool, comptime fmt: []const u8, args: anytype, source: SourceLocation) void {
     if (builtin.mode == .Debug and !condition) {
         var format_buf: [512:0]u8 = undefined;
-        _ = std.fmt.bufPrintZ(&format_buf, fmt, args) catch {}; // @Cleanup just discard NoSpaceLeft error for now
+        formatLog(&format_buf, fmt, args);
         oc_assert_fail(
             @constCast(source.file),
             @constCast(source.fn_name),
@@ -107,7 +107,7 @@ extern fn oc_assert_fail(
 /// Abort the application, showing an error message.
 pub fn abort(comptime fmt: []const u8, args: anytype, source: SourceLocation) noreturn {
     var format_buf: [512:0]u8 = undefined;
-    _ = std.fmt.bufPrintZ(&format_buf, fmt, args) catch {}; // @Cleanup just discard NoSpaceLeft error for now
+    formatLog(&format_buf, fmt, args);
     oc_abort_ext(
         @constCast(source.file),
         @constCast(source.fn_name),
@@ -132,3 +132,11 @@ extern fn oc_abort_ext(
     /// Additional arguments for the abort message.
     ...,
 ) callconv(.C) void;
+
+fn formatLog(format_buf: [:0]u8, comptime fmt: []const u8, args: anytype) void {
+    _ = std.fmt.bufPrintZ(format_buf, fmt, args) catch {
+        // No more space left in buffer, append a note to the truncated message
+        const msg = "...(msg truncated)";
+        @memcpy(format_buf[format_buf.len - msg.len ..], msg);
+    };
+}
