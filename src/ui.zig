@@ -574,6 +574,26 @@ extern fn oc_ui_style_rule_begin(
 pub const styleRuleEnd = oc_ui_style_rule_end;
 extern fn oc_ui_style_rule_end() callconv(.C) void;
 
+pub fn styleSetAxis(axis: Axis) void {
+    styleSetI32(.axis, @intCast(@intFromEnum(axis)));
+}
+
+pub fn styleSetAlign(axis: Axis, alignment: Align) void {
+    const attr: Attribute = switch (axis) {
+        .x => .align_x,
+        .y => .align_y,
+    };
+    styleSetI32(attr, @intCast(@intFromEnum(alignment)));
+}
+
+pub fn styleSetOverflow(axis: Axis, overflow: Overflow) void {
+    const attr: Attribute = switch (axis) {
+        .x => .overflow_x,
+        .y => .overflow_y,
+    };
+    styleSetI32(attr, @intCast(@intFromEnum(overflow)));
+}
+
 pub const styleSetI32 = oc_ui_style_set_i32;
 extern fn oc_ui_style_set_i32(
     attr: Attribute,

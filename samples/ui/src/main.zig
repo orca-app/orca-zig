@@ -130,7 +130,7 @@ pub fn onFrameRefresh() !void {
 
                 ui.styleSetSize(.width, .{ .kind = .parent, .value = 1 });
                 ui.styleSetSize(.height, .{ .kind = .parent, .value = 1, .relax = 1 });
-                ui.styleSetI32(.axis, @intFromEnum(ui.Axis.x));
+                ui.styleSetAxis(.x);
                 ui.styleSetF32(.margin_x, 16);
                 ui.styleSetF32(.margin_y, 16);
                 ui.styleSetF32(.spacing, 16);
@@ -169,14 +169,14 @@ fn widgets(arena: *oc.mem.Arena) !void {
         defer _ = ui.boxEnd();
 
         ui.styleSetSize(.width, .{ .kind = .parent, .value = 1 });
-        ui.styleSetI32(.axis, @intFromEnum(ui.Axis.x));
+        ui.styleSetAxis(.x);
         ui.styleSetF32(.spacing, 32);
 
         {
             _ = ui.boxBeginStr8(oc.toStr8("top_left"));
             defer _ = ui.boxEnd();
 
-            ui.styleSetI32(.axis, @intFromEnum(ui.Axis.y));
+            ui.styleSetAxis(.y);
             ui.styleSetF32(.spacing, 24);
 
             //-----------------------------------------------------------------------------
@@ -195,9 +195,8 @@ fn widgets(arena: *oc.mem.Arena) !void {
                 _ = ui.boxBeginStr8(oc.toStr8("checkbox"));
                 defer _ = ui.boxEnd();
 
-                // @Cleanup add set axis/align fns
-                ui.styleSetI32(.axis, @intFromEnum(ui.Axis.x));
-                ui.styleSetI32(.align_y, @intFromEnum(ui.Align.center));
+                ui.styleSetAxis(.x);
+                ui.styleSetAlign(.y, .center);
                 ui.styleSetF32(.spacing, 8);
                 ui.styleSetF32(.margin_x, 2);
 
@@ -240,7 +239,7 @@ fn widgets(arena: *oc.mem.Arena) !void {
             _ = ui.boxBeginStr8(oc.toStr8("top right"));
             defer _ = ui.boxEnd();
 
-            ui.styleSetI32(.axis, @intFromEnum(ui.Axis.y));
+            ui.styleSetAxis(.y);
             ui.styleSetF32(.spacing, 24);
 
             //-----------------------------------------------------------------------------
@@ -345,7 +344,7 @@ fn widgets(arena: *oc.mem.Arena) !void {
         ui.styleSetF32(.border_size, 1);
         ui.styleSetVar(.roundness, "roundness-small"); // @Api missing themes
 
-        ui.styleSetI32(.overflow_y, @intFromEnum(ui.Overflow.scroll));
+        ui.styleSetOverflow(.y, .scroll);
 
         {
             _ = ui.boxBeginStr8(oc.toStr8("contents"));
@@ -353,7 +352,7 @@ fn widgets(arena: *oc.mem.Arena) !void {
 
             ui.styleSetF32(.margin_x, 16);
             ui.styleSetF32(.margin_y, 16);
-            ui.styleSetI32(.axis, @intFromEnum(ui.Axis.y));
+            ui.styleSetAxis(.y);
 
             if (log_lines.list.isEmpty()) {
                 {
@@ -413,8 +412,8 @@ fn styling(arena: *oc.mem.Arena) void {
         ui.styleSetColor(.bg_color, .{ .r = 0.086, .g = 0.086, .b = 0.102 });
         ui.styleSetVar(.roundness, "roundness-small"); // @Api missing themes
 
-        ui.styleSetI32(.align_x, @intFromEnum(ui.Align.center));
-        ui.styleSetI32(.align_y, @intFromEnum(ui.Align.center));
+        ui.styleSetAlign(.x, .center);
+        ui.styleSetAlign(.y, .center);
 
         {
             var list: oc.strings.Str8List = .empty;
@@ -482,14 +481,14 @@ fn styling(arena: *oc.mem.Arena) void {
         _ = ui.boxBeginStr8(oc.toStr8("controls"));
         defer _ = ui.boxEnd();
 
-        ui.styleSetI32(.axis, @intFromEnum(ui.Axis.x));
+        ui.styleSetAxis(.x);
         ui.styleSetF32(.spacing, 32);
 
         {
             _ = ui.boxBeginStr8(oc.toStr8("unselected"));
             defer _ = ui.boxEnd();
 
-            ui.styleSetI32(.axis, @intFromEnum(ui.Axis.y));
+            ui.styleSetAxis(.y);
             ui.styleSetF32(.spacing, 16);
 
             {
@@ -504,7 +503,7 @@ fn styling(arena: *oc.mem.Arena) void {
                 _ = ui.boxBeginStr8(oc.toStr8("size"));
                 defer _ = ui.boxEnd();
 
-                ui.styleSetI32(.axis, @intFromEnum(ui.Axis.y));
+                ui.styleSetAxis(.y);
                 ui.styleSetF32(.spacing, 4);
 
                 var width_slider = (unselected_width - 8) / 16;
@@ -524,7 +523,7 @@ fn styling(arena: *oc.mem.Arena) void {
                 _ = ui.boxBeginStr8(oc.toStr8("background"));
                 defer _ = ui.boxEnd();
 
-                ui.styleSetI32(.axis, @intFromEnum(ui.Axis.y));
+                ui.styleSetAxis(.y);
                 ui.styleSetF32(.spacing, 4);
                 labeledSlider("Background R", &unselected_bg_color.r);
                 labeledSlider("Background G", &unselected_bg_color.g);
@@ -536,7 +535,7 @@ fn styling(arena: *oc.mem.Arena) void {
                 _ = ui.boxBeginStr8(oc.toStr8("border"));
                 defer _ = ui.boxEnd();
 
-                ui.styleSetI32(.axis, @intFromEnum(ui.Axis.y));
+                ui.styleSetAxis(.y);
                 ui.styleSetF32(.spacing, 4);
                 labeledSlider("Border R", &unselected_border_color.r);
                 labeledSlider("Border G", &unselected_border_color.g);
@@ -552,7 +551,7 @@ fn styling(arena: *oc.mem.Arena) void {
                 _ = ui.boxBeginStr8(oc.toStr8("status_override"));
                 defer _ = ui.boxEnd();
 
-                ui.styleSetI32(.axis, @intFromEnum(ui.Axis.y));
+                ui.styleSetAxis(.y);
                 ui.styleSetF32(.spacing, 10);
                 _ = ui.label("label", "Override");
 
@@ -581,7 +580,7 @@ fn styling(arena: *oc.mem.Arena) void {
             _ = ui.boxBeginStr8(oc.toStr8("selected"));
             defer _ = ui.boxEnd();
 
-            ui.styleSetI32(.axis, @intFromEnum(ui.Axis.y));
+            ui.styleSetAxis(.y);
             ui.styleSetF32(.spacing, 16);
 
             {
@@ -596,7 +595,7 @@ fn styling(arena: *oc.mem.Arena) void {
                 _ = ui.boxBeginStr8(oc.toStr8("size"));
                 defer _ = ui.boxEnd();
 
-                ui.styleSetI32(.axis, @intFromEnum(ui.Axis.y));
+                ui.styleSetAxis(.y);
                 ui.styleSetF32(.spacing, 4);
 
                 var width_slider = (selected_width - 8) / 16;
@@ -616,7 +615,7 @@ fn styling(arena: *oc.mem.Arena) void {
                 _ = ui.boxBeginStr8(oc.toStr8("background"));
                 defer _ = ui.boxEnd();
 
-                ui.styleSetI32(.axis, @intFromEnum(ui.Axis.y));
+                ui.styleSetAxis(.y);
                 ui.styleSetF32(.spacing, 4);
                 labeledSlider("Background R", &selected_bg_color.r);
                 labeledSlider("Background G", &selected_bg_color.g);
@@ -628,7 +627,7 @@ fn styling(arena: *oc.mem.Arena) void {
                 _ = ui.boxBeginStr8(oc.toStr8("center"));
                 defer _ = ui.boxEnd();
 
-                ui.styleSetI32(.axis, @intFromEnum(ui.Axis.y));
+                ui.styleSetAxis(.y);
                 ui.styleSetF32(.spacing, 4);
                 labeledSlider("Center R", &selected_center_color.r);
                 labeledSlider("Center G", &selected_center_color.g);
@@ -647,7 +646,7 @@ fn styling(arena: *oc.mem.Arena) void {
                 _ = ui.boxBeginStr8(oc.toStr8("status_override"));
                 defer _ = ui.boxEnd();
 
-                ui.styleSetI32(.axis, @intFromEnum(ui.Axis.y));
+                ui.styleSetAxis(.y);
                 ui.styleSetF32(.spacing, 10);
                 _ = ui.label("label", "Override");
 
@@ -676,7 +675,7 @@ fn styling(arena: *oc.mem.Arena) void {
             _ = ui.boxBeginStr8(oc.toStr8("label"));
             defer _ = ui.boxEnd();
 
-            ui.styleSetI32(.axis, @intFromEnum(ui.Axis.y));
+            ui.styleSetAxis(.y);
             ui.styleSetF32(.spacing, 16);
 
             {
@@ -775,7 +774,7 @@ fn columnBegin(header: []const u8, widthFraction: f32) void {
 
     ui.styleSetSize(.width, .{ .kind = .parent, .value = widthFraction, .relax = 1 });
     ui.styleSetSize(.height, .{ .kind = .parent, .value = 1 });
-    ui.styleSetI32(.axis, @intFromEnum(ui.Axis.y));
+    ui.styleSetAxis(.y);
     ui.styleSetF32(.margin_y, 8);
     ui.styleSetF32(.spacing, 24);
     ui.styleSetVar(.bg_color, "bg-1"); // @Api missing themes
@@ -789,7 +788,7 @@ fn columnBegin(header: []const u8, widthFraction: f32) void {
         defer _ = ui.boxEnd();
 
         ui.styleSetSize(.width, .{ .kind = .parent, .value = 1 });
-        ui.styleSetI32(.align_x, @intFromEnum(ui.Align.center));
+        ui.styleSetAlign(.x, .center);
 
         {
             ui.styleRuleBegin(oc.toStr8(".label"));
@@ -802,8 +801,8 @@ fn columnBegin(header: []const u8, widthFraction: f32) void {
     _ = ui.boxBeginStr8(oc.toStr8("contents"));
     ui.styleSetSize(.width, .{ .kind = .parent, .value = 1 });
     ui.styleSetSize(.height, .{ .kind = .parent, .value = 1, .relax = 1 });
-    ui.styleSetI32(.axis, @intFromEnum(ui.Axis.y));
-    ui.styleSetI32(.align_x, @intFromEnum(ui.Align.start));
+    ui.styleSetAxis(.y);
+    ui.styleSetAlign(.x, .start);
     ui.styleSetF32(.margin_x, 16);
     ui.styleSetF32(.spacing, 24);
     ui.styleSetI32(.constrain_y, 1);
