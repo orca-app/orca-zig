@@ -63,6 +63,10 @@ pub fn OrcaSlice(comptime T: type) type {
         ) oc.mem.Arena.Error!Self {
             return .fromSlice(try arena.pushCopy(T, s.toSlice()));
         }
+
+        pub fn eql(a: Self, b: Self) bool {
+            return std.mem.eql(T, a.toSlice(), b.toSlice());
+        }
     };
 }
 
@@ -158,7 +162,8 @@ extern fn oc_str8_list_join(arena: [*c]oc.mem.Arena, list: Str8List) callconv(.C
 extern fn oc_str16_list_join(arena: [*c]oc.mem.Arena, list: Str16List) callconv(.C) Str16;
 extern fn oc_str32_list_join(arena: [*c]oc.mem.Arena, list: Str32List) callconv(.C) Str32;
 
-// @Incomplete: forget all the string stuff, zig can do that better, just use tiny converters instead. The real star of the show are the list types! Focus on those instead.
+// The functions below are included for compatibility. It's recommended to use the stdlib
+// for these use cases instead, specifically the `std.mem` namespace.
 
 /// Lexicographically compare the contents of two strings.
 /// This function returns `-1` if `s1` is less than `s2`, `+1` if `s1` is greater than `s2`, and `0` if `s1` and `s2` are equal.
