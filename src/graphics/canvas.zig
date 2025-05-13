@@ -445,6 +445,7 @@ pub const CapType = enum(u32) {
     square = 1,
 };
 
+// @Incomplete
 /// An opaque struct representing a rectangle atlas. This is used to allocate rectangular regions of an image to make texture atlases.
 pub const rect_atlas = opaque {};
 

@@ -3,24 +3,6 @@ const std = @import("std");
 // @Cleanup convert @Api tags into issues in the orca repository
 // @Incomplete add doc comments for return values
 
-// @Api api.json wishlist (in order of importance):
-// - format documentation
-// - format and api versioning!!!
-// - specify pointer types (single/multi-item, nullable, mutable, etc...)
-// - change module brief to doc for consistency
-// - remove unnamed enums, create a dedicated "constant" kind instead
-// - missing OC_UNICODE_RANGE values
-// - missing OC_UI_THEME values
-// - missing oc_clock types
-// - oc_pool and oc_window are missing typename entries
-// - UI APIs missing documentation
-// - oc_ui_box is duplicated
-// - OC_OC_IO_ERROR typo?
-// - is io_error intended to be signed?
-// - flag enum types should be differentiated from normal enums
-// - flag enum types should use the correct backing values (i.e. oc_file_open_flags_enum should use u16 not u32)
-// - io api should document what errors can be returned per function
-
 pub const panic = std.debug.FullPanic(panicImpl);
 fn panicImpl(msg: []const u8, first_trace_addr: ?usize) noreturn {
     @branchHint(.cold);
@@ -40,7 +22,6 @@ pub fn toStr8(buf: []const u8) strings.Str8 {
     return strings.Str8.fromSlice(@constCast(buf));
 }
 
-// @Api utility is a meaningless name and the namespace should be removed, relocating it's children into the root.
 //------------------------------------------------------------------------------------------
 // [Utility] Utility data structures and helpers used throughout the Orca API.
 //------------------------------------------------------------------------------------------
