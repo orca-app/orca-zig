@@ -1,84 +1,142 @@
-///////////////////////////////////////////////////////////////////////////////
-//
-//  Orca
-//  Copyright 2023 Martin Fouilleul and the Orca project contributors
-//  See LICENSE.txt for licensing information
-//
-///////////////////////////////////////////////////////////////////////////////
+//! Helpers for logging, asserting and aborting.
 
 const std = @import("std");
 const builtin = @import("builtin");
-
-//------------------------------------------------------------------------------------------
-// [DEBUG] Logging
-//------------------------------------------------------------------------------------------
+const SourceLocation = std.builtin.SourceLocation;
 
 pub const log = struct {
-    pub const Level = enum(c_uint) {
-        Error,
-        Warning,
-        Info,
+    /// Constants allowing to specify the level of logging verbosity.
+    pub const Level = enum(u32) {
+        /// Only errors are logged.
+        err = 0,
+        /// Only warnings and errors are logged.
+        warning = 1,
+        /// All messages are logged.
+        info = 2,
     };
 
-    pub const Output = opaque {
-        extern var OC_LOG_DEFAULT_OUTPUT: ?*Output;
-        extern fn oc_log_set_output(output: *Output) void;
+    /// Set the logging verbosity.
+    pub const setLevel = oc_log_set_level;
+    extern fn oc_log_set_level(
+        /// The desired logging level. Messages whose level is below this threshold will not be logged.
+        level: Level,
+    ) callconv(.C) void;
 
-        pub inline fn default() ?*Output {
-            return OC_LOG_DEFAULT_OUTPUT;
-        }
-
-        const set = oc_log_set_output;
-    };
-
-    extern fn oc_log_set_level(level: Level) void;
-    extern fn oc_log_ext(level: Level, function: [*]const u8, file: [*]const u8, line: c_int, fmt: [*]const u8, ...) void;
-
-    const setLevel = oc_log_set_level;
-
-    pub fn info(comptime fmt: []const u8, args: anytype, source: std.builtin.SourceLocation) void {
-        ext(Level.Info, fmt, args, source);
+    /// Log a informative message to the console.
+    pub fn info(comptime fmt: []const u8, args: anytype, source: SourceLocation) void {
+        ext(.info, fmt, args, source);
     }
 
-    pub fn warn(comptime fmt: []const u8, args: anytype, source: std.builtin.SourceLocation) void {
-        ext(Level.Warning, fmt, args, source);
+    /// Log a warning to the console.
+    pub fn warn(comptime fmt: []const u8, args: anytype, source: SourceLocation) void {
+        ext(.warning, fmt, args, source);
     }
 
-    pub fn err(comptime fmt: []const u8, args: anytype, source: std.builtin.SourceLocation) void {
-        ext(Level.Error, fmt, args, source);
+    /// Log an error to the console.
+    pub fn err(comptime fmt: []const u8, args: anytype, source: SourceLocation) void {
+        ext(.err, fmt, args, source);
     }
 
-    pub fn ext(comptime level: Level, comptime fmt: []const u8, args: anytype, source: std.builtin.SourceLocation) void {
+    /// Log a message to the console.
+    pub fn ext(comptime level: Level, comptime fmt: []const u8, args: anytype, source: SourceLocation) void {
         var format_buf: [512:0]u8 = undefined;
-        _ = std.fmt.bufPrintZ(&format_buf, fmt, args) catch 0; // just discard NoSpaceLeft error for now
-        var line: c_int = @intCast(source.line);
-
-        oc_log_ext(level, source.fn_name.ptr, source.file.ptr, line, format_buf[0..].ptr);
+        formatLog(&format_buf, fmt, args);
+        oc_log_ext(
+            level,
+            @constCast(source.fn_name),
+            @constCast(source.file),
+            @intCast(source.line),
+            format_buf[0..],
+        );
     }
+    // @Api params should be const
+    extern fn oc_log_ext(
+        /// The logging level of the message.
+        level: Level,
+        /// The name of the function the message originated from
+        function: [*c]u8,
+        /// The name of the source file the message originated from
+        file: [*c]u8,
+        /// The source line the message originated from
+        line: i32,
+        /// The format string of the message, similar to `printf()`.
+        fmt: [*c]u8,
+        /// Additional arguments of the message
+        ...,
+    ) callconv(.C) void;
 };
 
-//------------------------------------------------------------------------------------------
-// [DEBUG] Assert/Abort
-//------------------------------------------------------------------------------------------
-
-extern fn oc_abort_ext(file: [*]const u8, function: [*]const u8, line: c_int, fmt: [*]const u8, ...) void;
-extern fn oc_assert_fail(file: [*]const u8, function: [*]const u8, line: c_int, src: [*]const u8, fmt: [*]const u8, ...) void;
-
-pub fn assert(condition: bool, comptime fmt: []const u8, args: anytype, source: std.builtin.SourceLocation) void {
-    if (builtin.mode == .Debug and condition == false) {
+/// Test a given condition, and abort the application if it is false.
+pub fn assert(condition: bool, comptime fmt: []const u8, args: anytype, source: SourceLocation) void {
+    if (builtin.mode == .Debug and !condition) {
         var format_buf: [512:0]u8 = undefined;
-        _ = std.fmt.bufPrintZ(&format_buf, fmt, args) catch 0;
-        var line: c_int = @intCast(source.line);
-
-        oc_assert_fail(source.file.ptr, source.fn_name.ptr, line, "assertion failed", format_buf[0..].ptr);
+        formatLog(&format_buf, fmt, args);
+        oc_assert_fail(
+            @constCast(source.file),
+            @constCast(source.fn_name),
+            @intCast(source.line),
+            // @Improvement if the bindings are modified to not take over the root,
+            // we can conditionally embed the source file and include the exact line here
+            // since `source` is comptime known.
+            @constCast(""),
+            format_buf[0..],
+        );
+        unreachable;
     }
 }
 
-pub fn abort(comptime fmt: []const u8, args: anytype, source: std.builtin.SourceLocation) noreturn {
-    var format_buf: [512:0]u8 = undefined;
-    _ = std.fmt.bufPrintZ(&format_buf, fmt, args) catch 0;
-    var line: c_int = @intCast(source.line);
+// @Api typo
+// @Api should be noreturn
+// @Api params should be const
+/// Tigger a failed assertion. This aborts the application, showing the failed assertion and an error message.
+extern fn oc_assert_fail(
+    /// The name of the source file the failed assertion originates from.
+    file: [*c]u8,
+    /// The name of the function the failed assertion originates from.
+    function: [*c]u8,
+    /// The source line the failed assertion originates from.
+    line: i32,
+    /// The source code of the failed assert condition.
+    src: [*c]u8,
+    /// The format string of the error message, similar to `printf()`.
+    fmt: [*c]u8,
+    /// Additional arguments for the error message.
+    ...,
+) callconv(.C) void;
 
-    oc_abort_ext(source.file.ptr, source.fn_name.ptr, line, format_buf[0..].ptr);
+/// Abort the application, showing an error message.
+pub fn abort(comptime fmt: []const u8, args: anytype, source: SourceLocation) noreturn {
+    var format_buf: [512:0]u8 = undefined;
+    formatLog(&format_buf, fmt, args);
+    oc_abort_ext(
+        @constCast(source.file),
+        @constCast(source.fn_name),
+        @intCast(source.line),
+        format_buf[0..],
+    );
     unreachable;
+}
+
+// @Api should be noreturn
+// @Api params should be const
+/// Abort the application, showing an error message.
+extern fn oc_abort_ext(
+    /// The name of the source file the abort originates from.
+    file: [*c]u8,
+    /// The name of the function the abort originates from.
+    function: [*c]u8,
+    /// The source line the abort originates from.
+    line: i32,
+    /// The format string of the abort message similar to `printf()`.
+    fmt: [*c]u8,
+    /// Additional arguments for the abort message.
+    ...,
+) callconv(.C) void;
+
+fn formatLog(format_buf: [:0]u8, comptime fmt: []const u8, args: anytype) void {
+    _ = std.fmt.bufPrintZ(format_buf, fmt, args) catch {
+        // No more space left in buffer, append a note to the truncated message
+        const msg = "...(msg truncated)";
+        @memcpy(format_buf[format_buf.len - msg.len ..], msg);
+    };
 }
