@@ -2,6 +2,9 @@ const std = @import("std");
 const oc = @import("orca");
 const ui = oc.ui;
 const canvas = oc.graphics.canvas;
+comptime {
+    oc.exportEventHandlers();
+}
 
 var frame_size: oc.math.Vec2 = .{ .x = 1200, .y = 838 };
 

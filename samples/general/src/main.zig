@@ -1,6 +1,9 @@
 const std = @import("std");
 const oc = @import("orca");
 const canvas = oc.graphics.canvas;
+comptime {
+    oc.exportEventHandlers();
+}
 
 const Vec2 = oc.math.Vec2;
 const Mat2x3 = oc.math.Mat2x3;

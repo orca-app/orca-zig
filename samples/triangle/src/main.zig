@@ -11,6 +11,9 @@ const math = std.math;
 
 const oc = @import("orca");
 const gl = oc.graphics.gles_3_0;
+comptime {
+    oc.exportEventHandlers();
+}
 
 var frame_size: oc.math.Vec2 = .{ .x = 100, .y = 100 };
 var surface: oc.graphics.canvas.Surface = undefined;

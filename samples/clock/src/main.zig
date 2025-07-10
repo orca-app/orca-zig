@@ -1,6 +1,9 @@
 const std = @import("std");
 const oc = @import("orca");
 const canvas = oc.graphics.canvas;
+comptime {
+    oc.exportEventHandlers();
+}
 
 var renderer: canvas.Renderer = undefined;
 var surface: canvas.Surface = undefined;

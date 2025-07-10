@@ -57,82 +57,86 @@ pub const clock = struct {
 // [Orca hooks]
 //------------------------------------------------------------------------------------------
 
-const user_root = @import("user_root");
+const root = @import("root");
 
-// TODO: document callbacks
-comptime {
-    exportCallback("onInit", "oc_on_init");
-    exportCallback("onMouseDown", "oc_on_mouse_down");
-    exportCallback("onMouseUp", "oc_on_mouse_up");
-    exportCallback("onMouseEnter", "oc_on_mouse_enter");
-    exportCallback("onMouseLeave", "oc_on_mouse_leave");
-    exportCallback("onMouseMove", "oc_on_mouse_move");
-    exportCallback("onMouseWheel", "oc_on_mouse_wheel");
-    exportCallback("onKeyDown", "oc_on_key_down");
-    exportCallback("onKeyUp", "oc_on_key_up");
-    exportCallback("onFrameRefresh", "oc_on_frame_refresh");
-    exportCallback("onResize", "oc_on_resize");
-    exportCallback("onRawEvent", "oc_on_raw_event");
-    exportCallback("onTerminate", "oc_on_terminate");
+// @Incomplete: document hooks
+/// Should only be called once in your application, and must be within a comptime block.
+pub fn exportEventHandlers() void {
+    exportHandler("onInit", "oc_on_init");
+    exportHandler("onMouseDown", "oc_on_mouse_down");
+    exportHandler("onMouseUp", "oc_on_mouse_up");
+    exportHandler("onMouseEnter", "oc_on_mouse_enter");
+    exportHandler("onMouseLeave", "oc_on_mouse_leave");
+    exportHandler("onMouseMove", "oc_on_mouse_move");
+    exportHandler("onMouseWheel", "oc_on_mouse_wheel");
+    exportHandler("onKeyDown", "oc_on_key_down");
+    exportHandler("onKeyUp", "oc_on_key_up");
+    exportHandler("onFrameRefresh", "oc_on_frame_refresh");
+    exportHandler("onResize", "oc_on_resize");
+    exportHandler("onRawEvent", "oc_on_raw_event");
+    exportHandler("onTerminate", "oc_on_terminate");
 }
 
-fn exportCallback(comptime handler: []const u8, comptime callback: []const u8) void {
-    if (@hasDecl(user_root, handler)) {
-        const func = &@field(@This(), callback);
-        @export(func, .{ .name = callback });
+fn exportHandler(
+    comptime zig_handler: []const u8,
+    comptime c_wrapper: []const u8,
+) void {
+    if (@hasDecl(root, zig_handler)) {
+        const func = &@field(@This(), c_wrapper);
+        @export(func, .{ .name = c_wrapper });
     }
 }
 
 fn oc_on_init() callconv(.C) void {
-    callHandler(user_root.onInit, .{}, @src());
+    callHandler(root.onInit, .{}, @src());
 }
 
 fn oc_on_mouse_down(button: app.MouseButton) callconv(.C) void {
-    callHandler(user_root.onMouseDown, .{button}, @src());
+    callHandler(root.onMouseDown, .{button}, @src());
 }
 
 fn oc_on_mouse_up(button: app.MouseButton) callconv(.C) void {
-    callHandler(user_root.onMouseUp, .{button}, @src());
+    callHandler(root.onMouseUp, .{button}, @src());
 }
 
 fn oc_on_mouse_enter() callconv(.C) void {
-    callHandler(user_root.onMouseEnter, .{}, @src());
+    callHandler(root.onMouseEnter, .{}, @src());
 }
 
 fn oc_on_mouse_leave() callconv(.C) void {
-    callHandler(user_root.onMouseLeave, .{}, @src());
+    callHandler(root.onMouseLeave, .{}, @src());
 }
 
 fn oc_on_mouse_move(x: f32, y: f32, deltaX: f32, deltaY: f32) callconv(.C) void {
-    callHandler(user_root.onMouseMove, .{ x, y, deltaX, deltaY }, @src());
+    callHandler(root.onMouseMove, .{ x, y, deltaX, deltaY }, @src());
 }
 
 fn oc_on_mouse_wheel(deltaX: f32, deltaY: f32) callconv(.C) void {
-    callHandler(user_root.onMouseWheel, .{ deltaX, deltaY }, @src());
+    callHandler(root.onMouseWheel, .{ deltaX, deltaY }, @src());
 }
 
 fn oc_on_key_down(scan: app.ScanCode, key: app.KeyCode) callconv(.C) void {
-    callHandler(user_root.onKeyDown, .{ scan, key }, @src());
+    callHandler(root.onKeyDown, .{ scan, key }, @src());
 }
 
 fn oc_on_key_up(scan: app.ScanCode, key: app.KeyCode) callconv(.C) void {
-    callHandler(user_root.onKeyUp, .{ scan, key }, @src());
+    callHandler(root.onKeyUp, .{ scan, key }, @src());
 }
 
 fn oc_on_frame_refresh() callconv(.C) void {
-    callHandler(user_root.onFrameRefresh, .{}, @src());
+    callHandler(root.onFrameRefresh, .{}, @src());
 }
 
 fn oc_on_resize(width: u32, height: u32) callconv(.C) void {
-    callHandler(user_root.onResize, .{ width, height }, @src());
+    callHandler(root.onResize, .{ width, height }, @src());
 }
 
 fn oc_on_raw_event(c_event: *app.Event) callconv(.C) void {
-    callHandler(user_root.onRawEvent, .{c_event}, @src());
+    callHandler(root.onRawEvent, .{c_event}, @src());
 }
 
 fn oc_on_terminate() callconv(.C) void {
-    callHandler(user_root.onTerminate, .{}, @src());
+    callHandler(root.onTerminate, .{}, @src());
 }
 
 fn callHandler(func: anytype, params: anytype, source: std.builtin.SourceLocation) void {
