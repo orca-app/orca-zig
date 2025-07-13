@@ -87,17 +87,11 @@ pub fn build(b: *Build) !void {
         });
         sample_check_step.dependOn(&app_wasm.step);
 
-        const bundle = bundleApplication(b, .{
-            .app = app_wasm,
-            .icon = sample.icon,
-            .resource_dir = sample.resource_dir,
-        });
-
         sample_step.dependOn(
-            &b.addInstallDirectory(.{
-                .source_dir = bundle,
-                .install_dir = .prefix,
-                .install_subdir = sample.name,
+            &addInstallApplication(b, .{
+                .app = app_wasm,
+                .icon = sample.icon,
+                .resource_dir = sample.resource_dir,
             }).step,
         );
     }
@@ -177,4 +171,15 @@ pub fn bundleApplication(b: *Build, options: BundleOptions) Build.LazyPath {
     run_bundle.addArtifactArg(options.app);
 
     return bundle_output.path(b, name); // orca bundle creates a subdir with the app name
+}
+
+/// Bundle an application and install it to the output prefix.
+/// See `bundleApplication` for more control.
+pub fn addInstallApplication(b: *Build, options: BundleOptions) *Build.Step.InstallDir {
+    const bundle = bundleApplication(b, options);
+    return b.addInstallDirectory(.{
+        .source_dir = bundle,
+        .install_dir = .prefix,
+        .install_subdir = options.app.name,
+    });
 }
