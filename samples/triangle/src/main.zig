@@ -11,6 +11,8 @@ const math = std.math;
 
 const oc = @import("orca");
 const gl = oc.graphics.gles_3_0;
+
+pub const panic = oc.panic;
 comptime {
     oc.exportEventHandlers();
 }
