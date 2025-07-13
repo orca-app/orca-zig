@@ -3,13 +3,6 @@ const std = @import("std");
 // @Cleanup convert @Api tags into issues in the orca repository
 // @Incomplete add doc comments for return values
 
-pub const panic = std.debug.FullPanic(panicImpl);
-fn panicImpl(msg: []const u8, first_trace_addr: ?usize) noreturn {
-    @branchHint(.cold);
-    _ = first_trace_addr; // @Incomplete: stack trace
-    debug.abort("panic: {s}", .{msg}, @src());
-}
-
 // shortcuts
 pub const log = debug.log;
 pub const assert = debug.assert;
@@ -59,24 +52,24 @@ pub const clock = struct {
 
 const user_root = @import("user_root");
 
-// TODO: document callbacks
+// @Incomplete document callbacks
 comptime {
-    exportCallback("onInit", "oc_on_init");
-    exportCallback("onMouseDown", "oc_on_mouse_down");
-    exportCallback("onMouseUp", "oc_on_mouse_up");
-    exportCallback("onMouseEnter", "oc_on_mouse_enter");
-    exportCallback("onMouseLeave", "oc_on_mouse_leave");
-    exportCallback("onMouseMove", "oc_on_mouse_move");
-    exportCallback("onMouseWheel", "oc_on_mouse_wheel");
-    exportCallback("onKeyDown", "oc_on_key_down");
-    exportCallback("onKeyUp", "oc_on_key_up");
-    exportCallback("onFrameRefresh", "oc_on_frame_refresh");
-    exportCallback("onResize", "oc_on_resize");
-    exportCallback("onRawEvent", "oc_on_raw_event");
-    exportCallback("onTerminate", "oc_on_terminate");
+    maybeExportCallback("onInit", "oc_on_init");
+    maybeExportCallback("onMouseDown", "oc_on_mouse_down");
+    maybeExportCallback("onMouseUp", "oc_on_mouse_up");
+    maybeExportCallback("onMouseEnter", "oc_on_mouse_enter");
+    maybeExportCallback("onMouseLeave", "oc_on_mouse_leave");
+    maybeExportCallback("onMouseMove", "oc_on_mouse_move");
+    maybeExportCallback("onMouseWheel", "oc_on_mouse_wheel");
+    maybeExportCallback("onKeyDown", "oc_on_key_down");
+    maybeExportCallback("onKeyUp", "oc_on_key_up");
+    maybeExportCallback("onFrameRefresh", "oc_on_frame_refresh");
+    maybeExportCallback("onResize", "oc_on_resize");
+    maybeExportCallback("onRawEvent", "oc_on_raw_event");
+    maybeExportCallback("onTerminate", "oc_on_terminate");
 }
 
-fn exportCallback(comptime handler: []const u8, comptime callback: []const u8) void {
+fn maybeExportCallback(comptime handler: []const u8, comptime callback: []const u8) void {
     if (@hasDecl(user_root, handler)) {
         const func = &@field(@This(), callback);
         @export(func, .{ .name = callback });
@@ -84,62 +77,109 @@ fn exportCallback(comptime handler: []const u8, comptime callback: []const u8) v
 }
 
 fn oc_on_init() callconv(.C) void {
-    callHandler(user_root.onInit, .{}, @src());
+    callHandler("onInit", .{}, @src());
 }
 
 fn oc_on_mouse_down(button: app.MouseButton) callconv(.C) void {
-    callHandler(user_root.onMouseDown, .{button}, @src());
+    callHandler("onMouseDown", .{button}, @src());
 }
 
 fn oc_on_mouse_up(button: app.MouseButton) callconv(.C) void {
-    callHandler(user_root.onMouseUp, .{button}, @src());
+    callHandler("onMouseUp", .{button}, @src());
 }
 
 fn oc_on_mouse_enter() callconv(.C) void {
-    callHandler(user_root.onMouseEnter, .{}, @src());
+    callHandler("onMouseEnter", .{}, @src());
 }
 
 fn oc_on_mouse_leave() callconv(.C) void {
-    callHandler(user_root.onMouseLeave, .{}, @src());
+    callHandler("onMouseLeave", .{}, @src());
 }
 
 fn oc_on_mouse_move(x: f32, y: f32, deltaX: f32, deltaY: f32) callconv(.C) void {
-    callHandler(user_root.onMouseMove, .{ x, y, deltaX, deltaY }, @src());
+    callHandler("onMouseMove", .{ x, y, deltaX, deltaY }, @src());
 }
 
 fn oc_on_mouse_wheel(deltaX: f32, deltaY: f32) callconv(.C) void {
-    callHandler(user_root.onMouseWheel, .{ deltaX, deltaY }, @src());
+    callHandler("onMouseWheel", .{ deltaX, deltaY }, @src());
 }
 
 fn oc_on_key_down(scan: app.ScanCode, key: app.KeyCode) callconv(.C) void {
-    callHandler(user_root.onKeyDown, .{ scan, key }, @src());
+    callHandler("onKeyDown", .{ scan, key }, @src());
 }
 
 fn oc_on_key_up(scan: app.ScanCode, key: app.KeyCode) callconv(.C) void {
-    callHandler(user_root.onKeyUp, .{ scan, key }, @src());
+    callHandler("onKeyUp", .{ scan, key }, @src());
 }
 
 fn oc_on_frame_refresh() callconv(.C) void {
-    callHandler(user_root.onFrameRefresh, .{}, @src());
+    callHandler("onFrameRefresh", .{}, @src());
 }
 
 fn oc_on_resize(width: u32, height: u32) callconv(.C) void {
-    callHandler(user_root.onResize, .{ width, height }, @src());
+    callHandler("onResize", .{ width, height }, @src());
 }
 
 fn oc_on_raw_event(c_event: *app.Event) callconv(.C) void {
-    callHandler(user_root.onRawEvent, .{c_event}, @src());
+    callHandler("onRawEvent", .{c_event}, @src());
 }
 
 fn oc_on_terminate() callconv(.C) void {
-    callHandler(user_root.onTerminate, .{}, @src());
+    callHandler("onTerminate", .{}, @src());
 }
 
-fn callHandler(func: anytype, params: anytype, source: std.builtin.SourceLocation) void {
-    switch (@typeInfo(@typeInfo(@TypeOf(func)).@"fn".return_type.?)) {
+inline fn callHandler(
+    comptime name: []const u8,
+    params: anytype,
+    source: std.builtin.SourceLocation,
+) void {
+    const func = @field(user_root, name);
+    const ReturnType = @typeInfo(@TypeOf(func)).@"fn".return_type.?;
+    const bad_return_type =
+        "Orca event handler '" ++ name ++ "' must have a return type of 'void' or '!void', found '" ++ @typeName(ReturnType) ++ "'";
+
+    switch (@typeInfo(ReturnType)) {
         .void => @call(.auto, func, params),
-        .error_union => @call(.auto, func, params) catch |e|
-            debug.abort("Caught error: {}", .{e}, source), // @Incomplete error return trace
-        else => @compileError("Orca event handler must have void return type"),
+        .error_union => |eu| {
+            if (eu.payload != void) @compileError(bad_return_type);
+            @call(.auto, func, params) catch |err| {
+                // @Incomplete error return trace.
+                // errorReturnTrace() is implemented using returnAddress(),
+                // which is not supported on wasm-freestanding.
+                // See https://github.com/orca-app/orca-zig/issues/9
+                debug.abort("Caught error: {}", .{err}, source);
+            };
+        },
+        else => @compileError(bad_return_type),
     }
+}
+
+pub const panic = std.debug.FullPanic(panicImpl);
+var panic_stage: u2 = 0;
+fn panicImpl(msg: []const u8, first_trace_addr: ?usize) noreturn {
+    @branchHint(.cold);
+
+    switch (panic_stage) {
+        0 => panic_stage = 1,
+        1 => {
+            panic_stage = 2;
+            debug.abort("Panicked while panicking. Aborting...", .{}, @src());
+        },
+        else => @trap(), // Panicked while printing the recursive panic
+    }
+
+    _ = first_trace_addr;
+    // @Incomplete stack trace
+    // returnAddress() is not supported on wasm-freestanding and will always return 0.
+    // See https://github.com/orca-app/orca-zig/issues/9
+
+    // @Incomplete populate source location from stack trace
+    const panic_source: std.builtin.SourceLocation = .{
+        .module = "???",
+        .file = "???",
+        .fn_name = "???",
+        .column = 0,
+        .line = 0,
+    };
+    debug.abort("Panic: {s}", .{msg}, panic_source);
 }
