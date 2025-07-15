@@ -56,7 +56,7 @@ pub const clock = struct {
 // ```
 // // In root source file
 // const orca = @import("orca");
-// pub const panic = orca.panic; // You'll probably want to use our panic handler too
+// pub const panic = orca.panic; // You'll probably want to use the Orca panic handler too
 // comptime {
 //     // This step is important!
 //     orca.exportEventHandlers();

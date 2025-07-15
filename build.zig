@@ -101,11 +101,18 @@ pub fn target(b: *Build) Build.ResolvedTarget {
     return b.resolveTargetQuery(.{
         .cpu_arch = .wasm32,
         .os_tag = .freestanding,
-        .cpu_features_add = std.Target.wasm.featureSet(&.{.bulk_memory}),
+        .cpu_features_add = std.Target.wasm.featureSet(&.{
+            .bulk_memory,
+            .nontrapping_fptoint,
+        }),
     });
 }
 
+/// Returns a `LazyPath` to the target sdk version installed on the host system.
+/// See also `orca.sdk_version`.
 pub fn sdkPath(b: *Build) Build.LazyPath {
+    // orca will report a nice error for us
+    // if the target sdk version is missing.
     return .{
         .cwd_relative = b.run(&.{
             "orca",      "sdk-path",
@@ -119,6 +126,8 @@ pub const ApplicationOptions = struct {
     root_module: *Build.Module,
     sdk_path: Build.LazyPath,
 };
+/// Creates a wasm executable linked with Orca's wasm runtime and libc.
+/// Asserts `options.root_module` is correctly configured.
 pub fn addApplication(b: *Build, options: ApplicationOptions) *Build.Step.Compile {
     {
         const resolved = options.root_module.resolved_target;
@@ -160,7 +169,7 @@ pub fn bundleApplication(b: *Build, options: BundleOptions) Build.LazyPath {
     });
     if (options.icon) |icon| {
         run_bundle.addArg("--icon");
-        run_bundle.addDirectoryArg(icon);
+        run_bundle.addFileArg(icon);
     }
     if (options.resource_dir) |res_dir| {
         run_bundle.addArg("--resource-dir");
