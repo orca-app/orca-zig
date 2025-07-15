@@ -3,6 +3,11 @@ const oc = @import("orca");
 const ui = oc.ui;
 const canvas = oc.graphics.canvas;
 
+pub const panic = oc.panic;
+comptime {
+    oc.exportEventHandlers();
+}
+
 var frame_size: oc.math.Vec2 = .{ .x = 1200, .y = 838 };
 
 var surface: canvas.Surface = undefined;

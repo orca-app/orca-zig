@@ -2,6 +2,11 @@ const std = @import("std");
 const oc = @import("orca");
 const canvas = oc.graphics.canvas;
 
+pub const panic = oc.panic;
+comptime {
+    oc.exportEventHandlers();
+}
+
 var renderer: canvas.Renderer = undefined;
 var surface: canvas.Surface = undefined;
 var context: canvas.Context = undefined;
