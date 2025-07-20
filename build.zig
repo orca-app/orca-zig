@@ -8,16 +8,31 @@ pub const sdk_version = "test-release-4f124dd346";
 pub const orca_api_commit = "4f124dd3461f48c444518ad48c6337de6bfeb72f";
 
 pub fn build(b: *Build) !void {
+    const wasm_target = target(b);
     const optimize = b.standardOptimizeOption(.{});
 
-    const wasm_target = target(b);
-    const sdk_path = sdkPath(b);
+    const sdk: Build.LazyPath = .{
+        // orca will report a nice error for us
+        // if the target sdk version is missing.
+        .cwd_relative = b.run(&.{
+            "orca",      "sdk-path",
+            "--version", sdk_version,
+        }),
+    };
+    // escape hatch if the user needs access to the sdk for some reason.
+    b.addNamedLazyPath("sdk_path", sdk);
 
-    const orca_mod = b.addModule("orca", .{
+    const orca = b.addModule("orca", .{
         .root_source_file = b.path("src/orca.zig"),
         .target = wasm_target,
         .optimize = optimize,
+        .link_libc = false,
+        .single_threaded = true,
     });
+    orca.addObjectFile(sdk.path(b, "bin/liborca_wasm.a"));
+    orca.addObjectFile(sdk.path(b, "orca-libc/lib/libc.o"));
+    orca.addObjectFile(sdk.path(b, "orca-libc/lib/libc.a"));
+    orca.addObjectFile(sdk.path(b, "orca-libc/lib/crt1.o"));
 
     const gl_gen_step = b.step("gl-api", "Generates GLES bindings to be modified and committed");
     {
@@ -78,18 +93,17 @@ pub fn build(b: *Build) !void {
             .target = wasm_target,
             .optimize = optimize,
         });
-        root.addImport("orca", orca_mod);
+        root.addImport("orca", orca);
 
-        const app_wasm = addApplication(b, .{
+        const sample_app = addApplication(b, .{
             .name = sample.name,
             .root_module = root,
-            .sdk_path = sdk_path,
         });
-        sample_check_step.dependOn(&app_wasm.step);
+        sample_check_step.dependOn(&sample_app.step);
 
         sample_step.dependOn(
             &addInstallApplication(b, .{
-                .app = app_wasm,
+                .app = sample_app,
                 .icon = sample.icon,
                 .resource_dir = sample.resource_dir,
             }).step,
@@ -108,49 +122,29 @@ pub fn target(b: *Build) Build.ResolvedTarget {
     });
 }
 
-/// Returns a `LazyPath` to the target sdk version installed on the host system.
-/// See also `orca.sdk_version`.
-pub fn sdkPath(b: *Build) Build.LazyPath {
-    // orca will report a nice error for us
-    // if the target sdk version is missing.
-    return .{
-        .cwd_relative = b.run(&.{
-            "orca",      "sdk-path",
-            "--version", sdk_version,
-        }),
-    };
-}
-
 pub const ApplicationOptions = struct {
     name: []const u8,
     root_module: *Build.Module,
-    sdk_path: Build.LazyPath,
 };
-/// Creates a wasm executable linked with Orca's wasm runtime and libc.
-/// Asserts `options.root_module` is correctly configured.
+/// Creates a wasm executable configured for Orca.
+/// Asserts `options.root_module.resolved_target` is correctly configured.
 pub fn addApplication(b: *Build, options: ApplicationOptions) *Build.Step.Compile {
+    const resolved = options.root_module.resolved_target;
+    if (resolved == null or
+        resolved.?.result.cpu.arch != .wasm32 or
+        resolved.?.result.os.tag != .freestanding)
     {
-        const resolved = options.root_module.resolved_target;
-        if (resolved == null or
-            resolved.?.result.cpu.arch != .wasm32 or
-            resolved.?.result.os.tag != .freestanding)
-        {
-            @panic("root module must define a target using `orca.target()`");
-        }
+        @panic("root module must define a target using `orca.target()`");
     }
 
-    const app_wasm = b.addExecutable(.{
+    const app_exe = b.addExecutable(.{
         .name = options.name,
         .root_module = options.root_module,
     });
-    app_wasm.entry = .disabled; // See https://github.com/ziglang/zig/pull/17815
-    app_wasm.rdynamic = true;
-    app_wasm.addObjectFile(options.sdk_path.path(b, "bin/liborca_wasm.a"));
-    app_wasm.addObjectFile(options.sdk_path.path(b, "orca-libc/lib/libc.o"));
-    app_wasm.addObjectFile(options.sdk_path.path(b, "orca-libc/lib/libc.a"));
-    app_wasm.addObjectFile(options.sdk_path.path(b, "orca-libc/lib/crt1.o"));
+    app_exe.entry = .disabled; // See https://github.com/ziglang/zig/pull/17815
+    app_exe.rdynamic = true;
 
-    return app_wasm;
+    return app_exe;
 }
 
 pub const BundleOptions = struct {
@@ -162,28 +156,29 @@ pub const BundleOptions = struct {
 /// bundled files for an application.
 pub fn bundleApplication(b: *Build, options: BundleOptions) Build.LazyPath {
     const name = options.app.name;
-    const run_bundle = b.addSystemCommand(&.{
+    const run = b.addSystemCommand(&.{
         "orca",      "bundle",
         "--name",    name,
         "--version", sdk_version,
     });
+    run.setName(b.fmt("orca bundle {s}", .{name}));
     if (options.icon) |icon| {
-        run_bundle.addArg("--icon");
-        run_bundle.addFileArg(icon);
+        run.addArg("--icon");
+        run.addFileArg(icon);
     }
     if (options.resource_dir) |res_dir| {
-        run_bundle.addArg("--resource-dir");
-        run_bundle.addDirectoryArg(res_dir);
+        run.addArg("--resource-dir");
+        run.addDirectoryArg(res_dir);
     }
-    run_bundle.addArg("--out-dir");
-    const bundle_output = run_bundle.addOutputDirectoryArg(name);
-    run_bundle.addArtifactArg(options.app);
+    run.addArg("--out-dir");
+    const output = run.addOutputDirectoryArg(name);
+    run.addArtifactArg(options.app);
 
-    return bundle_output.path(b, name); // orca bundle creates a subdir with the app name
+    return output.path(b, name); // orca bundle creates a subdir with the app name
 }
 
 /// Bundle an application and install it to the output prefix.
-/// See `bundleApplication` for more control.
+/// See `orca.bundleApplication` for more control.
 pub fn addInstallApplication(b: *Build, options: BundleOptions) *Build.Step.InstallDir {
     const bundle = bundleApplication(b, options);
     return b.addInstallDirectory(.{
