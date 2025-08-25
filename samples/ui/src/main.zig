@@ -370,11 +370,10 @@ fn widgets(arena: *oc.mem.Arena) !void {
 
             var i: u32 = 0;
             var id: [15]u8 = undefined;
-            std.debug.assert(log_lines.elt_count < 100000000000000); // 15 digits
             var iter = log_lines.iterate(.{});
             while (iter.next()) |log_line| : (i += 1) {
                 _ = ui.labelStr8(
-                    oc.toStr8(std.fmt.bufPrintIntToSlice(&id, i, 10, .lower, .{})),
+                    oc.toStr8(id[0..std.fmt.printInt(&id, i, 10, .lower, .{})]),
                     log_line.string,
                 );
             }
@@ -386,19 +385,19 @@ var styling_selected_radio: i32 = 0;
 var unselected_width: f32 = 16;
 var unselected_height: f32 = 16;
 var unselected_roundness: f32 = 8;
-var unselected_bg_color: canvas.Color = canvas.Color.rgba(0.086, 0.086, 0.102, 1);
-var unselected_border_color: canvas.Color = canvas.Color.rgba(0.976, 0.976, 0.976, 0.35);
+var unselected_bg_color: canvas.Color = .rgba(0.086, 0.086, 0.102, 1);
+var unselected_border_color: canvas.Color = .rgba(0.976, 0.976, 0.976, 0.35);
 var unselected_border_size: f32 = 1;
 var unselected_when_status: oc.strings.Str8 = oc.toStr8("");
 var unselected_status_index: i32 = 0;
 var selected_width: f32 = 16;
 var selected_height: f32 = 16;
 var selected_roundness: f32 = 8;
-var selected_center_color: canvas.Color = canvas.Color.rgba(1, 1, 1, 1);
-var selected_bg_color: canvas.Color = canvas.Color.rgba(0.33, 0.66, 1, 1);
+var selected_center_color: canvas.Color = .rgba(1, 1, 1, 1);
+var selected_bg_color: canvas.Color = .rgba(0.33, 0.66, 1, 1);
 var selected_when_status: oc.strings.Str8 = oc.toStr8("");
 var selected_status_index: i32 = 0;
-var label_font_color: canvas.Color = canvas.Color.rgba(0.976, 0.976, 0.976, 1);
+var label_font_color: canvas.Color = .rgba(0.976, 0.976, 0.976, 1);
 var label_font_color_selected: i32 = 0;
 var label_font: *canvas.Font = &font_regular;
 var label_font_selected: i32 = 0;

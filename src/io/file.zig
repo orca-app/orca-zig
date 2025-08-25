@@ -140,8 +140,9 @@ pub const File = enum(u64) {
         return @intCast(n);
     }
 
-    pub const Writer = std.io.Writer(File, oc.io.Error, write);
-    pub const Reader = std.io.Reader(File, oc.io.Error, read);
+    // @Todo: Writergate implementations
+    pub const Writer = std.io.GenericWriter(File, oc.io.Error, write);
+    pub const Reader = std.io.GenericReader(File, oc.io.Error, read);
 
     pub fn writer(f: File) Writer {
         return .{ .context = f };
@@ -221,17 +222,17 @@ pub const File = enum(u64) {
         return handle.oc_file_last_error().toError() orelse {};
     }
 
-    extern fn oc_file_nil() callconv(.C) File;
-    extern fn oc_file_is_nil(handle: File) callconv(.C) bool;
-    extern fn oc_file_open(path: oc.strings.Str8, rights: AccessFlags, flags: OpenFlags) callconv(.C) File;
-    extern fn oc_file_open_with_request(path: oc.strings.Str8, rights: AccessFlags, flags: OpenFlags) callconv(.C) File;
-    extern fn oc_file_open_at(dir: File, path: oc.strings.Str8, rights: AccessFlags, flags: OpenFlags) callconv(.C) File;
-    extern fn oc_file_close(file: File) callconv(.C) void;
-    extern fn oc_file_pos(file: File) callconv(.C) i64;
-    extern fn oc_file_seek(file: File, offset: i64, whence: Whence) callconv(.C) i64;
-    extern fn oc_file_write(file: File, size: u64, buffer: [*c]u8) callconv(.C) u64;
-    extern fn oc_file_read(file: File, size: u64, buffer: [*c]u8) callconv(.C) u64;
-    extern fn oc_file_get_status(file: File) callconv(.C) Stat;
-    extern fn oc_file_size(file: File) callconv(.C) u64;
-    extern fn oc_file_last_error(handle: File) callconv(.C) oc.io.ErrorEnum;
+    extern fn oc_file_nil() callconv(.c) File;
+    extern fn oc_file_is_nil(handle: File) callconv(.c) bool;
+    extern fn oc_file_open(path: oc.strings.Str8, rights: AccessFlags, flags: OpenFlags) callconv(.c) File;
+    extern fn oc_file_open_with_request(path: oc.strings.Str8, rights: AccessFlags, flags: OpenFlags) callconv(.c) File;
+    extern fn oc_file_open_at(dir: File, path: oc.strings.Str8, rights: AccessFlags, flags: OpenFlags) callconv(.c) File;
+    extern fn oc_file_close(file: File) callconv(.c) void;
+    extern fn oc_file_pos(file: File) callconv(.c) i64;
+    extern fn oc_file_seek(file: File, offset: i64, whence: Whence) callconv(.c) i64;
+    extern fn oc_file_write(file: File, size: u64, buffer: [*c]u8) callconv(.c) u64;
+    extern fn oc_file_read(file: File, size: u64, buffer: [*c]u8) callconv(.c) u64;
+    extern fn oc_file_get_status(file: File) callconv(.c) Stat;
+    extern fn oc_file_size(file: File) callconv(.c) u64;
+    extern fn oc_file_last_error(handle: File) callconv(.c) oc.io.ErrorEnum;
 };

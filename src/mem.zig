@@ -17,9 +17,9 @@ pub const BaseAllocator = extern struct {
     release: MemModifyProc,
 
     /// The prototype of a procedure to reserve memory from the system.
-    pub const MemReserveProc = *const fn (context: [*c]BaseAllocator, size: u64) callconv(.C) ?*anyopaque;
+    pub const MemReserveProc = *const fn (context: [*c]BaseAllocator, size: u64) callconv(.c) ?*anyopaque;
     /// The prototype of a procedure to modify a memory reservation.
-    pub const MemModifyProc = *const fn (context: [*c]BaseAllocator, ptr: ?*anyopaque, size: u64) callconv(.C) void;
+    pub const MemModifyProc = *const fn (context: [*c]BaseAllocator, ptr: ?*anyopaque, size: u64) callconv(.c) void;
 };
 
 /// A memory arena, allowing to allocate memory in a linear or stack-like fashion.
@@ -62,7 +62,7 @@ pub const Arena = extern struct {
         extern fn oc_arena_scope_end(
             /// An `oc_arena_scope` object that was created by a call to `oc_arena_scope_begin()`.
             scope: Scope,
-        ) callconv(.C) void;
+        ) callconv(.c) void;
     };
 
     pub const Error = error{OutOfMemory};
@@ -73,7 +73,7 @@ pub const Arena = extern struct {
         oc_arena_init(&arena);
         return arena;
     }
-    extern fn oc_arena_init(arena: *Arena) callconv(.C) void;
+    extern fn oc_arena_init(arena: *Arena) callconv(.c) void;
 
     /// Initialize a memory arena with additional options.
     pub const initWithOptions = oc_arena_init_with_options;
@@ -82,11 +82,11 @@ pub const Arena = extern struct {
         arena: *Arena,
         /// The options to use to initialize the arena.
         options: *ArenaOptions,
-    ) callconv(.C) void;
+    ) callconv(.c) void;
 
     /// Release all resources allocated to a memory arena.
     pub const cleanup = oc_arena_cleanup;
-    extern fn oc_arena_cleanup(arena: *Arena) callconv(.C) void;
+    extern fn oc_arena_cleanup(arena: *Arena) callconv(.c) void;
 
     /// Allocate a block of memory from an arena.
     pub fn push(
@@ -112,8 +112,8 @@ pub const Arena = extern struct {
         return @as([*]u8, @ptrCast(@alignCast(ptr)))[0..size];
     }
 
-    extern fn oc_arena_push(arena: *Arena, size: u64) callconv(.C) ?*anyopaque;
-    extern fn oc_arena_push_aligned(arena: *Arena, size: u64, alignment: u32) callconv(.C) ?*anyopaque;
+    extern fn oc_arena_push(arena: *Arena, size: u64) callconv(.c) ?*anyopaque;
+    extern fn oc_arena_push_aligned(arena: *Arena, size: u64, alignment: u32) callconv(.c) ?*anyopaque;
 
     /// Allocate a type from an arena. This macro takes care of the memory alignment and type cast.
     pub fn pushType(arena: *Arena, comptime T: type) Error!*T {
@@ -136,14 +136,14 @@ pub const Arena = extern struct {
 
     /// Reset an arena. All memory that was previously allocated from this arena is released to the arena, and can be reallocated by later calls to `oc_arena_push` and similar functions. No memory is actually released _to the system_.
     pub const clear = oc_arena_clear;
-    extern fn oc_arena_clear(arena: *Arena) callconv(.C) void;
+    extern fn oc_arena_clear(arena: *Arena) callconv(.c) void;
 
     /// Begin a memory scope. This creates an `oc_arena_scope` object that stores the current offset of the arena. The arena can later be reset to that offset by calling `oc_arena_scope_end`, releasing all memory that was allocated within the scope to the arena.
     pub const scopeBegin = oc_arena_scope_begin;
     extern fn oc_arena_scope_begin(
         /// The arena for which the scope is created.
         arena: *Arena,
-    ) callconv(.C) Scope;
+    ) callconv(.c) Scope;
 
     pub fn allocator(arena: *Arena) Allocator {
         return .{
@@ -171,11 +171,11 @@ pub const Arena = extern struct {
 /// - Allocate memory for the result upfront and call `oc_scratch_begin` afterwards, if possible.
 /// - Use `oc_scratch_begin_next()` and pass it the result arena, to get a scratch arena that does not conflict with it.
 pub const scratchBegin = oc_scratch_begin;
-extern fn oc_scratch_begin() callconv(.C) Arena.Scope;
+extern fn oc_scratch_begin() callconv(.c) Arena.Scope;
 
 /// Begin a scratch scope that does not conflict with a given arena. See `oc_scratch_begin()` for more details about when to use this function.
 pub const scratchBeginNext = oc_scratch_begin_next;
 extern fn oc_scratch_begin_next(
     /// A pointer to a memory arena that the scratch scope shouldn't interfere with.
     used: *Arena,
-) callconv(.C) Arena.Scope;
+) callconv(.c) Arena.Scope;

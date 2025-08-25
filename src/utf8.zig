@@ -28,27 +28,27 @@ pub const sizeFromLeadingChar = oc_utf8_size_from_leading_char;
 extern fn oc_utf8_size_from_leading_char(
     /// The first byte of utf8 sequence.
     leadingChar: u8,
-) callconv(.C) u32;
+) callconv(.c) u32;
 
 /// Get the size of the utf8 encoding of a codepoint.
 pub const codepointSize = oc_utf8_codepoint_size;
 extern fn oc_utf8_codepoint_size(
     /// A unicode codepoint.
     codePoint: Utf32,
-) callconv(.C) u32;
+) callconv(.c) u32;
 
 pub const codepointCountForString = oc_utf8_codepoint_count_for_string;
 extern fn oc_utf8_codepoint_count_for_string(
     /// A utf8 encoded string.
     string: oc.strings.Str8,
-) callconv(.C) u64;
+) callconv(.c) u64;
 
 /// Get the length of the utf8 encoding of a sequence of unicode codepoints.
 pub const byteCountForCodepoints = oc_utf8_byte_count_for_codepoints;
 extern fn oc_utf8_byte_count_for_codepoints(
     /// A sequence of unicode codepoints.
     codePoints: oc.strings.Str32,
-) callconv(.C) u64;
+) callconv(.c) u64;
 
 /// Get the offset of the next codepoint after a given offset, in a utf8 encoded string.
 pub const nextOffset = oc_utf8_next_offset;
@@ -57,7 +57,7 @@ extern fn oc_utf8_next_offset(
     string: oc.strings.Str8,
     /// The offset after which to look for the next codepoint, in bytes.
     byteOffset: u64,
-) callconv(.C) u64;
+) callconv(.c) u64;
 
 /// Get the offset of the previous codepoint before a given offset, in a utf8 encoded string.
 pub const prevOffset = oc_utf8_prev_offset;
@@ -66,7 +66,7 @@ extern fn oc_utf8_prev_offset(
     string: oc.strings.Str8,
     /// The offset before which to look for the previous codepoint, in bytes.
     byteOffset: u64,
-) callconv(.C) u64;
+) callconv(.c) u64;
 
 /// A type representing the result of decoding of utf8-encoded codepoint.
 pub const DecodeResult = extern struct {
@@ -83,7 +83,7 @@ pub const decode = oc_utf8_decode;
 extern fn oc_utf8_decode(
     /// A utf8-encoded codepoint.
     string: oc.strings.Str8,
-) callconv(.C) DecodeResult;
+) callconv(.c) DecodeResult;
 
 /// Decode a codepoint at a given offset in a utf8 encoded string.
 pub const decodeAt = oc_utf8_decode_at;
@@ -92,7 +92,7 @@ extern fn oc_utf8_decode_at(
     string: oc.strings.Str8,
     /// The offset at which to decode a codepoint.
     offset: u64,
-) callconv(.C) DecodeResult;
+) callconv(.c) DecodeResult;
 
 /// Encode a unicode codepoint into a utf8 sequence.
 pub const encode = oc_utf8_encode;
@@ -101,7 +101,7 @@ extern fn oc_utf8_encode(
     dst: [*c]u8,
     /// The unicode codepoint to encode.
     codePoint: Utf32,
-) callconv(.C) oc.strings.Str8;
+) callconv(.c) oc.strings.Str8;
 
 /// Decode a utf8 string to a string of unicode codepoints using memory passed by the caller.
 pub const toCodepoints = oc_utf8_to_codepoints;
@@ -112,7 +112,7 @@ extern fn oc_utf8_to_codepoints(
     backing: [*c]Utf32,
     /// A utf8 encoded string.
     string: oc.strings.Str8,
-) callconv(.C) oc.strings.Str32;
+) callconv(.c) oc.strings.Str32;
 
 /// Encode a string of unicode codepoints into a utf8 string using memory passed by the caller.
 pub const fromCodepoints = oc_utf8_from_codepoints;
@@ -123,7 +123,7 @@ extern fn oc_utf8_from_codepoints(
     backing: [*c]u8,
     /// A string of unicode codepoints.
     codePoints: oc.strings.Str32,
-) callconv(.C) oc.strings.Str8;
+) callconv(.c) oc.strings.Str8;
 
 /// Decode a utf8 encoded string to a string of unicode codepoints using an arena.
 pub const pushToCodepoints = oc_utf8_push_to_codepoints;
@@ -132,7 +132,7 @@ extern fn oc_utf8_push_to_codepoints(
     arena: [*c]oc.mem.Arena,
     /// A utf8 encoded string.
     string: oc.strings.Str8,
-) callconv(.C) oc.strings.Str32;
+) callconv(.c) oc.strings.Str32;
 
 /// Encode a string of unicode codepoints into a utf8 string using an arena.
 pub const pushFromCodepoints = oc_utf8_push_from_codepoints;
@@ -141,7 +141,7 @@ extern fn oc_utf8_push_from_codepoints(
     arena: [*c]oc.mem.Arena,
     /// A string of unicode codepoints.
     codePoints: oc.strings.Str32,
-) callconv(.C) oc.strings.Str8;
+) callconv(.c) oc.strings.Str8;
 
 /// A type representing a contiguous range of unicode codepoints.
 pub const Range = extern struct {

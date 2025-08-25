@@ -54,7 +54,7 @@ pub const Mat2x3 = extern struct {
         m: Mat2x3,
         /// The input vector. It is treated as a 3D homogeneous coordinate vector with an implicit z-coordinate equal to 1.
         p: Vec2,
-    ) callconv(.C) Vec2;
+    ) callconv(.c) Vec2;
 
     /// Multiply two affine transformations represented as 2x3 matrices. Both matrices are treated as 3x3 matrices with an implicit `(0, 0, 1)` bottom row
     pub const mulMat = oc_mat2x3_mul_m;
@@ -63,21 +63,21 @@ pub const Mat2x3 = extern struct {
         lhs: Mat2x3,
         /// The right-hand side matrix
         rhs: Mat2x3,
-    ) callconv(.C) Mat2x3;
+    ) callconv(.c) Mat2x3;
 
     /// Invert an affine transform represented as a 2x3 matrix.
     pub const invert = oc_mat2x3_inv;
     extern fn oc_mat2x3_inv(
         /// The input matrix. It is treated as a 3x3 matrix with an implicit `(0, 0, 1)` bottom row.
         x: Mat2x3,
-    ) callconv(.C) Mat2x3;
+    ) callconv(.c) Mat2x3;
 
     /// Return a 2x3 matrix representing a rotation.
     pub const rotation = oc_mat2x3_rotate;
     extern fn oc_mat2x3_rotate(
         /// The rotation angle, in radians.
         radians: f32,
-    ) callconv(.C) Mat2x3;
+    ) callconv(.c) Mat2x3;
 
     /// Return a 2x3 matrix representing a translation.
     pub const translation = oc_mat2x3_translate;
@@ -86,7 +86,7 @@ pub const Mat2x3 = extern struct {
         x: f32,
         /// The second component of the translation.
         y: f32,
-    ) callconv(.C) Mat2x3;
+    ) callconv(.c) Mat2x3;
 };
 
 /// An axis-aligned rectangle.

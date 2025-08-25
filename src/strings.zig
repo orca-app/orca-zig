@@ -155,12 +155,12 @@ fn StringList(comptime Str: type) type {
     };
 }
 
-extern fn oc_str8_list_push(arena: [*c]oc.mem.Arena, list: [*c]Str8List, str: Str8) callconv(.C) void;
-extern fn oc_str16_list_push(arena: [*c]oc.mem.Arena, list: [*c]Str16List, str: Str16) callconv(.C) void;
-extern fn oc_str32_list_push(arena: [*c]oc.mem.Arena, list: [*c]Str32List, str: Str32) callconv(.C) void;
-extern fn oc_str8_list_join(arena: [*c]oc.mem.Arena, list: Str8List) callconv(.C) Str8;
-extern fn oc_str16_list_join(arena: [*c]oc.mem.Arena, list: Str16List) callconv(.C) Str16;
-extern fn oc_str32_list_join(arena: [*c]oc.mem.Arena, list: Str32List) callconv(.C) Str32;
+extern fn oc_str8_list_push(arena: [*c]oc.mem.Arena, list: [*c]Str8List, str: Str8) callconv(.c) void;
+extern fn oc_str16_list_push(arena: [*c]oc.mem.Arena, list: [*c]Str16List, str: Str16) callconv(.c) void;
+extern fn oc_str32_list_push(arena: [*c]oc.mem.Arena, list: [*c]Str32List, str: Str32) callconv(.c) void;
+extern fn oc_str8_list_join(arena: [*c]oc.mem.Arena, list: Str8List) callconv(.c) Str8;
+extern fn oc_str16_list_join(arena: [*c]oc.mem.Arena, list: Str16List) callconv(.c) Str16;
+extern fn oc_str32_list_join(arena: [*c]oc.mem.Arena, list: Str32List) callconv(.c) Str32;
 
 // The functions below are included for compatibility. It's recommended to use the stdlib
 // for these use cases instead, specifically the `std.mem` namespace.
@@ -173,7 +173,7 @@ extern fn oc_str8_cmp(
     s1: Str8,
     /// The second string to compare.
     s2: Str8,
-) callconv(.C) i32;
+) callconv(.c) i32;
 
 /// Create a null-terminated C-string from an `oc_str8` string.
 pub const str8ToCstring = oc_str8_to_cstring;
@@ -182,7 +182,7 @@ extern fn oc_str8_to_cstring(
     arena: [*c]oc.mem.Arena,
     /// The input string.
     string: Str8,
-) callconv(.C) [*c]u8;
+) callconv(.c) [*c]u8;
 
 /// Build a string by combining the elements of a string list with a prefix, a suffix, and separators.
 pub const str8ListCollate = oc_str8_list_collate;
@@ -197,7 +197,7 @@ extern fn oc_str8_list_collate(
     separator: Str8,
     /// A suffix that is pasted at the end of the string.
     suffix: Str8,
-) callconv(.C) Str8;
+) callconv(.c) Str8;
 
 /// Split a list into a string list according to separators.
 ///
@@ -210,7 +210,7 @@ extern fn oc_str8_split(
     str: Str8,
     /// A list of separators used to split the input string.
     separators: Str8List,
-) callconv(.C) Str8List;
+) callconv(.c) Str8List;
 
 /// Split a list into a string list according to separators.
 ///
@@ -223,7 +223,7 @@ extern fn oc_str16_split(
     str: Str16,
     /// A list of separators used to split the input string.
     separators: Str16List,
-) callconv(.C) Str16List;
+) callconv(.c) Str16List;
 
 /// Split a list into a string list according to separators.
 ///
@@ -236,4 +236,4 @@ extern fn oc_str32_split(
     str: Str32,
     /// A list of separators used to split the input string.
     separators: Str32List,
-) callconv(.C) Str32List;
+) callconv(.c) Str32List;

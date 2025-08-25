@@ -470,29 +470,29 @@ pub const windowSetTitle = oc_window_set_title;
 extern fn oc_window_set_title(
     /// The title to display in the title bar of the application.
     title: oc.strings.Str8,
-) callconv(.C) void;
+) callconv(.c) void;
 
 /// Set the size of the application's window.
 pub const windowSetSize = oc_window_set_size;
 extern fn oc_window_set_size(
     /// The new size of the application's window.
     size: oc.math.Vec2,
-) callconv(.C) void;
+) callconv(.c) void;
 
 /// Request the system to quit the application.
 pub const requestQuit = oc_request_quit;
-extern fn oc_request_quit() callconv(.C) void;
+extern fn oc_request_quit() callconv(.c) void;
 
 /// Convert a scancode to a keycode, according to current keyboard layout.
 pub const scancodeToKeycode = oc_scancode_to_keycode;
 extern fn oc_scancode_to_keycode(
     /// The scan code to convert.
     scanCode: ScanCode,
-) callconv(.C) KeyCode;
+) callconv(.c) KeyCode;
 
 /// Put a string in the clipboard.
 pub const clipboardSetString = oc_clipboard_set_string;
 extern fn oc_clipboard_set_string(
     /// A string to put in the clipboard.
     string: oc.strings.Str8,
-) callconv(.C) void;
+) callconv(.c) void;

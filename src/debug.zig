@@ -20,7 +20,7 @@ pub const log = struct {
     extern fn oc_log_set_level(
         /// The desired logging level. Messages whose level is below this threshold will not be logged.
         level: Level,
-    ) callconv(.C) void;
+    ) callconv(.c) void;
 
     /// Log a informative message to the console.
     pub fn info(comptime fmt: []const u8, args: anytype, source: SourceLocation) void {
@@ -63,7 +63,7 @@ pub const log = struct {
         fmt: [*c]u8,
         /// Additional arguments of the message
         ...,
-    ) callconv(.C) void;
+    ) callconv(.c) void;
 };
 
 /// Test a given condition, and abort the application if it is false.
@@ -102,7 +102,7 @@ extern fn oc_assert_fail(
     fmt: [*c]u8,
     /// Additional arguments for the error message.
     ...,
-) callconv(.C) void;
+) callconv(.c) void;
 
 /// Abort the application, showing an error message.
 pub fn abort(comptime fmt: []const u8, args: anytype, source: SourceLocation) noreturn {
@@ -131,7 +131,7 @@ extern fn oc_abort_ext(
     fmt: [*c]u8,
     /// Additional arguments for the abort message.
     ...,
-) callconv(.C) void;
+) callconv(.c) void;
 
 fn formatLog(format_buf: [:0]u8, comptime fmt: []const u8, args: anytype) void {
     _ = std.fmt.bufPrintZ(format_buf, fmt, args) catch {

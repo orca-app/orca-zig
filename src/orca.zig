@@ -104,55 +104,55 @@ pub fn exportEventHandlers() void {
 
 const root = @import("root");
 
-fn oc_on_init() callconv(.C) void {
+fn oc_on_init() callconv(.c) void {
     callHandler("onInit", .{}, @src());
 }
 
-fn oc_on_mouse_down(button: app.MouseButton) callconv(.C) void {
+fn oc_on_mouse_down(button: app.MouseButton) callconv(.c) void {
     callHandler("onMouseDown", .{button}, @src());
 }
 
-fn oc_on_mouse_up(button: app.MouseButton) callconv(.C) void {
+fn oc_on_mouse_up(button: app.MouseButton) callconv(.c) void {
     callHandler("onMouseUp", .{button}, @src());
 }
 
-fn oc_on_mouse_enter() callconv(.C) void {
+fn oc_on_mouse_enter() callconv(.c) void {
     callHandler("onMouseEnter", .{}, @src());
 }
 
-fn oc_on_mouse_leave() callconv(.C) void {
+fn oc_on_mouse_leave() callconv(.c) void {
     callHandler("onMouseLeave", .{}, @src());
 }
 
-fn oc_on_mouse_move(x: f32, y: f32, deltaX: f32, deltaY: f32) callconv(.C) void {
+fn oc_on_mouse_move(x: f32, y: f32, deltaX: f32, deltaY: f32) callconv(.c) void {
     callHandler("onMouseMove", .{ x, y, deltaX, deltaY }, @src());
 }
 
-fn oc_on_mouse_wheel(deltaX: f32, deltaY: f32) callconv(.C) void {
+fn oc_on_mouse_wheel(deltaX: f32, deltaY: f32) callconv(.c) void {
     callHandler("onMouseWheel", .{ deltaX, deltaY }, @src());
 }
 
-fn oc_on_key_down(scan: app.ScanCode, key: app.KeyCode) callconv(.C) void {
+fn oc_on_key_down(scan: app.ScanCode, key: app.KeyCode) callconv(.c) void {
     callHandler("onKeyDown", .{ scan, key }, @src());
 }
 
-fn oc_on_key_up(scan: app.ScanCode, key: app.KeyCode) callconv(.C) void {
+fn oc_on_key_up(scan: app.ScanCode, key: app.KeyCode) callconv(.c) void {
     callHandler("onKeyUp", .{ scan, key }, @src());
 }
 
-fn oc_on_frame_refresh() callconv(.C) void {
+fn oc_on_frame_refresh() callconv(.c) void {
     callHandler("onFrameRefresh", .{}, @src());
 }
 
-fn oc_on_resize(width: u32, height: u32) callconv(.C) void {
+fn oc_on_resize(width: u32, height: u32) callconv(.c) void {
     callHandler("onResize", .{ width, height }, @src());
 }
 
-fn oc_on_raw_event(c_event: *app.Event) callconv(.C) void {
+fn oc_on_raw_event(c_event: *app.Event) callconv(.c) void {
     callHandler("onRawEvent", .{c_event}, @src());
 }
 
-fn oc_on_terminate() callconv(.C) void {
+fn oc_on_terminate() callconv(.c) void {
     callHandler("onTerminate", .{}, @src());
 }
 

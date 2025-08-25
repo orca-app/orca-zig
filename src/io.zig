@@ -235,7 +235,7 @@ pub const ioWaitSingleReq = oc_io_wait_single_req;
 extern fn oc_io_wait_single_req(
     /// The I/O request to send.
     req: [*c]Request,
-) callconv(.C) Completion;
+) callconv(.c) Completion;
 
 //------------------------------------------------------------------------------------------
 // [Dialogs] API for obtaining file capabilities through open/save dialogs.
@@ -269,4 +269,4 @@ extern fn oc_file_open_with_dialog(
     flags: File.OpenFlags,
     /// A structure controlling the options of the file dialog window.
     desc: [*c]oc.app.FileDialogDesc,
-) callconv(.C) FileOpenWithDialogResult;
+) callconv(.c) FileOpenWithDialogResult;

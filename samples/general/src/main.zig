@@ -290,18 +290,17 @@ pub fn onFrameRefresh() !void {
 
         const scratch = scratch_scope.arena.allocator();
 
-        var strings_array = std.ArrayList([]const u8).init(scratch);
-        defer strings_array.deinit();
-        try strings_array.append("This ");
-        try strings_array.append("is");
-        try strings_array.append(" |a");
-        try strings_array.append("one-word string that ");
-        try strings_array.append(" |  has");
-        try strings_array.append(" no ");
-        try strings_array.append("    spaces i");
-        try strings_array.append("n it");
+        var strings_array: std.ArrayList([]const u8) = try .initCapacity(scratch, 8);
+        strings_array.appendAssumeCapacity("This ");
+        strings_array.appendAssumeCapacity("is");
+        strings_array.appendAssumeCapacity(" |a");
+        strings_array.appendAssumeCapacity("one-word string that ");
+        strings_array.appendAssumeCapacity(" |  has");
+        strings_array.appendAssumeCapacity(" no ");
+        strings_array.appendAssumeCapacity("    spaces i");
+        strings_array.appendAssumeCapacity("n it");
 
-        var single_string: std.ArrayListUnmanaged(u8) = .empty;
+        var single_string: std.ArrayList(u8) = .empty;
         for (strings_array.items) |str| {
             try single_string.appendSlice(scratch, str);
         }
@@ -314,7 +313,7 @@ pub fn onFrameRefresh() !void {
                 size += tok.len;
             }
 
-            var array: std.ArrayListUnmanaged(u8) = try .initCapacity(scratch, size);
+            var array: std.ArrayList(u8) = try .initCapacity(scratch, size);
             iter.reset();
 
             while (iter.next()) |tok| {
