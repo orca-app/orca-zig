@@ -193,7 +193,7 @@ fn widgets(arena: *oc.mem.Arena) !void {
             // Button
             //-----------------------------------------------------------------------------
             if (ui.button("button", "Button").clicked) {
-                logPush("Button clicked");
+                try logPush("Button clicked");
             }
 
             {
@@ -210,9 +210,9 @@ fn widgets(arena: *oc.mem.Arena) !void {
                 //-------------------------------------------------------------------------
                 if (ui.checkbox("checkbox", &checkbox_checked).clicked) {
                     if (checkbox_checked) {
-                        logPush("Checkbox checked");
+                        try logPush("Checkbox checked");
                     } else {
-                        logPush("Checkbox unhecked");
+                        try logPush("Checkbox unhecked");
                     }
                 }
 
@@ -306,11 +306,13 @@ fn widgets(arena: *oc.mem.Arena) !void {
         const result = ui.textBoxStr8(oc.toStr8("text"), arena, &text_info);
         if (result.changed) {
             text_arena.clear();
-            text_info.text = try result.text.pushCopy(&text_arena);
+            if (result.text.len > 0)
+                text_info.text = try result.text.pushCopy(&text_arena)
+            else
+                text_info.text.len = 0;
         }
         if (result.accepted) {
-            // @Bug this code never seems to run?
-            try logPushf("Entered text {s}", .{text_info.text.toSlice()});
+            try logPushf("Entered text: {s}", .{text_info.text.toSlice()});
         }
     }
 
@@ -840,12 +842,12 @@ fn labeledSlider(label: []const u8, value: *f32) void {
     _ = ui.slider("slider", value);
 }
 
-fn logPush(line: []const u8) void {
-    log_lines.push(&log_arena, oc.toStr8(line));
+fn logPush(line: []const u8) oc.mem.Arena.Error!void {
+    const str = try log_arena.pushCopy(u8, line);
+    log_lines.push(&log_arena, .fromSlice(str));
 }
 
 fn logPushf(comptime fmt: []const u8, args: anytype) oc.mem.Arena.Error!void {
-    const size: usize = @intCast(std.fmt.count(fmt, args));
-    const str = oc.toStr8(try log_arena.push(size));
-    log_lines.push(&log_arena, str);
+    const str = try std.fmt.allocPrint(log_arena.allocator(), fmt, args);
+    log_lines.push(&log_arena, .fromSlice(str));
 }
