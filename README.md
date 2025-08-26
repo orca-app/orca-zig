@@ -10,7 +10,7 @@ As more APIs get tested and ergonomics are worked out, there is a possibility of
 Because we want to improve Orca's API metadata for everyone. By using `api.json` as our only Source of Truth, any gaps or missing/ambiguous types in the bindings highlight missing information in the metadata. Once the missing information is upstreamed, all other bindings projects can benefit, *including the C API*.
 
 ## Usage
-First you must have installed the Orca runtime (specifically the version these bindings target) and ensured the `orca` executable is in your `PATH`. Zig version `0.14` is required. Then, add `orca` to your `build.zig.zon`:
+First you must have installed the Orca runtime (specifically the version these bindings target) and ensured the `orca` executable is in your `PATH`. Zig version `0.15` is required. Then, add `orca` to your `build.zig.zon`:
 
 ```sh
 zig fetch --save git+https://github.com/orca-app/orca-zig
