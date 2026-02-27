@@ -69,15 +69,13 @@ pub const log = struct {
 /// Test a given condition, and abort the application if it is false.
 pub fn assert(condition: bool, comptime fmt: []const u8, args: anytype, source: SourceLocation) void {
     if ((builtin.mode == .Debug or builtin.mode == .ReleaseSafe) and !condition) {
+        @branchHint(.cold);
         var format_buf: [512:0]u8 = undefined;
         formatLog(&format_buf, fmt, args);
         oc_assert_fail(
             @constCast(source.file),
             @constCast(source.fn_name),
             @intCast(source.line),
-            // @Improvement if the bindings are modified to not take over the root,
-            // we can conditionally embed the source file and include the exact line here
-            // since `source` is comptime known.
             @constCast(""),
             &format_buf,
         );
