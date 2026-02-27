@@ -466,33 +466,31 @@ pub const FileDialogResult = extern struct {
 };
 
 /// Set the title of the application's window.
-pub const windowSetTitle = oc_window_set_title;
-extern fn oc_window_set_title(
+pub const windowSetTitle = @extern(*const fn (
     /// The title to display in the title bar of the application.
     title: oc.strings.Str8,
-) callconv(.c) void;
+) callconv(.c) void, .{ .name = "oc_window_set_title" });
 
 /// Set the size of the application's window.
-pub const windowSetSize = oc_window_set_size;
-extern fn oc_window_set_size(
+pub const windowSetSize = @extern(*const fn (
     /// The new size of the application's window.
     size: oc.math.Vec2,
-) callconv(.c) void;
+) callconv(.c) void, .{ .name = "oc_window_set_size" });
 
 /// Request the system to quit the application.
-pub const requestQuit = oc_request_quit;
-extern fn oc_request_quit() callconv(.c) void;
+pub const requestQuit = @extern(
+    *const fn () callconv(.c) void,
+    .{ .name = "oc_request_quit" },
+);
 
 /// Convert a scancode to a keycode, according to current keyboard layout.
-pub const scancodeToKeycode = oc_scancode_to_keycode;
-extern fn oc_scancode_to_keycode(
+pub const scancodeToKeycode = @extern(*const fn (
     /// The scan code to convert.
     scanCode: ScanCode,
-) callconv(.c) KeyCode;
+) callconv(.c) KeyCode, .{ .name = "oc_scancode_to_keycode" });
 
 /// Put a string in the clipboard.
-pub const clipboardSetString = oc_clipboard_set_string;
-extern fn oc_clipboard_set_string(
+pub const clipboardSetString = @extern(*const fn (
     /// A string to put in the clipboard.
     string: oc.strings.Str8,
-) callconv(.c) void;
+) callconv(.c) void, .{ .name = "oc_clipboard_set_string" });

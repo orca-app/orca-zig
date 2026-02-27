@@ -38,76 +38,69 @@ pub const List = extern struct {
     pub const empty: List = .{ .first = null, .last = null };
 
     /// Check if a list is empty.
-    pub const isEmpty = oc_list_empty;
-    extern fn oc_list_empty(list: List) callconv(.c) bool;
+    pub const isEmpty = @extern(*const fn (
+        list: List,
+    ) callconv(.c) bool, .{ .name = "oc_list_empty" }).*;
 
     /// Zero-initializes a linked list.
-    pub const init = oc_list_init;
-    extern fn oc_list_init(
+    pub const init = @extern(*const fn (
         /// A pointer to the list to initialize.
         list: [*c]List,
-    ) callconv(.c) void;
+    ) callconv(.c) void, .{ .name = "oc_list_init" }).*;
 
     /// Insert an element in a list after a given element.
-    pub const insert = oc_list_insert;
-    extern fn oc_list_insert(
+    pub const insert = @extern(*const fn (
         list: [*c]List,
         afterElt: [*c]Elem,
         /// The element to insert in the list.
         elt: [*c]Elem,
-    ) callconv(.c) void;
+    ) callconv(.c) void, .{ .name = "oc_list_insert" }).*;
 
     /// Insert an element in a list before a given element.
-    pub const insertBefore = oc_list_insert_before;
-    extern fn oc_list_insert_before(
+    pub const insertBefore = @extern(*const fn (
         /// The list to insert in.
         list: [*c]List,
         /// The element before which to insert.
         beforeElt: [*c]Elem,
         /// The element to insert in the list.
         elt: [*c]Elem,
-    ) callconv(.c) void;
+    ) callconv(.c) void, .{ .name = "oc_list_insert_before" }).*;
 
     /// Remove an element from a list.
-    pub const remove = oc_list_remove;
-    extern fn oc_list_remove(
+    pub const remove = @extern(*const fn (
         /// The list to remove from.
         list: [*c]List,
         /// The element to remove from the list.
         elt: [*c]Elem,
-    ) callconv(.c) void;
+    ) callconv(.c) void, .{ .name = "oc_list_remove" }).*;
 
     /// Add an element at the end of a list.
-    pub const pushBack = oc_list_push_back;
-    extern fn oc_list_push_back(
+    pub const pushBack = @extern(*const fn (
         /// The list to add an element to.
         list: [*c]List,
         /// The element to add to the list.
         elt: [*c]Elem,
-    ) callconv(.c) void;
+    ) callconv(.c) void, .{ .name = "oc_list_push_back" }).*;
 
     /// Remove the last element from a list.
-    pub const popBack = oc_list_pop_back;
-    extern fn oc_list_pop_back(
+    pub const popBack = @extern(*const fn (
         /// The list to remove an element from.
         list: [*c]List,
-    ) callconv(.c) [*c]Elem;
+    ) callconv(.c) [*c]Elem, .{ .name = "oc_list_pop_back" }).*;
 
     /// Add an element at the beginning of a list.
-    pub const pushFront = oc_list_push_front;
-    extern fn oc_list_push_front(
+    pub const pushFront = @extern(*const fn (
         /// The list to add an element to.
         list: [*c]List,
         /// The element to add to the list.
         elt: [*c]Elem,
-    ) callconv(.c) void;
+    ) callconv(.c) void, .{ .name = "oc_list_push_front" }).*;
 
     /// Remove the first element from a list.
-    pub const popFront = oc_list_pop_front;
-    extern fn oc_list_pop_front(
+    pub const popFront = @extern(*const fn (
         /// The list to remove an element from.
         list: [*c]List,
-    ) callconv(.c) [*c]Elem;
+    ) callconv(.c) [*c]Elem, .{ .name = "oc_list_pop_front" }).*;
 
     pub const IterateOptions = struct {
         reversed: bool = false,

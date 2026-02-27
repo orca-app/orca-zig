@@ -8,10 +8,15 @@ pub const File = enum(u64) {
     _,
 
     /// Returns a `nil` file handle
-    pub const nil = oc_file_nil;
+    pub const nil = @extern(
+        *const fn () callconv(.c) File,
+        .{ .name = "oc_file_nil" },
+    );
 
     /// Test if a file handle is `nil`.
-    pub const isNil = oc_file_is_nil;
+    pub const isNil = @extern(*const fn (
+        handle: File,
+    ) callconv(.c) bool, .{ .name = "oc_file_is_nil" }).*;
 
     // @Api should be marked as a bitflags type
     /// The type of file open flags describing file open options.
@@ -88,7 +93,9 @@ pub const File = enum(u64) {
     }
 
     /// Close a file.
-    pub const close = oc_file_close;
+    pub const close = @extern(*const fn (
+        file: File,
+    ) callconv(.c) void, .{ .name = "oc_file_close" }).*;
 
     /// Get the current position in a file.
     pub fn pos(file: File) oc.io.Error!i64 {
@@ -222,12 +229,10 @@ pub const File = enum(u64) {
         return handle.oc_file_last_error().toError() orelse {};
     }
 
-    extern fn oc_file_nil() callconv(.c) File;
-    extern fn oc_file_is_nil(handle: File) callconv(.c) bool;
     extern fn oc_file_open(path: oc.strings.Str8, rights: AccessFlags, flags: OpenFlags) callconv(.c) File;
     extern fn oc_file_open_with_request(path: oc.strings.Str8, rights: AccessFlags, flags: OpenFlags) callconv(.c) File;
     extern fn oc_file_open_at(dir: File, path: oc.strings.Str8, rights: AccessFlags, flags: OpenFlags) callconv(.c) File;
-    extern fn oc_file_close(file: File) callconv(.c) void;
+
     extern fn oc_file_pos(file: File) callconv(.c) i64;
     extern fn oc_file_seek(file: File, offset: i64, whence: Whence) callconv(.c) i64;
     extern fn oc_file_write(file: File, size: u64, buffer: [*c]u8) callconv(.c) u64;

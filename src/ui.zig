@@ -56,137 +56,114 @@ pub const InputState = extern struct {
     clipboard: ClipboardState,
 };
 
-pub const inputProcessEvent = oc_input_process_event;
-extern fn oc_input_process_event(
+pub const inputProcessEvent = @extern(*const fn (
     arena: [*c]oc.mem.Arena,
     state: [*c]InputState,
     event: [*c]oc.app.Event,
-) callconv(.c) void;
+) callconv(.c) void, .{ .name = "oc_input_process_event" });
 
-pub const inputNextFrame = oc_input_next_frame;
-extern fn oc_input_next_frame(
+pub const inputNextFrame = @extern(*const fn (
     state: [*c]InputState,
-) callconv(.c) void;
+) callconv(.c) void, .{ .name = "oc_input_next_frame" });
 
-pub const keyDown = oc_key_down;
-extern fn oc_key_down(
+pub const keyDown = @extern(*const fn (
     state: [*c]InputState,
     key: oc.app.KeyCode,
-) callconv(.c) bool;
+) callconv(.c) bool, .{ .name = "oc_key_down" });
 
-pub const keyPressCount = oc_key_press_count;
-extern fn oc_key_press_count(
+pub const keyPressCount = @extern(*const fn (
     state: [*c]InputState,
     key: oc.app.KeyCode,
-) callconv(.c) u8;
+) callconv(.c) u8, .{ .name = "oc_key_press_count" });
 
-pub const keyReleaseCount = oc_key_release_count;
-extern fn oc_key_release_count(
+pub const keyReleaseCount = @extern(*const fn (
     state: [*c]InputState,
     key: oc.app.KeyCode,
-) callconv(.c) u8;
+) callconv(.c) u8, .{ .name = "oc_key_release_count" });
 
-pub const keyRepeatCount = oc_key_repeat_count;
-extern fn oc_key_repeat_count(
+pub const keyRepeatCount = @extern(*const fn (
     state: [*c]InputState,
     key: oc.app.KeyCode,
-) callconv(.c) u8;
+) callconv(.c) u8, .{ .name = "oc_key_repeat_count" });
 
-pub const keyDownScancode = oc_key_down_scancode;
-extern fn oc_key_down_scancode(
+pub const keyDownScancode = @extern(*const fn (
     state: [*c]InputState,
     key: oc.app.ScanCode,
-) callconv(.c) bool;
+) callconv(.c) bool, .{ .name = "oc_key_down_scancode" });
 
-pub const keyPressCountScancode = oc_key_press_count_scancode;
-extern fn oc_key_press_count_scancode(
+pub const keyPressCountScancode = @extern(*const fn (
     state: [*c]InputState,
     key: oc.app.ScanCode,
-) callconv(.c) u8;
+) callconv(.c) u8, .{ .name = "oc_key_press_count_scancode" });
 
-pub const keyReleaseCountScancode = oc_key_release_count_scancode;
-extern fn oc_key_release_count_scancode(
+pub const keyReleaseCountScancode = @extern(*const fn (
     state: [*c]InputState,
     key: oc.app.ScanCode,
-) callconv(.c) u8;
+) callconv(.c) u8, .{ .name = "oc_key_release_count_scancode" });
 
-pub const keyRepeatCountScancode = oc_key_repeat_count_scancode;
-extern fn oc_key_repeat_count_scancode(
+pub const keyRepeatCountScancode = @extern(*const fn (
     state: [*c]InputState,
     key: oc.app.ScanCode,
-) callconv(.c) u8;
+) callconv(.c) u8, .{ .name = "oc_key_repeat_count_scancode" });
 
-pub const mouseDown = oc_mouse_down;
-extern fn oc_mouse_down(
+pub const mouseDown = @extern(*const fn (
     state: [*c]InputState,
     button: oc.app.MouseButton,
-) callconv(.c) bool;
+) callconv(.c) bool, .{ .name = "oc_mouse_down" });
 
-pub const mousePressed = oc_mouse_pressed;
-extern fn oc_mouse_pressed(
+pub const mousePressed = @extern(*const fn (
     state: [*c]InputState,
     button: oc.app.MouseButton,
-) callconv(.c) u8;
+) callconv(.c) u8, .{ .name = "oc_mouse_pressed" });
 
-pub const mouseReleased = oc_mouse_released;
-extern fn oc_mouse_released(
+pub const mouseReleased = @extern(*const fn (
     state: [*c]InputState,
     button: oc.app.MouseButton,
-) callconv(.c) u8;
+) callconv(.c) u8, .{ .name = "oc_mouse_released" });
 
-pub const mouseClicked = oc_mouse_clicked;
-extern fn oc_mouse_clicked(
+pub const mouseClicked = @extern(*const fn (
     state: [*c]InputState,
     button: oc.app.MouseButton,
-) callconv(.c) bool;
+) callconv(.c) bool, .{ .name = "oc_mouse_clicked" });
 
-pub const mouseDoubleClicked = oc_mouse_double_clicked;
-extern fn oc_mouse_double_clicked(
+pub const mouseDoubleClicked = @extern(*const fn (
     state: [*c]InputState,
     button: oc.app.MouseButton,
-) callconv(.c) bool;
+) callconv(.c) bool, .{ .name = "oc_mouse_double_clicked" });
 
-pub const mousePosition = oc_mouse_position;
-extern fn oc_mouse_position(
+pub const mousePosition = @extern(*const fn (
     state: [*c]InputState,
-) callconv(.c) oc.math.Vec2;
+) callconv(.c) oc.math.Vec2, .{ .name = "oc_mouse_position" });
 
-pub const mouseDelta = oc_mouse_delta;
-extern fn oc_mouse_delta(
+pub const mouseDelta = @extern(*const fn (
     state: [*c]InputState,
-) callconv(.c) oc.math.Vec2;
+) callconv(.c) oc.math.Vec2, .{ .name = "oc_mouse_delta" });
 
-pub const mouseWheel = oc_mouse_wheel;
-extern fn oc_mouse_wheel(
+pub const mouseWheel = @extern(*const fn (
     state: [*c]InputState,
-) callconv(.c) oc.math.Vec2;
+) callconv(.c) oc.math.Vec2, .{ .name = "oc_mouse_wheel" });
 
-pub const inputTextUtf32 = oc_input_text_utf32;
-extern fn oc_input_text_utf32(
+pub const inputTextUtf32 = @extern(*const fn (
     arena: [*c]oc.mem.Arena,
     state: [*c]InputState,
-) callconv(.c) oc.strings.Str32;
+) callconv(.c) oc.strings.Str32, .{ .name = "oc_input_text_utf32" });
 
-pub const inputTextUtf8 = oc_input_text_utf8;
-extern fn oc_input_text_utf8(
+pub const inputTextUtf8 = @extern(*const fn (
     arena: [*c]oc.mem.Arena,
     state: [*c]InputState,
-) callconv(.c) oc.strings.Str8;
+) callconv(.c) oc.strings.Str8, .{ .name = "oc_input_text_utf8" });
 
-pub const clipboardPasted = oc_clipboard_pasted;
-extern fn oc_clipboard_pasted(
+pub const clipboardPasted = @extern(*const fn (
     state: [*c]InputState,
-) callconv(.c) bool;
+) callconv(.c) bool, .{ .name = "oc_clipboard_pasted" });
 
-pub const clipboardPastedText = oc_clipboard_pasted_text;
-extern fn oc_clipboard_pasted_text(
+pub const clipboardPastedText = @extern(*const fn (
     state: [*c]InputState,
-) callconv(.c) oc.strings.Str8;
+) callconv(.c) oc.strings.Str8, .{ .name = "oc_clipboard_pasted_text" });
 
-pub const keyMods = oc_key_mods;
-extern fn oc_key_mods(
+pub const keyMods = @extern(*const fn (
     state: [*c]InputState,
-) callconv(.c) oc.app.KeymodFlags;
+) callconv(.c) oc.app.KeymodFlags, .{ .name = "oc_key_mods" });
 
 //------------------------------------------------------------------------------------------
 // [UI Core] Graphical User Interface Core API.
@@ -410,169 +387,169 @@ pub const Box = extern struct {
     activeTransition: f32,
 };
 
-pub const contextCreate = oc_ui_context_create;
-extern fn oc_ui_context_create(
+pub const contextCreate = @extern(*const fn (
     defaultFont: oc.graphics.canvas.Font,
-) callconv(.c) ?*Context;
+) callconv(.c) ?*Context, .{ .name = "oc_ui_context_create" });
 
-pub const contextDestroy = oc_ui_context_destroy;
-extern fn oc_ui_context_destroy(
+pub const contextDestroy = @extern(*const fn (
     context: ?*Context,
-) callconv(.c) void;
+) callconv(.c) void, .{ .name = "oc_ui_context_destroy" });
 
-pub const getContext = oc_ui_get_context;
-extern fn oc_ui_get_context() callconv(.c) ?*Context;
+pub const getContext = @extern(
+    *const fn () callconv(.c) ?*Context,
+    .{ .name = "oc_ui_get_context" },
+);
 
-pub const setContext = oc_ui_set_context;
-extern fn oc_ui_set_context(
+pub const setContext = @extern(*const fn (
     context: ?*Context,
-) callconv(.c) void;
+) callconv(.c) void, .{ .name = "oc_ui_set_context" });
 
-pub const processEvent = oc_ui_process_event;
-extern fn oc_ui_process_event(
+pub const processEvent = @extern(*const fn (
     event: [*c]oc.app.Event,
-) callconv(.c) void;
+) callconv(.c) void, .{ .name = "oc_ui_process_event" });
 
-pub const frameBegin = oc_ui_frame_begin;
-extern fn oc_ui_frame_begin(
+pub const frameBegin = @extern(*const fn (
     size: oc.math.Vec2,
-) callconv(.c) void;
+) callconv(.c) void, .{ .name = "oc_ui_frame_begin" });
 
-pub const frameEnd = oc_ui_frame_end;
-extern fn oc_ui_frame_end() callconv(.c) void;
+pub const frameEnd = @extern(
+    *const fn () callconv(.c) void,
+    .{ .name = "oc_ui_frame_end" },
+);
 
-pub const draw = oc_ui_draw;
-extern fn oc_ui_draw() callconv(.c) void;
+pub const draw = @extern(
+    *const fn () callconv(.c) void,
+    .{ .name = "oc_ui_draw" },
+);
 
-pub const input = oc_ui_input;
-extern fn oc_ui_input() callconv(.c) [*c]InputState;
+pub const input = @extern(
+    *const fn () callconv(.c) [*c]InputState,
+    .{ .name = "oc_ui_input" },
+);
 
-pub const frameArena = oc_ui_frame_arena;
-extern fn oc_ui_frame_arena() callconv(.c) [*c]oc.mem.Arena;
+pub const frameArena = @extern(
+    *const fn () callconv(.c) [*c]oc.mem.Arena,
+    .{ .name = "oc_ui_frame_arena" },
+);
 
-pub const frameTime = oc_ui_frame_time;
-extern fn oc_ui_frame_time() callconv(.c) f64;
+pub const frameTime = @extern(
+    *const fn () callconv(.c) f64,
+    .{ .name = "oc_ui_frame_time" },
+);
 
-pub const boxBeginStr8 = oc_ui_box_begin_str8;
-extern fn oc_ui_box_begin_str8(
+pub const boxBeginStr8 = @extern(*const fn (
     string: oc.strings.Str8,
-) callconv(.c) [*c]Box;
+) callconv(.c) [*c]Box, .{ .name = "oc_ui_box_begin_str8" });
 
-pub const boxEnd = oc_ui_box_end;
-extern fn oc_ui_box_end() callconv(.c) [*c]Box;
+pub const boxEnd = @extern(
+    *const fn () callconv(.c) [*c]Box,
+    .{ .name = "oc_ui_box_end" },
+);
 
-pub const boxSetDrawProc = oc_ui_box_set_draw_proc;
-extern fn oc_ui_box_set_draw_proc(
+pub const boxSetDrawProc = @extern(*const fn (
     box: [*c]Box,
     proc: BoxDrawProc,
     data: ?*anyopaque,
-) callconv(.c) void;
+) callconv(.c) void, .{ .name = "oc_ui_box_set_draw_proc" });
 
-pub const boxSetText = oc_ui_box_set_text;
-extern fn oc_ui_box_set_text(
+pub const boxSetText = @extern(*const fn (
     box: [*c]Box,
     text: oc.strings.Str8,
-) callconv(.c) void;
+) callconv(.c) void, .{ .name = "oc_ui_box_set_text" });
 
-pub const boxSetOverlay = oc_ui_box_set_overlay;
-extern fn oc_ui_box_set_overlay(
+pub const boxSetOverlay = @extern(*const fn (
     box: [*c]Box,
     overlay: bool,
-) callconv(.c) void;
+) callconv(.c) void, .{ .name = "oc_ui_box_set_overlay" });
 
-pub const boxSetClosed = oc_ui_box_set_closed;
-extern fn oc_ui_box_set_closed(
+pub const boxSetClosed = @extern(*const fn (
     box: [*c]Box,
     closed: bool,
-) callconv(.c) void;
+) callconv(.c) void, .{ .name = "oc_ui_box_set_closed" });
 
-pub const boxUserDataGet = oc_ui_box_user_data_get;
-extern fn oc_ui_box_user_data_get(
+pub const boxUserDataGet = @extern(*const fn (
     box: [*c]Box,
-) callconv(.c) [*c]u8;
+) callconv(.c) [*c]u8, .{ .name = "oc_ui_box_user_data_get" });
 
-pub const boxUserDataPush = oc_ui_box_user_data_push;
-extern fn oc_ui_box_user_data_push(
+pub const boxUserDataPush = @extern(*const fn (
     box: [*c]Box,
     size: u64,
-) callconv(.c) [*c]u8;
+) callconv(.c) [*c]u8, .{ .name = "oc_ui_box_user_data_push" });
 
-pub const boxRequestFocus = oc_ui_box_request_focus;
-extern fn oc_ui_box_request_focus(
+pub const boxRequestFocus = @extern(*const fn (
     box: [*c]Box,
-) callconv(.c) void;
+) callconv(.c) void, .{ .name = "oc_ui_box_request_focus" });
 
-pub const boxReleaseFocus = oc_ui_box_release_focus;
-extern fn oc_ui_box_release_focus(
+pub const boxReleaseFocus = @extern(*const fn (
     box: [*c]Box,
-) callconv(.c) void;
+) callconv(.c) void, .{ .name = "oc_ui_box_release_focus" });
 
-pub const boxGetSig = oc_ui_box_get_sig;
-extern fn oc_ui_box_get_sig(
+pub const boxGetSig = @extern(*const fn (
     box: [*c]Box,
-) callconv(.c) Sig;
+) callconv(.c) Sig, .{ .name = "oc_ui_box_get_sig" });
 
-pub const setDrawProc = oc_ui_set_draw_proc;
-extern fn oc_ui_set_draw_proc(
+pub const setDrawProc = @extern(*const fn (
     proc: BoxDrawProc,
     data: ?*anyopaque,
-) callconv(.c) void;
+) callconv(.c) void, .{ .name = "oc_ui_set_draw_proc" });
 
-pub const setText = oc_ui_set_text;
-extern fn oc_ui_set_text(
+pub const setText = @extern(*const fn (
     text: oc.strings.Str8,
-) callconv(.c) void;
+) callconv(.c) void, .{ .name = "oc_ui_set_text" });
 
-pub const setOverlay = oc_ui_set_overlay;
-extern fn oc_ui_set_overlay(
+pub const setOverlay = @extern(*const fn (
     overlay: bool,
-) callconv(.c) void;
+) callconv(.c) void, .{ .name = "oc_ui_set_overlay" });
 
-pub const setClosed = oc_ui_set_closed;
-extern fn oc_ui_set_closed(
+pub const setClosed = @extern(*const fn (
     closed: bool,
-) callconv(.c) void;
+) callconv(.c) void, .{ .name = "oc_ui_set_closed" });
 
-pub const userDataGet = oc_ui_user_data_get;
-extern fn oc_ui_user_data_get() callconv(.c) [*c]u8;
+pub const userDataGet = @extern(
+    *const fn () callconv(.c) [*c]u8,
+    .{ .name = "oc_ui_user_data_get" },
+);
 
-pub const userDataPush = oc_ui_user_data_push;
-extern fn oc_ui_user_data_push(
+pub const userDataPush = @extern(*const fn (
     size: u64,
-) callconv(.c) [*c]u8;
+) callconv(.c) [*c]u8, .{ .name = "oc_ui_user_data_push" });
 
-pub const requestFocus = oc_ui_request_focus;
-extern fn oc_ui_request_focus() callconv(.c) void;
+pub const requestFocus = @extern(
+    *const fn () callconv(.c) void,
+    .{ .name = "oc_ui_request_focus" },
+);
 
-pub const releaseFocus = oc_ui_release_focus;
-extern fn oc_ui_release_focus() callconv(.c) void;
+pub const releaseFocus = @extern(
+    *const fn () callconv(.c) void,
+    .{ .name = "oc_ui_release_focus" },
+);
 
-pub const getSig = oc_ui_get_sig;
-extern fn oc_ui_get_sig() callconv(.c) Sig;
+pub const getSig = @extern(
+    *const fn () callconv(.c) Sig,
+    .{ .name = "oc_ui_get_sig" },
+);
 
-pub const boxTagStr8 = oc_ui_box_tag_str8;
-extern fn oc_ui_box_tag_str8(
+pub const boxTagStr8 = @extern(*const fn (
     box: [*c]Box,
     string: oc.strings.Str8,
-) callconv(.c) void;
+) callconv(.c) void, .{ .name = "oc_ui_box_tag_str8" });
 
-pub const tagStr8 = oc_ui_tag_str8;
-extern fn oc_ui_tag_str8(
+pub const tagStr8 = @extern(*const fn (
     string: oc.strings.Str8,
-) callconv(.c) void;
+) callconv(.c) void, .{ .name = "oc_ui_tag_str8" });
 
-pub const tagNextStr8 = oc_ui_tag_next_str8;
-extern fn oc_ui_tag_next_str8(
+pub const tagNextStr8 = @extern(*const fn (
     string: oc.strings.Str8,
-) callconv(.c) void;
+) callconv(.c) void, .{ .name = "oc_ui_tag_next_str8" });
 
-pub const styleRuleBegin = oc_ui_style_rule_begin;
-extern fn oc_ui_style_rule_begin(
+pub const styleRuleBegin = @extern(*const fn (
     pattern: oc.strings.Str8,
-) callconv(.c) void;
+) callconv(.c) void, .{ .name = "oc_ui_style_rule_begin" });
 
-pub const styleRuleEnd = oc_ui_style_rule_end;
-extern fn oc_ui_style_rule_end() callconv(.c) void;
+pub const styleRuleEnd = @extern(
+    *const fn () callconv(.c) void,
+    .{ .name = "oc_ui_style_rule_end" },
+);
 
 pub fn styleSetAxis(axis: Axis) void {
     styleSetI32(.axis, @intCast(@intFromEnum(axis)));
@@ -594,351 +571,302 @@ pub fn styleSetOverflow(axis: Axis, overflow: Overflow) void {
     styleSetI32(attr, @intCast(@intFromEnum(overflow)));
 }
 
-pub const styleSetI32 = oc_ui_style_set_i32;
-extern fn oc_ui_style_set_i32(
+pub const styleSetI32 = @extern(*const fn (
     attr: Attribute,
     i: i32,
-) callconv(.c) void;
+) callconv(.c) void, .{ .name = "oc_ui_style_set_i32" });
 
-pub const styleSetF32 = oc_ui_style_set_f32;
-extern fn oc_ui_style_set_f32(
+pub const styleSetF32 = @extern(*const fn (
     attr: Attribute,
     f: f32,
-) callconv(.c) void;
+) callconv(.c) void, .{ .name = "oc_ui_style_set_f32" });
 
-pub const styleSetColor = oc_ui_style_set_color;
-extern fn oc_ui_style_set_color(
+pub const styleSetColor = @extern(*const fn (
     attr: Attribute,
     color: oc.graphics.canvas.Color,
-) callconv(.c) void;
+) callconv(.c) void, .{ .name = "oc_ui_style_set_color" });
 
-pub const styleSetFont = oc_ui_style_set_font;
-extern fn oc_ui_style_set_font(
+pub const styleSetFont = @extern(*const fn (
     attr: Attribute,
     font: oc.graphics.canvas.Font,
-) callconv(.c) void;
+) callconv(.c) void, .{ .name = "oc_ui_style_set_font" });
 
-pub const styleSetSize = oc_ui_style_set_size;
-extern fn oc_ui_style_set_size(
+pub const styleSetSize = @extern(*const fn (
     attr: Attribute,
     size: Size,
-) callconv(.c) void;
+) callconv(.c) void, .{ .name = "oc_ui_style_set_size" });
 
-pub const styleSetVarStr8 = oc_ui_style_set_var_str8;
-extern fn oc_ui_style_set_var_str8(
+pub const styleSetVarStr8 = @extern(*const fn (
     attr: Attribute,
     @"var": oc.strings.Str8,
-) callconv(.c) void;
+) callconv(.c) void, .{ .name = "oc_ui_style_set_var_str8" });
 
-pub const styleSetVar = oc_ui_style_set_var;
-extern fn oc_ui_style_set_var(
+pub const styleSetVar = @extern(*const fn (
     attr: Attribute,
     @"var": [*:0]const u8, // @Api assuming to be a cstring
-) callconv(.c) void;
+) callconv(.c) void, .{ .name = "oc_ui_style_set_var" });
 
-pub const varDefaultI32Str8 = oc_ui_var_default_i32_str8;
-extern fn oc_ui_var_default_i32_str8(
+pub const varDefaultI32Str8 = @extern(*const fn (
     name: oc.strings.Str8,
     i: i32,
-) callconv(.c) void;
+) callconv(.c) void, .{ .name = "oc_ui_var_default_i32_str8" });
 
-pub const varDefaultF32Str8 = oc_ui_var_default_f32_str8;
-extern fn oc_ui_var_default_f32_str8(
+pub const varDefaultF32Str8 = @extern(*const fn (
     name: oc.strings.Str8,
     f: f32,
-) callconv(.c) void;
+) callconv(.c) void, .{ .name = "oc_ui_var_default_f32_str8" });
 
-pub const varDefaultSizeStr8 = oc_ui_var_default_size_str8;
-extern fn oc_ui_var_default_size_str8(
+pub const varDefaultSizeStr8 = @extern(*const fn (
     name: oc.strings.Str8,
     size: Size,
-) callconv(.c) void;
+) callconv(.c) void, .{ .name = "oc_ui_var_default_size_str8" });
 
-pub const varDefaultColorStr8 = oc_ui_var_default_color_str8;
-extern fn oc_ui_var_default_color_str8(
+pub const varDefaultColorStr8 = @extern(*const fn (
     name: oc.strings.Str8,
     color: oc.graphics.canvas.Color,
-) callconv(.c) void;
+) callconv(.c) void, .{ .name = "oc_ui_var_default_color_str8" });
 
-pub const varDefaultFontStr8 = oc_ui_var_default_font_str8;
-extern fn oc_ui_var_default_font_str8(
+pub const varDefaultFontStr8 = @extern(*const fn (
     name: oc.strings.Str8,
     font: oc.graphics.canvas.Font,
-) callconv(.c) void;
+) callconv(.c) void, .{ .name = "oc_ui_var_default_font_str8" });
 
-pub const varDefaultStr8 = oc_ui_var_default_str8;
-extern fn oc_ui_var_default_str8(
+pub const varDefaultStr8 = @extern(*const fn (
     name: oc.strings.Str8,
     src: oc.strings.Str8,
-) callconv(.c) void;
+) callconv(.c) void, .{ .name = "oc_ui_var_default_str8" });
 
-pub const varDefaultI32 = oc_ui_var_default_i32;
-extern fn oc_ui_var_default_i32(
+pub const varDefaultI32 = @extern(*const fn (
     name: [*c]u8,
     i: i32,
-) callconv(.c) void;
+) callconv(.c) void, .{ .name = "oc_ui_var_default_i32" });
 
-pub const varDefaultF32 = oc_ui_var_default_f32;
-extern fn oc_ui_var_default_f32(
+pub const varDefaultF32 = @extern(*const fn (
     name: [*c]u8,
     f: f32,
-) callconv(.c) void;
+) callconv(.c) void, .{ .name = "oc_ui_var_default_f32" });
 
-pub const varDefaultSize = oc_ui_var_default_size;
-extern fn oc_ui_var_default_size(
+pub const varDefaultSize = @extern(*const fn (
     name: [*c]u8,
     size: Size,
-) callconv(.c) void;
+) callconv(.c) void, .{ .name = "oc_ui_var_default_size" });
 
-pub const varDefaultColor = oc_ui_var_default_color;
-extern fn oc_ui_var_default_color(
+pub const varDefaultColor = @extern(*const fn (
     name: [*c]u8,
     color: oc.graphics.canvas.Color,
-) callconv(.c) void;
+) callconv(.c) void, .{ .name = "oc_ui_var_default_color" });
 
-pub const varDefaultFont = oc_ui_var_default_font;
-extern fn oc_ui_var_default_font(
+pub const varDefaultFont = @extern(*const fn (
     name: [*c]u8,
     font: oc.graphics.canvas.Font,
-) callconv(.c) void;
+) callconv(.c) void, .{ .name = "oc_ui_var_default_font" });
 
-pub const varDefault = oc_ui_var_default;
-extern fn oc_ui_var_default(
+pub const varDefault = @extern(*const fn (
     name: [*c]u8,
     src: [*c]u8,
-) callconv(.c) void;
+) callconv(.c) void, .{ .name = "oc_ui_var_default" });
 
-pub const varSetI32Str8 = oc_ui_var_set_i32_str8;
-extern fn oc_ui_var_set_i32_str8(
+pub const varSetI32Str8 = @extern(*const fn (
     name: oc.strings.Str8,
     i: i32,
-) callconv(.c) void;
+) callconv(.c) void, .{ .name = "oc_ui_var_set_i32_str8" });
 
-pub const varSetF32Str8 = oc_ui_var_set_f32_str8;
-extern fn oc_ui_var_set_f32_str8(
+pub const varSetF32Str8 = @extern(*const fn (
     name: oc.strings.Str8,
     f: f32,
-) callconv(.c) void;
+) callconv(.c) void, .{ .name = "oc_ui_var_set_f32_str8" });
 
-pub const varSetSizeStr8 = oc_ui_var_set_size_str8;
-extern fn oc_ui_var_set_size_str8(
+pub const varSetSizeStr8 = @extern(*const fn (
     name: oc.strings.Str8,
     size: Size,
-) callconv(.c) void;
+) callconv(.c) void, .{ .name = "oc_ui_var_set_size_str8" });
 
-pub const varSetColorStr8 = oc_ui_var_set_color_str8;
-extern fn oc_ui_var_set_color_str8(
+pub const varSetColorStr8 = @extern(*const fn (
     name: oc.strings.Str8,
     color: oc.graphics.canvas.Color,
-) callconv(.c) void;
+) callconv(.c) void, .{ .name = "oc_ui_var_set_color_str8" });
 
-pub const varSetFontStr8 = oc_ui_var_set_font_str8;
-extern fn oc_ui_var_set_font_str8(
+pub const varSetFontStr8 = @extern(*const fn (
     name: oc.strings.Str8,
     font: oc.graphics.canvas.Font,
-) callconv(.c) void;
+) callconv(.c) void, .{ .name = "oc_ui_var_set_font_str8" });
 
-pub const varSetStr8 = oc_ui_var_set_str8;
-extern fn oc_ui_var_set_str8(
+pub const varSetStr8 = @extern(*const fn (
     name: oc.strings.Str8,
     src: oc.strings.Str8,
-) callconv(.c) void;
+) callconv(.c) void, .{ .name = "oc_ui_var_set_str8" });
 
-pub const varSetI32 = oc_ui_var_set_i32;
-extern fn oc_ui_var_set_i32(
+pub const varSetI32 = @extern(*const fn (
     name: [*c]u8,
     i: i32,
-) callconv(.c) void;
+) callconv(.c) void, .{ .name = "oc_ui_var_set_i32" });
 
-pub const varSetF32 = oc_ui_var_set_f32;
-extern fn oc_ui_var_set_f32(
+pub const varSetF32 = @extern(*const fn (
     name: [*c]u8,
     f: f32,
-) callconv(.c) void;
+) callconv(.c) void, .{ .name = "oc_ui_var_set_f32" });
 
-pub const varSetSize = oc_ui_var_set_size;
-extern fn oc_ui_var_set_size(
+pub const varSetSize = @extern(*const fn (
     name: [*c]u8,
     size: Size,
-) callconv(.c) void;
+) callconv(.c) void, .{ .name = "oc_ui_var_set_size" });
 
-pub const varSetColor = oc_ui_var_set_color;
-extern fn oc_ui_var_set_color(
+pub const varSetColor = @extern(*const fn (
     name: [*c]u8,
     color: oc.graphics.canvas.Color,
-) callconv(.c) void;
+) callconv(.c) void, .{ .name = "oc_ui_var_set_color" });
 
-pub const varSetFont = oc_ui_var_set_font;
-extern fn oc_ui_var_set_font(
+pub const varSetFont = @extern(*const fn (
     name: [*c]u8,
     font: oc.graphics.canvas.Font,
-) callconv(.c) void;
+) callconv(.c) void, .{ .name = "oc_ui_var_set_font" });
 
-pub const varSet = oc_ui_var_set;
-extern fn oc_ui_var_set(
+pub const varSet = @extern(*const fn (
     name: [*c]u8,
     src: [*c]u8,
-) callconv(.c) void;
+) callconv(.c) void, .{ .name = "oc_ui_var_set" });
 
-pub const varGetI32Str8 = oc_ui_var_get_i32_str8;
-extern fn oc_ui_var_get_i32_str8(
+pub const varGetI32Str8 = @extern(*const fn (
     name: oc.strings.Str8,
-) callconv(.c) i32;
+) callconv(.c) i32, .{ .name = "oc_ui_var_get_i32_str8" });
 
-pub const varGetF32Str8 = oc_ui_var_get_f32_str8;
-extern fn oc_ui_var_get_f32_str8(
+pub const varGetF32Str8 = @extern(*const fn (
     name: oc.strings.Str8,
-) callconv(.c) f32;
+) callconv(.c) f32, .{ .name = "oc_ui_var_get_f32_str8" });
 
-pub const varGetSizeStr8 = oc_ui_var_get_size_str8;
-extern fn oc_ui_var_get_size_str8(
+pub const varGetSizeStr8 = @extern(*const fn (
     name: oc.strings.Str8,
-) callconv(.c) Size;
+) callconv(.c) Size, .{ .name = "oc_ui_var_get_size_str8" });
 
-pub const varGetColorStr8 = oc_ui_var_get_color_str8;
-extern fn oc_ui_var_get_color_str8(
+pub const varGetColorStr8 = @extern(*const fn (
     name: oc.strings.Str8,
-) callconv(.c) oc.graphics.canvas.Color;
+) callconv(.c) oc.graphics.canvas.Color, .{ .name = "oc_ui_var_get_color_str8" });
 
-pub const varGetFontStr8 = oc_ui_var_get_font_str8;
-extern fn oc_ui_var_get_font_str8(
+pub const varGetFontStr8 = @extern(*const fn (
     name: oc.strings.Str8,
-) callconv(.c) oc.graphics.canvas.Font;
+) callconv(.c) oc.graphics.canvas.Font, .{ .name = "oc_ui_var_get_font_str8" });
 
-pub const varGetI32 = oc_ui_var_get_i32;
-extern fn oc_ui_var_get_i32(
+pub const varGetI32 = @extern(*const fn (
     name: [*c]u8,
-) callconv(.c) i32;
+) callconv(.c) i32, .{ .name = "oc_ui_var_get_i32" });
 
-pub const varGetF32 = oc_ui_var_get_f32;
-extern fn oc_ui_var_get_f32(
+pub const varGetF32 = @extern(*const fn (
     name: [*c]u8,
-) callconv(.c) f32;
+) callconv(.c) f32, .{ .name = "oc_ui_var_get_f32" });
 
-pub const varGetSize = oc_ui_var_get_size;
-extern fn oc_ui_var_get_size(
+pub const varGetSize = @extern(*const fn (
     name: [*c]u8,
-) callconv(.c) Size;
+) callconv(.c) Size, .{ .name = "oc_ui_var_get_size" });
 
-pub const varGetColor = oc_ui_var_get_color;
-extern fn oc_ui_var_get_color(
+pub const varGetColor = @extern(*const fn (
     name: [*c]u8,
-) callconv(.c) oc.graphics.canvas.Color;
+) callconv(.c) oc.graphics.canvas.Color, .{ .name = "oc_ui_var_get_color" });
 
-pub const varGetFont = oc_ui_var_get_font;
-extern fn oc_ui_var_get_font(
+pub const varGetFont = @extern(*const fn (
     name: [*c]u8,
-) callconv(.c) oc.graphics.canvas.Font;
+) callconv(.c) oc.graphics.canvas.Font, .{ .name = "oc_ui_var_get_font" });
 
-pub const setThemeDark = oc_ui_theme_dark;
-extern fn oc_ui_theme_dark() callconv(.c) void;
+pub const setThemeDark = @extern(
+    *const fn () callconv(.c) void,
+    .{ .name = "oc_ui_theme_dark" },
+);
 
-pub const setThemeLight = oc_ui_theme_light;
-extern fn oc_ui_theme_light() callconv(.c) void;
+pub const setThemeLight = @extern(
+    *const fn () callconv(.c) void,
+    .{ .name = "oc_ui_theme_light" },
+);
 
 //------------------------------------------------------------------------------------------
 // [UI Widgets] Graphical User Interface Widgets.
 //------------------------------------------------------------------------------------------
 
-pub const label = oc_ui_label;
-extern fn oc_ui_label(
+pub const label = @extern(*const fn (
     key: [*:0]const u8, // @Api assuming to be a cstring
     label: [*:0]const u8, // @Api assuming to be a cstring
-) callconv(.c) Sig;
+) callconv(.c) Sig, .{ .name = "oc_ui_label" });
 
-pub const labelStr8 = oc_ui_label_str8;
-extern fn oc_ui_label_str8(
+pub const labelStr8 = @extern(*const fn (
     key: oc.strings.Str8,
     label: oc.strings.Str8,
-) callconv(.c) Sig;
+) callconv(.c) Sig, .{ .name = "oc_ui_label_str8" });
 
-pub const button = oc_ui_button;
-extern fn oc_ui_button(
+pub const button = @extern(*const fn (
     key: [*:0]const u8, // @Api assuming to be a cstring
     text: [*:0]const u8, // @Api assuming to be a cstring
-) callconv(.c) Sig;
+) callconv(.c) Sig, .{ .name = "oc_ui_button" });
 
-pub const buttonStr8 = oc_ui_button_str8;
-extern fn oc_ui_button_str8(
+pub const buttonStr8 = @extern(*const fn (
     key: oc.strings.Str8,
     text: oc.strings.Str8,
-) callconv(.c) Sig;
+) callconv(.c) Sig, .{ .name = "oc_ui_button_str8" });
 
-pub const checkbox = oc_ui_checkbox;
-extern fn oc_ui_checkbox(
+pub const checkbox = @extern(*const fn (
     key: [*:0]const u8, // @Api assuming to be a cstring
     checked: [*c]bool,
-) callconv(.c) Sig;
+) callconv(.c) Sig, .{ .name = "oc_ui_checkbox" });
 
-pub const checkboxStr8 = oc_ui_checkbox_str8;
-extern fn oc_ui_checkbox_str8(
+pub const checkboxStr8 = @extern(*const fn (
     key: oc.strings.Str8,
     checked: [*c]bool,
-) callconv(.c) Sig;
+) callconv(.c) Sig, .{ .name = "oc_ui_checkbox_str8" });
 
-pub const slider = oc_ui_slider;
-extern fn oc_ui_slider(
+pub const slider = @extern(*const fn (
     name: [*:0]const u8, // @Api assuming to be a cstring
     value: [*c]f32,
-) callconv(.c) [*c]Box;
+) callconv(.c) [*c]Box, .{ .name = "oc_ui_slider" });
 
-pub const sliderStr8 = oc_ui_slider_str8;
-extern fn oc_ui_slider_str8(
+pub const sliderStr8 = @extern(*const fn (
     name: oc.strings.Str8,
     value: [*c]f32,
-) callconv(.c) [*c]Box;
+) callconv(.c) [*c]Box, .{ .name = "oc_ui_slider_str8" });
 
-pub const tooltip = oc_ui_tooltip;
-extern fn oc_ui_tooltip(
+pub const tooltip = @extern(*const fn (
     key: [*:0]const u8, // @Api assuming to be a cstring
     text: [*:0]const u8, // @Api assuming to be a cstring
-) callconv(.c) void;
+) callconv(.c) void, .{ .name = "oc_ui_tooltip" });
 
-pub const tooltipStr8 = oc_ui_tooltip_str8;
-extern fn oc_ui_tooltip_str8(
+pub const tooltipStr8 = @extern(*const fn (
     key: oc.strings.Str8,
     text: oc.strings.Str8,
-) callconv(.c) void;
+) callconv(.c) void, .{ .name = "oc_ui_tooltip_str8" });
 
-pub const menuBarBegin = oc_ui_menu_bar_begin;
-extern fn oc_ui_menu_bar_begin(
+pub const menuBarBegin = @extern(*const fn (
     key: [*c]u8,
-) callconv(.c) void;
+) callconv(.c) void, .{ .name = "oc_ui_menu_bar_begin" });
 
-pub const menuBarBeginStr8 = oc_ui_menu_bar_begin_str8;
-extern fn oc_ui_menu_bar_begin_str8(
+pub const menuBarBeginStr8 = @extern(*const fn (
     key: oc.strings.Str8,
-) callconv(.c) void;
+) callconv(.c) void, .{ .name = "oc_ui_menu_bar_begin_str8" });
 
-pub const menuBarEnd = oc_ui_menu_bar_end;
-extern fn oc_ui_menu_bar_end() callconv(.c) void;
+pub const menuBarEnd = @extern(
+    *const fn () callconv(.c) void,
+    .{ .name = "oc_ui_menu_bar_end" },
+);
 
-pub const menuBegin = oc_ui_menu_begin;
-extern fn oc_ui_menu_begin(
+pub const menuBegin = @extern(*const fn (
     key: [*c]u8,
     name: [*c]u8,
-) callconv(.c) void;
+) callconv(.c) void, .{ .name = "oc_ui_menu_begin" });
 
-pub const menuBeginStr8 = oc_ui_menu_begin_str8;
-extern fn oc_ui_menu_begin_str8(
+pub const menuBeginStr8 = @extern(*const fn (
     key: oc.strings.Str8,
     name: oc.strings.Str8,
-) callconv(.c) void;
+) callconv(.c) void, .{ .name = "oc_ui_menu_begin_str8" });
 
-pub const menuEnd = oc_ui_menu_end;
-extern fn oc_ui_menu_end() callconv(.c) void;
+pub const menuEnd = @extern(
+    *const fn () callconv(.c) void,
+    .{ .name = "oc_ui_menu_end" },
+);
 
-pub const menuButton = oc_ui_menu_button;
-extern fn oc_ui_menu_button(
+pub const menuButton = @extern(*const fn (
     key: [*c]u8,
     text: [*c]u8,
-) callconv(.c) Sig;
+) callconv(.c) Sig, .{ .name = "oc_ui_menu_button" });
 
-pub const menuButtonStr8 = oc_ui_menu_button_str8;
-extern fn oc_ui_menu_button_str8(
+pub const menuButtonStr8 = @extern(*const fn (
     key: oc.strings.Str8,
     text: oc.strings.Str8,
-) callconv(.c) Sig;
+) callconv(.c) Sig, .{ .name = "oc_ui_menu_button_str8" });
 
 pub const TextBoxResult = extern struct {
     changed: bool,
@@ -966,19 +894,17 @@ pub const TextBoxInfo = extern struct {
     cursorBlinkStart: f64 = 0,
 };
 
-pub const textBox = oc_ui_text_box;
-extern fn oc_ui_text_box(
+pub const textBox = @extern(*const fn (
     key: [*c]u8,
     arena: [*c]oc.mem.Arena,
     info: [*c]TextBoxInfo,
-) callconv(.c) TextBoxResult;
+) callconv(.c) TextBoxResult, .{ .name = "oc_ui_text_box" });
 
-pub const textBoxStr8 = oc_ui_text_box_str8;
-extern fn oc_ui_text_box_str8(
+pub const textBoxStr8 = @extern(*const fn (
     key: oc.strings.Str8,
     arena: [*c]oc.mem.Arena,
     info: [*c]TextBoxInfo,
-) callconv(.c) TextBoxResult;
+) callconv(.c) TextBoxResult, .{ .name = "oc_ui_text_box_str8" });
 
 pub const SelectPopupInfo = extern struct {
     changed: bool = false,
@@ -988,17 +914,15 @@ pub const SelectPopupInfo = extern struct {
     placeholder: oc.strings.Str8 = .fromSlice(@constCast("")),
 };
 
-pub const selectPopup = oc_ui_select_popup;
-extern fn oc_ui_select_popup(
+pub const selectPopup = @extern(*const fn (
     key: [*:0]const u8, // @Api assuming to be a cstring
     info: [*c]SelectPopupInfo,
-) callconv(.c) SelectPopupInfo;
+) callconv(.c) SelectPopupInfo, .{ .name = "oc_ui_select_popup" });
 
-pub const selectPopupStr8 = oc_ui_select_popup_str8;
-extern fn oc_ui_select_popup_str8(
+pub const selectPopupStr8 = @extern(*const fn (
     key: oc.strings.Str8,
     info: [*c]SelectPopupInfo,
-) callconv(.c) SelectPopupInfo;
+) callconv(.c) SelectPopupInfo, .{ .name = "oc_ui_select_popup_str8" });
 
 pub const RadioGroupInfo = extern struct {
     changed: bool = false,
@@ -1007,14 +931,12 @@ pub const RadioGroupInfo = extern struct {
     options: [*c]oc.strings.Str8,
 };
 
-pub const radioGroup = oc_ui_radio_group;
-extern fn oc_ui_radio_group(
+pub const radioGroup = @extern(*const fn (
     key: [*:0]const u8, // @Api assuming to be a cstring
     info: [*c]RadioGroupInfo,
-) callconv(.c) RadioGroupInfo;
+) callconv(.c) RadioGroupInfo, .{ .name = "oc_ui_radio_group" });
 
-pub const radioGroupStr8 = oc_ui_radio_group_str8;
-extern fn oc_ui_radio_group_str8(
+pub const radioGroupStr8 = @extern(*const fn (
     key: oc.strings.Str8,
     info: [*c]RadioGroupInfo,
-) callconv(.c) RadioGroupInfo;
+) callconv(.c) RadioGroupInfo, .{ .name = "oc_ui_radio_group_str8" });

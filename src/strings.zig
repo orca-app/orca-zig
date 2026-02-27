@@ -167,26 +167,23 @@ extern fn oc_str32_list_join(arena: [*c]oc.mem.Arena, list: Str32List) callconv(
 
 /// Lexicographically compare the contents of two strings.
 /// This function returns `-1` if `s1` is less than `s2`, `+1` if `s1` is greater than `s2`, and `0` if `s1` and `s2` are equal.
-pub const str8Cmp = oc_str8_cmp;
-extern fn oc_str8_cmp(
+pub const str8Cmp = @extern(*const fn (
     /// The first string to compare.
     s1: Str8,
     /// The second string to compare.
     s2: Str8,
-) callconv(.c) i32;
+) callconv(.c) i32, .{ .name = "oc_str8_cmp" });
 
 /// Create a null-terminated C-string from an `oc_str8` string.
-pub const str8ToCstring = oc_str8_to_cstring;
-extern fn oc_str8_to_cstring(
+pub const str8ToCstring = @extern(*const fn (
     /// The arena on which to copy the contents of `string` and the null terminator.
     arena: [*c]oc.mem.Arena,
     /// The input string.
     string: Str8,
-) callconv(.c) [*c]u8;
+) callconv(.c) [*c]u8, .{ .name = "oc_str8_to_cstring" });
 
 /// Build a string by combining the elements of a string list with a prefix, a suffix, and separators.
-pub const str8ListCollate = oc_str8_list_collate;
-extern fn oc_str8_list_collate(
+pub const str8ListCollate = @extern(*const fn (
     /// An arena on which to allocate the contents of the new string.
     arena: [*c]oc.mem.Arena,
     /// A string list containing the elements to combine
@@ -197,43 +194,40 @@ extern fn oc_str8_list_collate(
     separator: Str8,
     /// A suffix that is pasted at the end of the string.
     suffix: Str8,
-) callconv(.c) Str8;
+) callconv(.c) Str8, .{ .name = "oc_str8_list_collate" });
 
 /// Split a list into a string list according to separators.
 ///
 /// No string copies are made. The elements of the resulting string list refer to subsequences of the input string.
-pub const str8Split = oc_str8_split;
-extern fn oc_str8_split(
+pub const str8Split = @extern(*const fn (
     /// The arena on which to allocate the elements of the string list.
     arena: [*c]oc.mem.Arena,
     /// The input string.
     str: Str8,
     /// A list of separators used to split the input string.
     separators: Str8List,
-) callconv(.c) Str8List;
+) callconv(.c) Str8List, .{ .name = "oc_str8_split" });
 
 /// Split a list into a string list according to separators.
 ///
 /// No string copies are made. The elements of the resulting string list refer to subsequences of the input string.
-pub const str16Split = oc_str16_split;
-extern fn oc_str16_split(
+pub const str16Split = @extern(*const fn (
     /// The arena on which to allocate the elements of the string list.
     arena: [*c]oc.mem.Arena,
     /// The input string.
     str: Str16,
     /// A list of separators used to split the input string.
     separators: Str16List,
-) callconv(.c) Str16List;
+) callconv(.c) Str16List, .{ .name = "oc_str16_split" });
 
 /// Split a list into a string list according to separators.
 ///
 /// No string copies are made. The elements of the resulting string list refer to subsequences of the input string.
-pub const str32Split = oc_str32_split;
-extern fn oc_str32_split(
+pub const str32Split = @extern(*const fn (
     /// The arena on which to allocate the elements of the string list.
     arena: [*c]oc.mem.Arena,
     /// The input string.
     str: Str32,
     /// A list of separators used to split the input string.
     separators: Str32List,
-) callconv(.c) Str32List;
+) callconv(.c) Str32List, .{ .name = "oc_str32_split" });

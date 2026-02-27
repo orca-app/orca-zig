@@ -58,11 +58,10 @@ pub const Arena = extern struct {
         offset: u64,
 
         /// End a memory scope. This resets an arena to the offset it had when the scope was created. All memory allocated within the scope is released back to the arena.
-        pub const end = oc_arena_scope_end;
-        extern fn oc_arena_scope_end(
+        pub const end = @extern(*const fn (
             /// An `oc_arena_scope` object that was created by a call to `oc_arena_scope_begin()`.
             scope: Scope,
-        ) callconv(.c) void;
+        ) callconv(.c) void, .{ .name = "oc_arena_scope_end" }).*;
     };
 
     pub const Error = error{OutOfMemory};
@@ -76,17 +75,17 @@ pub const Arena = extern struct {
     extern fn oc_arena_init(arena: *Arena) callconv(.c) void;
 
     /// Initialize a memory arena with additional options.
-    pub const initWithOptions = oc_arena_init_with_options;
-    extern fn oc_arena_init_with_options(
+    pub const initWithOptions = @extern(*const fn (
         /// The arena to initialize.
         arena: *Arena,
         /// The options to use to initialize the arena.
         options: *ArenaOptions,
-    ) callconv(.c) void;
+    ) callconv(.c) void, .{ .name = "oc_arena_init_with_options" }).*;
 
     /// Release all resources allocated to a memory arena.
-    pub const cleanup = oc_arena_cleanup;
-    extern fn oc_arena_cleanup(arena: *Arena) callconv(.c) void;
+    pub const cleanup = @extern(*const fn (
+        arena: *Arena,
+    ) callconv(.c) void, .{ .name = "oc_arena_cleanup" }).*;
 
     /// Allocate a block of memory from an arena.
     pub fn push(
@@ -135,15 +134,15 @@ pub const Arena = extern struct {
     }
 
     /// Reset an arena. All memory that was previously allocated from this arena is released to the arena, and can be reallocated by later calls to `oc_arena_push` and similar functions. No memory is actually released _to the system_.
-    pub const clear = oc_arena_clear;
-    extern fn oc_arena_clear(arena: *Arena) callconv(.c) void;
+    pub const clear = @extern(*const fn (
+        arena: *Arena,
+    ) callconv(.c) void, .{ .name = "oc_arena_clear" }).*;
 
     /// Begin a memory scope. This creates an `oc_arena_scope` object that stores the current offset of the arena. The arena can later be reset to that offset by calling `oc_arena_scope_end`, releasing all memory that was allocated within the scope to the arena.
-    pub const scopeBegin = oc_arena_scope_begin;
-    extern fn oc_arena_scope_begin(
+    pub const scopeBegin = @extern(*const fn (
         /// The arena for which the scope is created.
         arena: *Arena,
-    ) callconv(.c) Scope;
+    ) callconv(.c) Scope, .{ .name = "oc_arena_scope_begin" }).*;
 
     pub fn allocator(arena: *Arena) Allocator {
         return .{
@@ -170,12 +169,13 @@ pub const Arena = extern struct {
 ///
 /// - Allocate memory for the result upfront and call `oc_scratch_begin` afterwards, if possible.
 /// - Use `oc_scratch_begin_next()` and pass it the result arena, to get a scratch arena that does not conflict with it.
-pub const scratchBegin = oc_scratch_begin;
-extern fn oc_scratch_begin() callconv(.c) Arena.Scope;
+pub const scratchBegin = @extern(
+    *const fn () callconv(.c) Arena.Scope,
+    .{ .name = "oc_scratch_begin" },
+);
 
 /// Begin a scratch scope that does not conflict with a given arena. See `oc_scratch_begin()` for more details about when to use this function.
-pub const scratchBeginNext = oc_scratch_begin_next;
-extern fn oc_scratch_begin_next(
+pub const scratchBeginNext = @extern(*const fn (
     /// A pointer to a memory arena that the scratch scope shouldn't interfere with.
     used: *Arena,
-) callconv(.c) Arena.Scope;
+) callconv(.c) Arena.Scope, .{ .name = "oc_scratch_begin_next" });

@@ -673,498 +673,990 @@ pub const ZERO = 0x0;
 //#endregion Constants
 
 //#region Commands
-pub const ActiveTexture = glActiveTexture;
-extern fn glActiveTexture(texture: @"enum") callconv(APIENTRY) void;
-pub const AttachShader = glAttachShader;
-extern fn glAttachShader(program: uint, shader: uint) callconv(APIENTRY) void;
-pub const BeginQuery = glBeginQuery;
-extern fn glBeginQuery(target: @"enum", id: uint) callconv(APIENTRY) void;
-pub const BeginTransformFeedback = glBeginTransformFeedback;
-extern fn glBeginTransformFeedback(primitiveMode: @"enum") callconv(APIENTRY) void;
-pub const BindAttribLocation = glBindAttribLocation;
-extern fn glBindAttribLocation(program: uint, index: uint, name: [*:0]const char) callconv(APIENTRY) void;
-pub const BindBuffer = glBindBuffer;
-extern fn glBindBuffer(target: @"enum", buffer: uint) callconv(APIENTRY) void;
-pub const BindBufferBase = glBindBufferBase;
-extern fn glBindBufferBase(target: @"enum", index: uint, buffer: uint) callconv(APIENTRY) void;
-pub const BindBufferRange = glBindBufferRange;
-extern fn glBindBufferRange(target: @"enum", index: uint, buffer: uint, offset: intptr, size: sizeiptr) callconv(APIENTRY) void;
-pub const BindFramebuffer = glBindFramebuffer;
-extern fn glBindFramebuffer(target: @"enum", framebuffer: uint) callconv(APIENTRY) void;
-pub const BindRenderbuffer = glBindRenderbuffer;
-extern fn glBindRenderbuffer(target: @"enum", renderbuffer: uint) callconv(APIENTRY) void;
-pub const BindSampler = glBindSampler;
-extern fn glBindSampler(unit: uint, sampler: uint) callconv(APIENTRY) void;
-pub const BindTexture = glBindTexture;
-extern fn glBindTexture(target: @"enum", texture: uint) callconv(APIENTRY) void;
-pub const BindTransformFeedback = glBindTransformFeedback;
-extern fn glBindTransformFeedback(target: @"enum", id: uint) callconv(APIENTRY) void;
-pub const BindVertexArray = glBindVertexArray;
-extern fn glBindVertexArray(array: uint) callconv(APIENTRY) void;
-pub const BlendColor = glBlendColor;
-extern fn glBlendColor(red: float, green: float, blue: float, alpha: float) callconv(APIENTRY) void;
-pub const BlendEquation = glBlendEquation;
-extern fn glBlendEquation(mode: @"enum") callconv(APIENTRY) void;
-pub const BlendEquationSeparate = glBlendEquationSeparate;
-extern fn glBlendEquationSeparate(modeRGB: @"enum", modeAlpha: @"enum") callconv(APIENTRY) void;
-pub const BlendFunc = glBlendFunc;
-extern fn glBlendFunc(sfactor: @"enum", dfactor: @"enum") callconv(APIENTRY) void;
-pub const BlendFuncSeparate = glBlendFuncSeparate;
-extern fn glBlendFuncSeparate(sfactorRGB: @"enum", dfactorRGB: @"enum", sfactorAlpha: @"enum", dfactorAlpha: @"enum") callconv(APIENTRY) void;
-pub const BlitFramebuffer = glBlitFramebuffer;
-extern fn glBlitFramebuffer(srcX0: int, srcY0: int, srcX1: int, srcY1: int, dstX0: int, dstY0: int, dstX1: int, dstY1: int, mask: bitfield, filter: @"enum") callconv(APIENTRY) void;
-pub const BufferData = glBufferData;
-extern fn glBufferData(target: @"enum", size: sizeiptr, data: ?*const anyopaque, usage: @"enum") callconv(APIENTRY) void;
-pub const BufferSubData = glBufferSubData;
-extern fn glBufferSubData(target: @"enum", offset: intptr, size: sizeiptr, data: ?*const anyopaque) callconv(APIENTRY) void;
-pub const CheckFramebufferStatus = glCheckFramebufferStatus;
-extern fn glCheckFramebufferStatus(target: @"enum") callconv(APIENTRY) @"enum";
-pub const Clear = glClear;
-extern fn glClear(mask: bitfield) callconv(APIENTRY) void;
-pub const ClearBufferfv = glClearBufferfv;
-extern fn glClearBufferfv(buffer: @"enum", drawbuffer: int, values: [*]const float) callconv(APIENTRY) void;
-pub const ClearBufferiv = glClearBufferiv;
-extern fn glClearBufferiv(buffer: @"enum", drawbuffer: int, values: [*]const int) callconv(APIENTRY) void;
-pub const ClearBufferuiv = glClearBufferuiv;
-extern fn glClearBufferuiv(buffer: @"enum", drawbuffer: int, values: [*]const uint) callconv(APIENTRY) void;
-pub const ClearBufferfi = glClearBufferfi;
-extern fn glClearBufferfi(buffer: @"enum", drawbuffer: int, depth: float, stencil: int) callconv(APIENTRY) void;
-pub const ClearColor = glClearColor;
-extern fn glClearColor(red: float, green: float, blue: float, alpha: float) callconv(APIENTRY) void;
-pub const ClearDepthf = glClearDepthf;
-extern fn glClearDepthf(d: float) callconv(APIENTRY) void;
-pub const ClearStencil = glClearStencil;
-extern fn glClearStencil(s: int) callconv(APIENTRY) void;
-pub const ClientWaitSync = glClientWaitSync;
-extern fn glClientWaitSync(sync_: sync, flags: bitfield, timeout: uint64) callconv(APIENTRY) @"enum";
-pub const ColorMask = glColorMask;
-extern fn glColorMask(red: boolean, green: boolean, blue: boolean, alpha: boolean) callconv(APIENTRY) void;
-pub const CompileShader = glCompileShader;
-extern fn glCompileShader(shader: uint) callconv(APIENTRY) void;
-pub const CompressedTexImage2D = glCompressedTexImage2D;
-extern fn glCompressedTexImage2D(target: @"enum", level: int, internalformat: @"enum", width: sizei, height: sizei, border: int, imageSize: sizei, data: ?*const anyopaque) callconv(APIENTRY) void;
-pub const CompressedTexImage3D = glCompressedTexImage3D;
-extern fn glCompressedTexImage3D(target: @"enum", level: int, internalformat: @"enum", width: sizei, height: sizei, depth: sizei, border: int, imageSize: sizei, data: ?*const anyopaque) callconv(APIENTRY) void;
-pub const CompressedTexSubImage2D = glCompressedTexSubImage2D;
-extern fn glCompressedTexSubImage2D(target: @"enum", level: int, xoffset: int, yoffset: int, width: sizei, height: sizei, format: @"enum", imageSize: sizei, data: ?*const anyopaque) callconv(APIENTRY) void;
-pub const CompressedTexSubImage3D = glCompressedTexSubImage3D;
-extern fn glCompressedTexSubImage3D(target: @"enum", level: int, xoffset: int, yoffset: int, zoffset: int, width: sizei, height: sizei, depth: sizei, format: @"enum", imageSize: sizei, data: ?*const anyopaque) callconv(APIENTRY) void;
-pub const CopyBufferSubData = glCopyBufferSubData;
-extern fn glCopyBufferSubData(readTarget: @"enum", writeTarget: @"enum", readOffset: intptr, writeOffset: intptr, size: sizeiptr) callconv(APIENTRY) void;
-pub const CopyTexImage2D = glCopyTexImage2D;
-extern fn glCopyTexImage2D(target: @"enum", level: int, internalformat: @"enum", x: int, y: int, width: sizei, height: sizei, border: int) callconv(APIENTRY) void;
-pub const CopyTexSubImage2D = glCopyTexSubImage2D;
-extern fn glCopyTexSubImage2D(target: @"enum", level: int, xoffset: int, yoffset: int, x: int, y: int, width: sizei, height: sizei) callconv(APIENTRY) void;
-pub const CopyTexSubImage3D = glCopyTexSubImage3D;
-extern fn glCopyTexSubImage3D(target: @"enum", level: int, xoffset: int, yoffset: int, zoffset: int, x: int, y: int, width: sizei, height: sizei) callconv(APIENTRY) void;
-pub const CreateProgram = glCreateProgram;
-extern fn glCreateProgram() callconv(APIENTRY) uint;
-pub const CreateShader = glCreateShader;
-extern fn glCreateShader(@"type": @"enum") callconv(APIENTRY) uint;
-pub const CullFace = glCullFace;
-extern fn glCullFace(mode: @"enum") callconv(APIENTRY) void;
-pub const DeleteBuffers = glDeleteBuffers;
-extern fn glDeleteBuffers(n: sizei, buffers: [*]const uint) callconv(APIENTRY) void;
-pub const DeleteFramebuffers = glDeleteFramebuffers;
-extern fn glDeleteFramebuffers(n: sizei, framebuffers: [*]const uint) callconv(APIENTRY) void;
-pub const DeleteProgram = glDeleteProgram;
-extern fn glDeleteProgram(program: uint) callconv(APIENTRY) void;
-pub const DeleteQueries = glDeleteQueries;
-extern fn glDeleteQueries(n: sizei, ids: [*]const uint) callconv(APIENTRY) void;
-pub const DeleteRenderbuffers = glDeleteRenderbuffers;
-extern fn glDeleteRenderbuffers(n: sizei, renderbuffers: [*]const uint) callconv(APIENTRY) void;
-pub const DeleteSamplers = glDeleteSamplers;
-extern fn glDeleteSamplers(count: sizei, samplers: [*]const uint) callconv(APIENTRY) void;
-pub const DeleteShader = glDeleteShader;
-extern fn glDeleteShader(shader: uint) callconv(APIENTRY) void;
-pub const DeleteSync = glDeleteSync;
-extern fn glDeleteSync(sync_: ?sync) callconv(APIENTRY) void;
-pub const DeleteTextures = glDeleteTextures;
-extern fn glDeleteTextures(n: sizei, textures: [*]const uint) callconv(APIENTRY) void;
-pub const DeleteTransformFeedbacks = glDeleteTransformFeedbacks;
-extern fn glDeleteTransformFeedbacks(n: sizei, ids: [*]const uint) callconv(APIENTRY) void;
-pub const DeleteVertexArrays = glDeleteVertexArrays;
-extern fn glDeleteVertexArrays(n: sizei, arrays: [*]const uint) callconv(APIENTRY) void;
-pub const DepthFunc = glDepthFunc;
-extern fn glDepthFunc(func: @"enum") callconv(APIENTRY) void;
-pub const DepthMask = glDepthMask;
-extern fn glDepthMask(flag: boolean) callconv(APIENTRY) void;
-pub const DepthRangef = glDepthRangef;
-extern fn glDepthRangef(n: float, f: float) callconv(APIENTRY) void;
-pub const DetachShader = glDetachShader;
-extern fn glDetachShader(program: uint, shader: uint) callconv(APIENTRY) void;
-pub const Disable = glDisable;
-extern fn glDisable(cap: @"enum") callconv(APIENTRY) void;
-pub const DisableVertexAttribArray = glDisableVertexAttribArray;
-extern fn glDisableVertexAttribArray(index: uint) callconv(APIENTRY) void;
-pub const DrawArrays = glDrawArrays;
-extern fn glDrawArrays(mode: @"enum", first: int, count: sizei) callconv(APIENTRY) void;
-pub const DrawArraysInstanced = glDrawArraysInstanced;
-extern fn glDrawArraysInstanced(mode: @"enum", first: int, count: sizei, instancecount: sizei) callconv(APIENTRY) void;
-pub const DrawBuffers = glDrawBuffers;
-extern fn glDrawBuffers(n: sizei, bufs: [*c]const @"enum") callconv(APIENTRY) void;
-pub const DrawElements = glDrawElements;
-extern fn glDrawElements(mode: @"enum", count: sizei, @"type": @"enum", indices: usize) callconv(APIENTRY) void;
-pub const DrawElementsInstanced = glDrawElementsInstanced;
-extern fn glDrawElementsInstanced(mode: @"enum", count: sizei, @"type": @"enum", indices: ?*const anyopaque, instancecount: sizei) callconv(APIENTRY) void;
-pub const DrawRangeElements = glDrawRangeElements;
-extern fn glDrawRangeElements(mode: @"enum", start: uint, end: uint, count: sizei, @"type": @"enum", indices: ?*const anyopaque) callconv(APIENTRY) void;
-pub const Enable = glEnable;
-extern fn glEnable(cap: @"enum") callconv(APIENTRY) void;
-pub const EnableVertexAttribArray = glEnableVertexAttribArray;
-extern fn glEnableVertexAttribArray(index: uint) callconv(APIENTRY) void;
-pub const EndQuery = glEndQuery;
-extern fn glEndQuery(target: @"enum") callconv(APIENTRY) void;
-pub const EndTransformFeedback = glEndTransformFeedback;
-extern fn glEndTransformFeedback() callconv(APIENTRY) void;
-pub const FenceSync = glFenceSync;
-extern fn glFenceSync(condition: @"enum", flags: bitfield) callconv(APIENTRY) ?sync;
-pub const Finish = glFinish;
-extern fn glFinish() callconv(APIENTRY) void;
-pub const Flush = glFlush;
-extern fn glFlush() callconv(APIENTRY) void;
-pub const FlushMappedBufferRange = glFlushMappedBufferRange;
-extern fn glFlushMappedBufferRange(target: @"enum", offset: intptr, length: sizeiptr) callconv(APIENTRY) void;
-pub const FramebufferRenderbuffer = glFramebufferRenderbuffer;
-extern fn glFramebufferRenderbuffer(target: @"enum", attachment: @"enum", renderbuffertarget: @"enum", renderbuffer: uint) callconv(APIENTRY) void;
-pub const FramebufferTexture2D = glFramebufferTexture2D;
-extern fn glFramebufferTexture2D(target: @"enum", attachment: @"enum", textarget: @"enum", texture: uint, level: int) callconv(APIENTRY) void;
-pub const FramebufferTextureLayer = glFramebufferTextureLayer;
-extern fn glFramebufferTextureLayer(target: @"enum", attachment: @"enum", texture: uint, level: int, layer: int) callconv(APIENTRY) void;
-pub const FrontFace = glFrontFace;
-extern fn glFrontFace(mode: @"enum") callconv(APIENTRY) void;
-pub const GenBuffers = glGenBuffers;
-extern fn glGenBuffers(n: sizei, buffers: [*]uint) callconv(APIENTRY) void;
-pub const GenFramebuffers = glGenFramebuffers;
-extern fn glGenFramebuffers(n: sizei, framebuffers: [*]uint) callconv(APIENTRY) void;
-pub const GenQueries = glGenQueries;
-extern fn glGenQueries(n: sizei, ids: [*]uint) callconv(APIENTRY) void;
-pub const GenRenderbuffers = glGenRenderbuffers;
-extern fn glGenRenderbuffers(n: sizei, renderbuffers: [*]uint) callconv(APIENTRY) void;
-pub const GenSamplers = glGenSamplers;
-extern fn glGenSamplers(count: sizei, samplers: [*]uint) callconv(APIENTRY) void;
-pub const GenTextures = glGenTextures;
-extern fn glGenTextures(n: sizei, textures: [*]uint) callconv(APIENTRY) void;
-pub const GenTransformFeedbacks = glGenTransformFeedbacks;
-extern fn glGenTransformFeedbacks(n: sizei, ids: [*]uint) callconv(APIENTRY) void;
-pub const GenVertexArrays = glGenVertexArrays;
-extern fn glGenVertexArrays(n: sizei, arrays: [*]uint) callconv(APIENTRY) void;
-pub const GenerateMipmap = glGenerateMipmap;
-extern fn glGenerateMipmap(target: @"enum") callconv(APIENTRY) void;
-pub const GetActiveAttrib = glGetActiveAttrib;
-extern fn glGetActiveAttrib(program: uint, index: uint, bufSize: sizei, length: [*c]sizei, size: [*c]int, @"type": [*c]@"enum", name: [*c]char) callconv(APIENTRY) void;
-pub const GetActiveUniform = glGetActiveUniform;
-extern fn glGetActiveUniform(program: uint, index: uint, bufSize: sizei, length: [*c]sizei, size: [*c]int, @"type": [*c]@"enum", name: [*c]char) callconv(APIENTRY) void;
-pub const GetActiveUniformsiv = glGetActiveUniformsiv;
-extern fn glGetActiveUniformsiv(program: uint, uniformCount: sizei, uniformIndices: [*c]const uint, pname: @"enum", params: [*c]int) callconv(APIENTRY) void;
-pub const GetActiveUniformBlockiv = glGetActiveUniformBlockiv;
-extern fn glGetActiveUniformBlockiv(program: uint, uniformBlockIndex: uint, pname: @"enum", params: [*c]int) callconv(APIENTRY) void;
-pub const GetActiveUniformBlockName = glGetActiveUniformBlockName;
-extern fn glGetActiveUniformBlockName(program: uint, uniformBlockIndex: uint, bufSize: sizei, length: [*c]sizei, uniformBlockName: [*c]char) callconv(APIENTRY) void;
-pub const GetAttachedShaders = glGetAttachedShaders;
-extern fn glGetAttachedShaders(program: uint, maxCount: sizei, count: [*c]sizei, shaders: [*c]uint) callconv(APIENTRY) void;
-pub const GetAttribLocation = glGetAttribLocation;
-extern fn glGetAttribLocation(program: uint, name: [*:0]const char) callconv(APIENTRY) int;
-pub const GetBooleanv = glGetBooleanv;
-extern fn glGetBooleanv(pname: @"enum", data: [*]boolean) callconv(APIENTRY) void;
-pub const GetBufferParameteriv = glGetBufferParameteriv;
-extern fn glGetBufferParameteriv(target: @"enum", pname: @"enum", params: [*c]int) callconv(APIENTRY) void;
-pub const GetBufferParameteri64v = glGetBufferParameteri64v;
-extern fn glGetBufferParameteri64v(target: @"enum", pname: @"enum", params: [*c]int64) callconv(APIENTRY) void;
-pub const GetBufferPointerv = glGetBufferPointerv;
-extern fn glGetBufferPointerv(target: @"enum", pname: @"enum", params: [*c]?*anyopaque) callconv(APIENTRY) void;
-pub const GetError = glGetError;
-extern fn glGetError() callconv(APIENTRY) @"enum";
-pub const GetFloatv = glGetFloatv;
-extern fn glGetFloatv(pname: @"enum", data: [*]float) callconv(APIENTRY) void;
-pub const GetFragDataLocation = glGetFragDataLocation;
-extern fn glGetFragDataLocation(program: uint, name: [*c]const char) callconv(APIENTRY) int;
-pub const GetFramebufferAttachmentParameteriv = glGetFramebufferAttachmentParameteriv;
-extern fn glGetFramebufferAttachmentParameteriv(target: @"enum", attachment: @"enum", pname: @"enum", params: [*c]int) callconv(APIENTRY) void;
-pub const GetIntegerv = glGetIntegerv;
-extern fn glGetIntegerv(pname: @"enum", data: [*]int) callconv(APIENTRY) void;
-pub const GetIntegeri_v = glGetIntegeri_v;
-extern fn glGetIntegeri_v(target: @"enum", index: uint, data: [*]int) callconv(APIENTRY) void;
-pub const GetInteger64v = glGetInteger64v;
-extern fn glGetInteger64v(pname: @"enum", data: [*]int64) callconv(APIENTRY) void;
-pub const GetInteger64i_v = glGetInteger64i_v;
-extern fn glGetInteger64i_v(target: @"enum", index: uint, data: [*]int64) callconv(APIENTRY) void;
-pub const GetInternalformativ = glGetInternalformativ;
-extern fn glGetInternalformativ(target: @"enum", internalformat: @"enum", pname: @"enum", count: sizei, params: [*c]int) callconv(APIENTRY) void;
-pub const GetProgramiv = glGetProgramiv;
-extern fn glGetProgramiv(program: uint, pname: @"enum", param: *int) callconv(APIENTRY) void;
-pub const GetProgramBinary = glGetProgramBinary;
-extern fn glGetProgramBinary(program: uint, bufSize: sizei, length: [*c]sizei, binaryFormat: [*c]@"enum", binary: ?*anyopaque) callconv(APIENTRY) void;
-pub const GetProgramInfoLog = glGetProgramInfoLog;
-extern fn glGetProgramInfoLog(program: uint, bufSize: sizei, length: ?*sizei, infoLog: [*]char) callconv(APIENTRY) void;
-pub const GetQueryiv = glGetQueryiv;
-extern fn glGetQueryiv(target: @"enum", pname: @"enum", params: [*c]int) callconv(APIENTRY) void;
-pub const GetQueryObjectuiv = glGetQueryObjectuiv;
-extern fn glGetQueryObjectuiv(id: uint, pname: @"enum", params: [*c]uint) callconv(APIENTRY) void;
-pub const GetRenderbufferParameteriv = glGetRenderbufferParameteriv;
-extern fn glGetRenderbufferParameteriv(target: @"enum", pname: @"enum", params: [*c]int) callconv(APIENTRY) void;
-pub const GetSamplerParameterfv = glGetSamplerParameterfv;
-extern fn glGetSamplerParameterfv(sampler: uint, pname: @"enum", params: [*c]float) callconv(APIENTRY) void;
-pub const GetSamplerParameteriv = glGetSamplerParameteriv;
-extern fn glGetSamplerParameteriv(sampler: uint, pname: @"enum", params: [*c]int) callconv(APIENTRY) void;
-pub const GetShaderiv = glGetShaderiv;
-extern fn glGetShaderiv(shader: uint, pname: @"enum", param: *int) callconv(APIENTRY) void;
-pub const GetShaderInfoLog = glGetShaderInfoLog;
-extern fn glGetShaderInfoLog(shader: uint, bufSize: sizei, length: ?*sizei, infoLog: [*]char) callconv(APIENTRY) void;
-pub const GetShaderPrecisionFormat = glGetShaderPrecisionFormat;
-extern fn glGetShaderPrecisionFormat(shadertype: @"enum", precisiontype: @"enum", range: *[2]int, precision: *int) callconv(APIENTRY) void;
-pub const GetShaderSource = glGetShaderSource;
-extern fn glGetShaderSource(shader: uint, bufSize: sizei, length: ?*sizei, source: [*]char) callconv(APIENTRY) void;
-pub const GetString = glGetString;
-extern fn glGetString(name: @"enum") callconv(APIENTRY) ?[*:0]const ubyte;
-pub const GetStringi = glGetStringi;
-extern fn glGetStringi(name: @"enum", index: uint) callconv(APIENTRY) ?[*:0]const ubyte;
-pub const GetSynciv = glGetSynciv;
-extern fn glGetSynciv(sync_: sync, pname: @"enum", count: sizei, length: [*c]sizei, values: [*c]int) callconv(APIENTRY) void;
-pub const GetTexParameterfv = glGetTexParameterfv;
-extern fn glGetTexParameterfv(target: @"enum", pname: @"enum", params: [*c]float) callconv(APIENTRY) void;
-pub const GetTexParameteriv = glGetTexParameteriv;
-extern fn glGetTexParameteriv(target: @"enum", pname: @"enum", params: [*c]int) callconv(APIENTRY) void;
-pub const GetTransformFeedbackVarying = glGetTransformFeedbackVarying;
-extern fn glGetTransformFeedbackVarying(program: uint, index: uint, bufSize: sizei, length: [*c]sizei, size: [*c]sizei, @"type": [*c]@"enum", name: [*c]char) callconv(APIENTRY) void;
-pub const GetUniformfv = glGetUniformfv;
-extern fn glGetUniformfv(program: uint, location: int, params: [*c]float) callconv(APIENTRY) void;
-pub const GetUniformiv = glGetUniformiv;
-extern fn glGetUniformiv(program: uint, location: int, params: [*c]int) callconv(APIENTRY) void;
-pub const GetUniformuiv = glGetUniformuiv;
-extern fn glGetUniformuiv(program: uint, location: int, params: [*c]uint) callconv(APIENTRY) void;
-pub const GetUniformBlockIndex = glGetUniformBlockIndex;
-extern fn glGetUniformBlockIndex(program: uint, uniformBlockName: [*c]const char) callconv(APIENTRY) uint;
-pub const GetUniformIndices = glGetUniformIndices;
-extern fn glGetUniformIndices(program: uint, uniformCount: sizei, uniformNames: [*c]const [*c]const char, uniformIndices: [*c]uint) callconv(APIENTRY) void;
-pub const GetUniformLocation = glGetUniformLocation;
-extern fn glGetUniformLocation(program: uint, name: [*:0]const char) callconv(APIENTRY) int;
-pub const GetVertexAttribfv = glGetVertexAttribfv;
-extern fn glGetVertexAttribfv(index: uint, pname: @"enum", params: [*c]float) callconv(APIENTRY) void;
-pub const GetVertexAttribiv = glGetVertexAttribiv;
-extern fn glGetVertexAttribiv(index: uint, pname: @"enum", params: [*c]int) callconv(APIENTRY) void;
-pub const GetVertexAttribIiv = glGetVertexAttribIiv;
-extern fn glGetVertexAttribIiv(index: uint, pname: @"enum", params: [*c]int) callconv(APIENTRY) void;
-pub const GetVertexAttribIuiv = glGetVertexAttribIuiv;
-extern fn glGetVertexAttribIuiv(index: uint, pname: @"enum", params: [*c]uint) callconv(APIENTRY) void;
-pub const GetVertexAttribPointerv = glGetVertexAttribPointerv;
-extern fn glGetVertexAttribPointerv(index: uint, pname: @"enum", pointer: [*c]?*anyopaque) callconv(APIENTRY) void;
-pub const Hint = glHint;
-extern fn glHint(target: @"enum", mode: @"enum") callconv(APIENTRY) void;
-pub const InvalidateFramebuffer = glInvalidateFramebuffer;
-extern fn glInvalidateFramebuffer(target: @"enum", numAttachments: sizei, attachments: [*c]const @"enum") callconv(APIENTRY) void;
-pub const InvalidateSubFramebuffer = glInvalidateSubFramebuffer;
-extern fn glInvalidateSubFramebuffer(target: @"enum", numAttachments: sizei, attachments: [*c]const @"enum", x: int, y: int, width: sizei, height: sizei) callconv(APIENTRY) void;
-pub const IsBuffer = glIsBuffer;
-extern fn glIsBuffer(buffer: uint) callconv(APIENTRY) boolean;
-pub const IsEnabled = glIsEnabled;
-extern fn glIsEnabled(cap: @"enum") callconv(APIENTRY) boolean;
-pub const IsFramebuffer = glIsFramebuffer;
-extern fn glIsFramebuffer(framebuffer: uint) callconv(APIENTRY) boolean;
-pub const IsProgram = glIsProgram;
-extern fn glIsProgram(program: uint) callconv(APIENTRY) boolean;
-pub const IsQuery = glIsQuery;
-extern fn glIsQuery(id: uint) callconv(APIENTRY) boolean;
-pub const IsRenderbuffer = glIsRenderbuffer;
-extern fn glIsRenderbuffer(renderbuffer: uint) callconv(APIENTRY) boolean;
-pub const IsSampler = glIsSampler;
-extern fn glIsSampler(sampler: uint) callconv(APIENTRY) boolean;
-pub const IsShader = glIsShader;
-extern fn glIsShader(shader: uint) callconv(APIENTRY) boolean;
-pub const IsSync = glIsSync;
-extern fn glIsSync(sync_: ?sync) callconv(APIENTRY) boolean;
-pub const IsTexture = glIsTexture;
-extern fn glIsTexture(texture: uint) callconv(APIENTRY) boolean;
-pub const IsTransformFeedback = glIsTransformFeedback;
-extern fn glIsTransformFeedback(id: uint) callconv(APIENTRY) boolean;
-pub const IsVertexArray = glIsVertexArray;
-extern fn glIsVertexArray(array: uint) callconv(APIENTRY) boolean;
-pub const LineWidth = glLineWidth;
-extern fn glLineWidth(width: float) callconv(APIENTRY) void;
-pub const LinkProgram = glLinkProgram;
-extern fn glLinkProgram(program: uint) callconv(APIENTRY) void;
-pub const MapBufferRange = glMapBufferRange;
-extern fn glMapBufferRange(target: @"enum", offset: intptr, length: sizeiptr, access: bitfield) callconv(APIENTRY) ?*anyopaque;
-pub const PauseTransformFeedback = glPauseTransformFeedback;
-extern fn glPauseTransformFeedback() callconv(APIENTRY) void;
-pub const PixelStorei = glPixelStorei;
-extern fn glPixelStorei(pname: @"enum", param: int) callconv(APIENTRY) void;
-pub const PolygonOffset = glPolygonOffset;
-extern fn glPolygonOffset(factor: float, units: float) callconv(APIENTRY) void;
-pub const ProgramBinary = glProgramBinary;
-extern fn glProgramBinary(program: uint, binaryFormat: @"enum", binary: ?*const anyopaque, length: sizei) callconv(APIENTRY) void;
-pub const ProgramParameteri = glProgramParameteri;
-extern fn glProgramParameteri(program: uint, pname: @"enum", value: int) callconv(APIENTRY) void;
-pub const ReadBuffer = glReadBuffer;
-extern fn glReadBuffer(src: @"enum") callconv(APIENTRY) void;
-pub const ReadPixels = glReadPixels;
-extern fn glReadPixels(x: int, y: int, width: sizei, height: sizei, format: @"enum", @"type": @"enum", pixels: ?*anyopaque) callconv(APIENTRY) void;
-pub const ReleaseShaderCompiler = glReleaseShaderCompiler;
-extern fn glReleaseShaderCompiler() callconv(APIENTRY) void;
-pub const RenderbufferStorage = glRenderbufferStorage;
-extern fn glRenderbufferStorage(target: @"enum", internalformat: @"enum", width: sizei, height: sizei) callconv(APIENTRY) void;
-pub const RenderbufferStorageMultisample = glRenderbufferStorageMultisample;
-extern fn glRenderbufferStorageMultisample(target: @"enum", samples: sizei, internalformat: @"enum", width: sizei, height: sizei) callconv(APIENTRY) void;
-pub const ResumeTransformFeedback = glResumeTransformFeedback;
-extern fn glResumeTransformFeedback() callconv(APIENTRY) void;
-pub const SampleCoverage = glSampleCoverage;
-extern fn glSampleCoverage(value: float, invert: boolean) callconv(APIENTRY) void;
-pub const SamplerParameterf = glSamplerParameterf;
-extern fn glSamplerParameterf(sampler: uint, pname: @"enum", param: float) callconv(APIENTRY) void;
-pub const SamplerParameterfv = glSamplerParameterfv;
-extern fn glSamplerParameterfv(sampler: uint, pname: @"enum", param: [*c]const float) callconv(APIENTRY) void;
-pub const SamplerParameteri = glSamplerParameteri;
-extern fn glSamplerParameteri(sampler: uint, pname: @"enum", param: int) callconv(APIENTRY) void;
-pub const SamplerParameteriv = glSamplerParameteriv;
-extern fn glSamplerParameteriv(sampler: uint, pname: @"enum", param: [*c]const int) callconv(APIENTRY) void;
-pub const Scissor = glScissor;
-extern fn glScissor(x: int, y: int, width: sizei, height: sizei) callconv(APIENTRY) void;
-pub const ShaderBinary = glShaderBinary;
-extern fn glShaderBinary(count: sizei, shaders: [*c]const uint, binaryFormat: @"enum", binary: ?*const anyopaque, length: sizei) callconv(APIENTRY) void;
-pub const ShaderSource = glShaderSource;
-extern fn glShaderSource(shader: uint, count: sizei, strings: [*]const [*]const char, lengths: ?[*]const int) callconv(APIENTRY) void;
-pub const StencilFunc = glStencilFunc;
-extern fn glStencilFunc(func: @"enum", ref: int, mask: uint) callconv(APIENTRY) void;
-pub const StencilFuncSeparate = glStencilFuncSeparate;
-extern fn glStencilFuncSeparate(face: @"enum", func: @"enum", ref: int, mask: uint) callconv(APIENTRY) void;
-pub const StencilMask = glStencilMask;
-extern fn glStencilMask(mask: uint) callconv(APIENTRY) void;
-pub const StencilMaskSeparate = glStencilMaskSeparate;
-extern fn glStencilMaskSeparate(face: @"enum", mask: uint) callconv(APIENTRY) void;
-pub const StencilOp = glStencilOp;
-extern fn glStencilOp(fail: @"enum", zfail: @"enum", zpass: @"enum") callconv(APIENTRY) void;
-pub const StencilOpSeparate = glStencilOpSeparate;
-extern fn glStencilOpSeparate(face: @"enum", sfail: @"enum", dpfail: @"enum", dppass: @"enum") callconv(APIENTRY) void;
-pub const TexImage2D = glTexImage2D;
-extern fn glTexImage2D(target: @"enum", level: int, internalformat: int, width: sizei, height: sizei, border: int, format: @"enum", @"type": @"enum", pixels: ?*const anyopaque) callconv(APIENTRY) void;
-pub const TexImage3D = glTexImage3D;
-extern fn glTexImage3D(target: @"enum", level: int, internalformat: int, width: sizei, height: sizei, depth: sizei, border: int, format: @"enum", @"type": @"enum", pixels: ?*const anyopaque) callconv(APIENTRY) void;
-pub const TexParameterf = glTexParameterf;
-extern fn glTexParameterf(target: @"enum", pname: @"enum", param: float) callconv(APIENTRY) void;
-pub const TexParameterfv = glTexParameterfv;
-extern fn glTexParameterfv(target: @"enum", pname: @"enum", params: [*c]const float) callconv(APIENTRY) void;
-pub const TexParameteri = glTexParameteri;
-extern fn glTexParameteri(target: @"enum", pname: @"enum", param: int) callconv(APIENTRY) void;
-pub const TexParameteriv = glTexParameteriv;
-extern fn glTexParameteriv(target: @"enum", pname: @"enum", params: [*c]const int) callconv(APIENTRY) void;
-pub const TexStorage2D = glTexStorage2D;
-extern fn glTexStorage2D(target: @"enum", levels: sizei, internalformat: @"enum", width: sizei, height: sizei) callconv(APIENTRY) void;
-pub const TexStorage3D = glTexStorage3D;
-extern fn glTexStorage3D(target: @"enum", levels: sizei, internalformat: @"enum", width: sizei, height: sizei, depth: sizei) callconv(APIENTRY) void;
-pub const TexSubImage2D = glTexSubImage2D;
-extern fn glTexSubImage2D(target: @"enum", level: int, xoffset: int, yoffset: int, width: sizei, height: sizei, format: @"enum", @"type": @"enum", pixels: ?*const anyopaque) callconv(APIENTRY) void;
-pub const TexSubImage3D = glTexSubImage3D;
-extern fn glTexSubImage3D(target: @"enum", level: int, xoffset: int, yoffset: int, zoffset: int, width: sizei, height: sizei, depth: sizei, format: @"enum", @"type": @"enum", pixels: ?*const anyopaque) callconv(APIENTRY) void;
-pub const TransformFeedbackVaryings = glTransformFeedbackVaryings;
-extern fn glTransformFeedbackVaryings(program: uint, count: sizei, varyings: [*c]const [*c]const char, bufferMode: @"enum") callconv(APIENTRY) void;
-pub const Uniform1f = glUniform1f;
-extern fn glUniform1f(location: int, v0: float) callconv(APIENTRY) void;
-pub const Uniform1fv = glUniform1fv;
-extern fn glUniform1fv(location: int, count: sizei, value: [*c]const float) callconv(APIENTRY) void;
-pub const Uniform1i = glUniform1i;
-extern fn glUniform1i(location: int, v0: int) callconv(APIENTRY) void;
-pub const Uniform1iv = glUniform1iv;
-extern fn glUniform1iv(location: int, count: sizei, value: [*c]const int) callconv(APIENTRY) void;
-pub const Uniform1ui = glUniform1ui;
-extern fn glUniform1ui(location: int, v0: uint) callconv(APIENTRY) void;
-pub const Uniform1uiv = glUniform1uiv;
-extern fn glUniform1uiv(location: int, count: sizei, value: [*c]const uint) callconv(APIENTRY) void;
-pub const Uniform2f = glUniform2f;
-extern fn glUniform2f(location: int, v0: float, v1: float) callconv(APIENTRY) void;
-pub const Uniform2fv = glUniform2fv;
-extern fn glUniform2fv(location: int, count: sizei, value: [*c]const float) callconv(APIENTRY) void;
-pub const Uniform2i = glUniform2i;
-extern fn glUniform2i(location: int, v0: int, v1: int) callconv(APIENTRY) void;
-pub const Uniform2iv = glUniform2iv;
-extern fn glUniform2iv(location: int, count: sizei, value: [*c]const int) callconv(APIENTRY) void;
-pub const Uniform2ui = glUniform2ui;
-extern fn glUniform2ui(location: int, v0: uint, v1: uint) callconv(APIENTRY) void;
-pub const Uniform2uiv = glUniform2uiv;
-extern fn glUniform2uiv(location: int, count: sizei, value: [*c]const uint) callconv(APIENTRY) void;
-pub const Uniform3f = glUniform3f;
-extern fn glUniform3f(location: int, v0: float, v1: float, v2: float) callconv(APIENTRY) void;
-pub const Uniform3fv = glUniform3fv;
-extern fn glUniform3fv(location: int, count: sizei, value: [*c]const float) callconv(APIENTRY) void;
-pub const Uniform3i = glUniform3i;
-extern fn glUniform3i(location: int, v0: int, v1: int, v2: int) callconv(APIENTRY) void;
-pub const Uniform3iv = glUniform3iv;
-extern fn glUniform3iv(location: int, count: sizei, value: [*c]const int) callconv(APIENTRY) void;
-pub const Uniform3ui = glUniform3ui;
-extern fn glUniform3ui(location: int, v0: uint, v1: uint, v2: uint) callconv(APIENTRY) void;
-pub const Uniform3uiv = glUniform3uiv;
-extern fn glUniform3uiv(location: int, count: sizei, value: [*c]const uint) callconv(APIENTRY) void;
-pub const Uniform4f = glUniform4f;
-extern fn glUniform4f(location: int, v0: float, v1: float, v2: float, v3: float) callconv(APIENTRY) void;
-pub const Uniform4fv = glUniform4fv;
-extern fn glUniform4fv(location: int, count: sizei, value: [*c]const float) callconv(APIENTRY) void;
-pub const Uniform4i = glUniform4i;
-extern fn glUniform4i(location: int, v0: int, v1: int, v2: int, v3: int) callconv(APIENTRY) void;
-pub const Uniform4iv = glUniform4iv;
-extern fn glUniform4iv(location: int, count: sizei, value: [*c]const int) callconv(APIENTRY) void;
-pub const Uniform4ui = glUniform4ui;
-extern fn glUniform4ui(location: int, v0: uint, v1: uint, v2: uint, v3: uint) callconv(APIENTRY) void;
-pub const Uniform4uiv = glUniform4uiv;
-extern fn glUniform4uiv(location: int, count: sizei, value: [*c]const uint) callconv(APIENTRY) void;
-pub const UniformBlockBinding = glUniformBlockBinding;
-extern fn glUniformBlockBinding(program: uint, uniformBlockIndex: uint, uniformBlockBinding: uint) callconv(APIENTRY) void;
-pub const UniformMatrix2fv = glUniformMatrix2fv;
-extern fn glUniformMatrix2fv(location: int, count: sizei, transpose: boolean, value: [*c]const float) callconv(APIENTRY) void;
-pub const UniformMatrix2x3fv = glUniformMatrix2x3fv;
-extern fn glUniformMatrix2x3fv(location: int, count: sizei, transpose: boolean, value: [*c]const float) callconv(APIENTRY) void;
-pub const UniformMatrix2x4fv = glUniformMatrix2x4fv;
-extern fn glUniformMatrix2x4fv(location: int, count: sizei, transpose: boolean, value: [*c]const float) callconv(APIENTRY) void;
-pub const UniformMatrix3fv = glUniformMatrix3fv;
-extern fn glUniformMatrix3fv(location: int, count: sizei, transpose: boolean, value: [*c]const float) callconv(APIENTRY) void;
-pub const UniformMatrix3x2fv = glUniformMatrix3x2fv;
-extern fn glUniformMatrix3x2fv(location: int, count: sizei, transpose: boolean, value: [*c]const float) callconv(APIENTRY) void;
-pub const UniformMatrix3x4fv = glUniformMatrix3x4fv;
-extern fn glUniformMatrix3x4fv(location: int, count: sizei, transpose: boolean, value: [*c]const float) callconv(APIENTRY) void;
-pub const UniformMatrix4fv = glUniformMatrix4fv;
-extern fn glUniformMatrix4fv(location: int, count: sizei, transpose: boolean, value: [*c]const float) callconv(APIENTRY) void;
-pub const UniformMatrix4x2fv = glUniformMatrix4x2fv;
-extern fn glUniformMatrix4x2fv(location: int, count: sizei, transpose: boolean, value: [*c]const float) callconv(APIENTRY) void;
-pub const UniformMatrix4x3fv = glUniformMatrix4x3fv;
-extern fn glUniformMatrix4x3fv(location: int, count: sizei, transpose: boolean, value: [*c]const float) callconv(APIENTRY) void;
-pub const UnmapBuffer = glUnmapBuffer;
-extern fn glUnmapBuffer(target: @"enum") callconv(APIENTRY) boolean;
-pub const UseProgram = glUseProgram;
-extern fn glUseProgram(program: uint) callconv(APIENTRY) void;
-pub const ValidateProgram = glValidateProgram;
-extern fn glValidateProgram(program: uint) callconv(APIENTRY) void;
-pub const VertexAttrib1f = glVertexAttrib1f;
-extern fn glVertexAttrib1f(index: uint, x: float) callconv(APIENTRY) void;
-pub const VertexAttrib1fv = glVertexAttrib1fv;
-extern fn glVertexAttrib1fv(index: uint, v: [*c]const float) callconv(APIENTRY) void;
-pub const VertexAttrib2f = glVertexAttrib2f;
-extern fn glVertexAttrib2f(index: uint, x: float, y: float) callconv(APIENTRY) void;
-pub const VertexAttrib2fv = glVertexAttrib2fv;
-extern fn glVertexAttrib2fv(index: uint, v: [*c]const float) callconv(APIENTRY) void;
-pub const VertexAttrib3f = glVertexAttrib3f;
-extern fn glVertexAttrib3f(index: uint, x: float, y: float, z: float) callconv(APIENTRY) void;
-pub const VertexAttrib3fv = glVertexAttrib3fv;
-extern fn glVertexAttrib3fv(index: uint, v: [*c]const float) callconv(APIENTRY) void;
-pub const VertexAttrib4f = glVertexAttrib4f;
-extern fn glVertexAttrib4f(index: uint, x: float, y: float, z: float, w: float) callconv(APIENTRY) void;
-pub const VertexAttrib4fv = glVertexAttrib4fv;
-extern fn glVertexAttrib4fv(index: uint, v: [*c]const float) callconv(APIENTRY) void;
-pub const VertexAttribDivisor = glVertexAttribDivisor;
-extern fn glVertexAttribDivisor(index: uint, divisor: uint) callconv(APIENTRY) void;
-pub const VertexAttribI4i = glVertexAttribI4i;
-extern fn glVertexAttribI4i(index: uint, x: int, y: int, z: int, w: int) callconv(APIENTRY) void;
-pub const VertexAttribI4iv = glVertexAttribI4iv;
-extern fn glVertexAttribI4iv(index: uint, v: [*c]const int) callconv(APIENTRY) void;
-pub const VertexAttribI4ui = glVertexAttribI4ui;
-extern fn glVertexAttribI4ui(index: uint, x: uint, y: uint, z: uint, w: uint) callconv(APIENTRY) void;
-pub const VertexAttribI4uiv = glVertexAttribI4uiv;
-extern fn glVertexAttribI4uiv(index: uint, v: [*c]const uint) callconv(APIENTRY) void;
-pub const VertexAttribIPointer = glVertexAttribIPointer;
-extern fn glVertexAttribIPointer(index: uint, size: int, @"type": @"enum", stride: sizei, pointer: usize) callconv(APIENTRY) void;
-pub const VertexAttribPointer = glVertexAttribPointer;
-extern fn glVertexAttribPointer(index: uint, size: int, @"type": @"enum", normalized: boolean, stride: sizei, pointer: usize) callconv(APIENTRY) void;
-pub const Viewport = glViewport;
-extern fn glViewport(x: int, y: int, width: sizei, height: sizei) callconv(APIENTRY) void;
-pub const WaitSync = glWaitSync;
-extern fn glWaitSync(sync_: sync, flags: bitfield, timeout: uint64) callconv(APIENTRY) void;
+pub const ActiveTexture = @extern(
+    *const fn (texture: @"enum") callconv(APIENTRY) void,
+    .{ .name = "glActiveTexture" },
+);
+pub const AttachShader = @extern(
+    *const fn (program: uint, shader: uint) callconv(APIENTRY) void,
+    .{ .name = "glAttachShader" },
+);
+pub const BeginQuery = @extern(
+    *const fn (target: @"enum", id: uint) callconv(APIENTRY) void,
+    .{ .name = "glBeginQuery" },
+);
+pub const BeginTransformFeedback = @extern(
+    *const fn (primitiveMode: @"enum") callconv(APIENTRY) void,
+    .{ .name = "glBeginTransformFeedback" },
+);
+pub const BindAttribLocation = @extern(
+    *const fn (program: uint, index: uint, name: [*:0]const char) callconv(APIENTRY) void,
+    .{ .name = "glBindAttribLocation" },
+);
+pub const BindBuffer = @extern(
+    *const fn (target: @"enum", buffer: uint) callconv(APIENTRY) void,
+    .{ .name = "glBindBuffer" },
+);
+pub const BindBufferBase = @extern(
+    *const fn (target: @"enum", index: uint, buffer: uint) callconv(APIENTRY) void,
+    .{ .name = "glBindBufferBase" },
+);
+pub const BindBufferRange = @extern(
+    *const fn (target: @"enum", index: uint, buffer: uint, offset: intptr, size: sizeiptr) callconv(APIENTRY) void,
+    .{ .name = "glBindBufferRange" },
+);
+pub const BindFramebuffer = @extern(
+    *const fn (target: @"enum", framebuffer: uint) callconv(APIENTRY) void,
+    .{ .name = "glBindFramebuffer" },
+);
+pub const BindRenderbuffer = @extern(
+    *const fn (target: @"enum", renderbuffer: uint) callconv(APIENTRY) void,
+    .{ .name = "glBindRenderbuffer" },
+);
+pub const BindSampler = @extern(
+    *const fn (unit: uint, sampler: uint) callconv(APIENTRY) void,
+    .{ .name = "glBindSampler" },
+);
+pub const BindTexture = @extern(
+    *const fn (target: @"enum", texture: uint) callconv(APIENTRY) void,
+    .{ .name = "glBindTexture" },
+);
+pub const BindTransformFeedback = @extern(
+    *const fn (target: @"enum", id: uint) callconv(APIENTRY) void,
+    .{ .name = "glBindTransformFeedback" },
+);
+pub const BindVertexArray = @extern(
+    *const fn (array: uint) callconv(APIENTRY) void,
+    .{ .name = "glBindVertexArray" },
+);
+pub const BlendColor = @extern(
+    *const fn (red: float, green: float, blue: float, alpha: float) callconv(APIENTRY) void,
+    .{ .name = "glBlendColor" },
+);
+pub const BlendEquation = @extern(
+    *const fn (mode: @"enum") callconv(APIENTRY) void,
+    .{ .name = "glBlendEquation" },
+);
+pub const BlendEquationSeparate = @extern(
+    *const fn (modeRGB: @"enum", modeAlpha: @"enum") callconv(APIENTRY) void,
+    .{ .name = "glBlendEquationSeparate" },
+);
+pub const BlendFunc = @extern(
+    *const fn (sfactor: @"enum", dfactor: @"enum") callconv(APIENTRY) void,
+    .{ .name = "glBlendFunc" },
+);
+pub const BlendFuncSeparate = @extern(
+    *const fn (sfactorRGB: @"enum", dfactorRGB: @"enum", sfactorAlpha: @"enum", dfactorAlpha: @"enum") callconv(APIENTRY) void,
+    .{ .name = "glBlendFuncSeparate" },
+);
+pub const BlitFramebuffer = @extern(
+    *const fn (srcX0: int, srcY0: int, srcX1: int, srcY1: int, dstX0: int, dstY0: int, dstX1: int, dstY1: int, mask: bitfield, filter: @"enum") callconv(APIENTRY) void,
+    .{ .name = "glBlitFramebuffer" },
+);
+pub const BufferData = @extern(
+    *const fn (target: @"enum", size: sizeiptr, data: ?*const anyopaque, usage: @"enum") callconv(APIENTRY) void,
+    .{ .name = "glBufferData" },
+);
+pub const BufferSubData = @extern(
+    *const fn (target: @"enum", offset: intptr, size: sizeiptr, data: ?*const anyopaque) callconv(APIENTRY) void,
+    .{ .name = "glBufferSubData" },
+);
+pub const CheckFramebufferStatus = @extern(
+    *const fn (target: @"enum") callconv(APIENTRY) @"enum",
+    .{ .name = "glCheckFramebufferStatus" },
+);
+pub const Clear = @extern(
+    *const fn (mask: bitfield) callconv(APIENTRY) void,
+    .{ .name = "glClear" },
+);
+pub const ClearBufferfv = @extern(
+    *const fn (buffer: @"enum", drawbuffer: int, values: [*]const float) callconv(APIENTRY) void,
+    .{ .name = "glClearBufferfv" },
+);
+pub const ClearBufferiv = @extern(
+    *const fn (buffer: @"enum", drawbuffer: int, values: [*]const int) callconv(APIENTRY) void,
+    .{ .name = "glClearBufferiv" },
+);
+pub const ClearBufferuiv = @extern(
+    *const fn (buffer: @"enum", drawbuffer: int, values: [*]const uint) callconv(APIENTRY) void,
+    .{ .name = "glClearBufferuiv" },
+);
+pub const ClearBufferfi = @extern(
+    *const fn (buffer: @"enum", drawbuffer: int, depth: float, stencil: int) callconv(APIENTRY) void,
+    .{ .name = "glClearBufferfi" },
+);
+pub const ClearColor = @extern(
+    *const fn (red: float, green: float, blue: float, alpha: float) callconv(APIENTRY) void,
+    .{ .name = "glClearColor" },
+);
+pub const ClearDepthf = @extern(
+    *const fn (d: float) callconv(APIENTRY) void,
+    .{ .name = "glClearDepthf" },
+);
+pub const ClearStencil = @extern(
+    *const fn (s: int) callconv(APIENTRY) void,
+    .{ .name = "glClearStencil" },
+);
+pub const ClientWaitSync = @extern(
+    *const fn (sync_: sync, flags: bitfield, timeout: uint64) callconv(APIENTRY) @"enum",
+    .{ .name = "glClientWaitSync" },
+);
+pub const ColorMask = @extern(
+    *const fn (red: boolean, green: boolean, blue: boolean, alpha: boolean) callconv(APIENTRY) void,
+    .{ .name = "glColorMask" },
+);
+pub const CompileShader = @extern(
+    *const fn (shader: uint) callconv(APIENTRY) void,
+    .{ .name = "glCompileShader" },
+);
+pub const CompressedTexImage2D = @extern(
+    *const fn (target: @"enum", level: int, internalformat: @"enum", width: sizei, height: sizei, border: int, imageSize: sizei, data: ?*const anyopaque) callconv(APIENTRY) void,
+    .{ .name = "glCompressedTexImage2D" },
+);
+pub const CompressedTexImage3D = @extern(
+    *const fn (target: @"enum", level: int, internalformat: @"enum", width: sizei, height: sizei, depth: sizei, border: int, imageSize: sizei, data: ?*const anyopaque) callconv(APIENTRY) void,
+    .{ .name = "glCompressedTexImage3D" },
+);
+pub const CompressedTexSubImage2D = @extern(
+    *const fn (target: @"enum", level: int, xoffset: int, yoffset: int, width: sizei, height: sizei, format: @"enum", imageSize: sizei, data: ?*const anyopaque) callconv(APIENTRY) void,
+    .{ .name = "glCompressedTexSubImage2D" },
+);
+pub const CompressedTexSubImage3D = @extern(
+    *const fn (target: @"enum", level: int, xoffset: int, yoffset: int, zoffset: int, width: sizei, height: sizei, depth: sizei, format: @"enum", imageSize: sizei, data: ?*const anyopaque) callconv(APIENTRY) void,
+    .{ .name = "glCompressedTexSubImage3D" },
+);
+pub const CopyBufferSubData = @extern(
+    *const fn (readTarget: @"enum", writeTarget: @"enum", readOffset: intptr, writeOffset: intptr, size: sizeiptr) callconv(APIENTRY) void,
+    .{ .name = "glCopyBufferSubData" },
+);
+pub const CopyTexImage2D = @extern(
+    *const fn (target: @"enum", level: int, internalformat: @"enum", x: int, y: int, width: sizei, height: sizei, border: int) callconv(APIENTRY) void,
+    .{ .name = "glCopyTexImage2D" },
+);
+pub const CopyTexSubImage2D = @extern(
+    *const fn (target: @"enum", level: int, xoffset: int, yoffset: int, x: int, y: int, width: sizei, height: sizei) callconv(APIENTRY) void,
+    .{ .name = "glCopyTexSubImage2D" },
+);
+pub const CopyTexSubImage3D = @extern(
+    *const fn (target: @"enum", level: int, xoffset: int, yoffset: int, zoffset: int, x: int, y: int, width: sizei, height: sizei) callconv(APIENTRY) void,
+    .{ .name = "glCopyTexSubImage3D" },
+);
+pub const CreateProgram = @extern(
+    *const fn () callconv(APIENTRY) uint,
+    .{ .name = "glCreateProgram" },
+);
+pub const CreateShader = @extern(
+    *const fn (@"type": @"enum") callconv(APIENTRY) uint,
+    .{ .name = "glCreateShader" },
+);
+pub const CullFace = @extern(
+    *const fn (mode: @"enum") callconv(APIENTRY) void,
+    .{ .name = "glCullFace" },
+);
+pub const DeleteBuffers = @extern(
+    *const fn (n: sizei, buffers: [*]const uint) callconv(APIENTRY) void,
+    .{ .name = "glDeleteBuffers" },
+);
+pub const DeleteFramebuffers = @extern(
+    *const fn (n: sizei, framebuffers: [*]const uint) callconv(APIENTRY) void,
+    .{ .name = "glDeleteFramebuffers" },
+);
+pub const DeleteProgram = @extern(
+    *const fn (program: uint) callconv(APIENTRY) void,
+    .{ .name = "glDeleteProgram" },
+);
+pub const DeleteQueries = @extern(
+    *const fn (n: sizei, ids: [*]const uint) callconv(APIENTRY) void,
+    .{ .name = "glDeleteQueries" },
+);
+pub const DeleteRenderbuffers = @extern(
+    *const fn (n: sizei, renderbuffers: [*]const uint) callconv(APIENTRY) void,
+    .{ .name = "glDeleteRenderbuffers" },
+);
+pub const DeleteSamplers = @extern(
+    *const fn (count: sizei, samplers: [*]const uint) callconv(APIENTRY) void,
+    .{ .name = "glDeleteSamplers" },
+);
+pub const DeleteShader = @extern(
+    *const fn (shader: uint) callconv(APIENTRY) void,
+    .{ .name = "glDeleteShader" },
+);
+pub const DeleteSync = @extern(
+    *const fn (sync_: ?sync) callconv(APIENTRY) void,
+    .{ .name = "glDeleteSync" },
+);
+pub const DeleteTextures = @extern(
+    *const fn (n: sizei, textures: [*]const uint) callconv(APIENTRY) void,
+    .{ .name = "glDeleteTextures" },
+);
+pub const DeleteTransformFeedbacks = @extern(
+    *const fn (n: sizei, ids: [*]const uint) callconv(APIENTRY) void,
+    .{ .name = "glDeleteTransformFeedbacks" },
+);
+pub const DeleteVertexArrays = @extern(
+    *const fn (n: sizei, arrays: [*]const uint) callconv(APIENTRY) void,
+    .{ .name = "glDeleteVertexArrays" },
+);
+pub const DepthFunc = @extern(
+    *const fn (func: @"enum") callconv(APIENTRY) void,
+    .{ .name = "glDepthFunc" },
+);
+pub const DepthMask = @extern(
+    *const fn (flag: boolean) callconv(APIENTRY) void,
+    .{ .name = "glDepthMask" },
+);
+pub const DepthRangef = @extern(
+    *const fn (n: float, f: float) callconv(APIENTRY) void,
+    .{ .name = "glDepthRangef" },
+);
+pub const DetachShader = @extern(
+    *const fn (program: uint, shader: uint) callconv(APIENTRY) void,
+    .{ .name = "glDetachShader" },
+);
+pub const Disable = @extern(
+    *const fn (cap: @"enum") callconv(APIENTRY) void,
+    .{ .name = "glDisable" },
+);
+pub const DisableVertexAttribArray = @extern(
+    *const fn (index: uint) callconv(APIENTRY) void,
+    .{ .name = "glDisableVertexAttribArray" },
+);
+pub const DrawArrays = @extern(
+    *const fn (mode: @"enum", first: int, count: sizei) callconv(APIENTRY) void,
+    .{ .name = "glDrawArrays" },
+);
+pub const DrawArraysInstanced = @extern(
+    *const fn (mode: @"enum", first: int, count: sizei, instancecount: sizei) callconv(APIENTRY) void,
+    .{ .name = "glDrawArraysInstanced" },
+);
+pub const DrawBuffers = @extern(
+    *const fn (n: sizei, bufs: [*c]const @"enum") callconv(APIENTRY) void,
+    .{ .name = "glDrawBuffers" },
+);
+pub const DrawElements = @extern(
+    *const fn (mode: @"enum", count: sizei, @"type": @"enum", indices: usize) callconv(APIENTRY) void,
+    .{ .name = "glDrawElements" },
+);
+pub const DrawElementsInstanced = @extern(
+    *const fn (mode: @"enum", count: sizei, @"type": @"enum", indices: ?*const anyopaque, instancecount: sizei) callconv(APIENTRY) void,
+    .{ .name = "glDrawElementsInstanced" },
+);
+pub const DrawRangeElements = @extern(
+    *const fn (mode: @"enum", start: uint, end: uint, count: sizei, @"type": @"enum", indices: ?*const anyopaque) callconv(APIENTRY) void,
+    .{ .name = "glDrawRangeElements" },
+);
+pub const Enable = @extern(
+    *const fn (cap: @"enum") callconv(APIENTRY) void,
+    .{ .name = "glEnable" },
+);
+pub const EnableVertexAttribArray = @extern(
+    *const fn (index: uint) callconv(APIENTRY) void,
+    .{ .name = "glEnableVertexAttribArray" },
+);
+pub const EndQuery = @extern(
+    *const fn (target: @"enum") callconv(APIENTRY) void,
+    .{ .name = "glEndQuery" },
+);
+pub const EndTransformFeedback = @extern(
+    *const fn () callconv(APIENTRY) void,
+    .{ .name = "glEndTransformFeedback" },
+);
+pub const FenceSync = @extern(
+    *const fn (condition: @"enum", flags: bitfield) callconv(APIENTRY) ?sync,
+    .{ .name = "glFenceSync" },
+);
+pub const Finish = @extern(
+    *const fn () callconv(APIENTRY) void,
+    .{ .name = "glFinish" },
+);
+pub const Flush = @extern(
+    *const fn () callconv(APIENTRY) void,
+    .{ .name = "glFlush" },
+);
+pub const FlushMappedBufferRange = @extern(
+    *const fn (target: @"enum", offset: intptr, length: sizeiptr) callconv(APIENTRY) void,
+    .{ .name = "glFlushMappedBufferRange" },
+);
+pub const FramebufferRenderbuffer = @extern(
+    *const fn (target: @"enum", attachment: @"enum", renderbuffertarget: @"enum", renderbuffer: uint) callconv(APIENTRY) void,
+    .{ .name = "glFramebufferRenderbuffer" },
+);
+pub const FramebufferTexture2D = @extern(
+    *const fn (target: @"enum", attachment: @"enum", textarget: @"enum", texture: uint, level: int) callconv(APIENTRY) void,
+    .{ .name = "glFramebufferTexture2D" },
+);
+pub const FramebufferTextureLayer = @extern(
+    *const fn (target: @"enum", attachment: @"enum", texture: uint, level: int, layer: int) callconv(APIENTRY) void,
+    .{ .name = "glFramebufferTextureLayer" },
+);
+pub const FrontFace = @extern(
+    *const fn (mode: @"enum") callconv(APIENTRY) void,
+    .{ .name = "glFrontFace" },
+);
+pub const GenBuffers = @extern(
+    *const fn (n: sizei, buffers: [*]uint) callconv(APIENTRY) void,
+    .{ .name = "glGenBuffers" },
+);
+pub const GenFramebuffers = @extern(
+    *const fn (n: sizei, framebuffers: [*]uint) callconv(APIENTRY) void,
+    .{ .name = "glGenFramebuffers" },
+);
+pub const GenQueries = @extern(
+    *const fn (n: sizei, ids: [*]uint) callconv(APIENTRY) void,
+    .{ .name = "glGenQueries" },
+);
+pub const GenRenderbuffers = @extern(
+    *const fn (n: sizei, renderbuffers: [*]uint) callconv(APIENTRY) void,
+    .{ .name = "glGenRenderbuffers" },
+);
+pub const GenSamplers = @extern(
+    *const fn (count: sizei, samplers: [*]uint) callconv(APIENTRY) void,
+    .{ .name = "glGenSamplers" },
+);
+pub const GenTextures = @extern(
+    *const fn (n: sizei, textures: [*]uint) callconv(APIENTRY) void,
+    .{ .name = "glGenTextures" },
+);
+pub const GenTransformFeedbacks = @extern(
+    *const fn (n: sizei, ids: [*]uint) callconv(APIENTRY) void,
+    .{ .name = "glGenTransformFeedbacks" },
+);
+pub const GenVertexArrays = @extern(
+    *const fn (n: sizei, arrays: [*]uint) callconv(APIENTRY) void,
+    .{ .name = "glGenVertexArrays" },
+);
+pub const GenerateMipmap = @extern(
+    *const fn (target: @"enum") callconv(APIENTRY) void,
+    .{ .name = "glGenerateMipmap" },
+);
+pub const GetActiveAttrib = @extern(
+    *const fn (program: uint, index: uint, bufSize: sizei, length: [*c]sizei, size: [*c]int, @"type": [*c]@"enum", name: [*c]char) callconv(APIENTRY) void,
+    .{ .name = "glGetActiveAttrib" },
+);
+pub const GetActiveUniform = @extern(
+    *const fn (program: uint, index: uint, bufSize: sizei, length: [*c]sizei, size: [*c]int, @"type": [*c]@"enum", name: [*c]char) callconv(APIENTRY) void,
+    .{ .name = "glGetActiveUniform" },
+);
+pub const GetActiveUniformsiv = @extern(
+    *const fn (program: uint, uniformCount: sizei, uniformIndices: [*c]const uint, pname: @"enum", params: [*c]int) callconv(APIENTRY) void,
+    .{ .name = "glGetActiveUniformsiv" },
+);
+pub const GetActiveUniformBlockiv = @extern(
+    *const fn (program: uint, uniformBlockIndex: uint, pname: @"enum", params: [*c]int) callconv(APIENTRY) void,
+    .{ .name = "glGetActiveUniformBlockiv" },
+);
+pub const GetActiveUniformBlockName = @extern(
+    *const fn (program: uint, uniformBlockIndex: uint, bufSize: sizei, length: [*c]sizei, uniformBlockName: [*c]char) callconv(APIENTRY) void,
+    .{ .name = "glGetActiveUniformBlockName" },
+);
+pub const GetAttachedShaders = @extern(
+    *const fn (program: uint, maxCount: sizei, count: [*c]sizei, shaders: [*c]uint) callconv(APIENTRY) void,
+    .{ .name = "glGetAttachedShaders" },
+);
+pub const GetAttribLocation = @extern(
+    *const fn (program: uint, name: [*:0]const char) callconv(APIENTRY) int,
+    .{ .name = "glGetAttribLocation" },
+);
+pub const GetBooleanv = @extern(
+    *const fn (pname: @"enum", data: [*]boolean) callconv(APIENTRY) void,
+    .{ .name = "glGetBooleanv" },
+);
+pub const GetBufferParameteriv = @extern(
+    *const fn (target: @"enum", pname: @"enum", params: [*c]int) callconv(APIENTRY) void,
+    .{ .name = "glGetBufferParameteriv" },
+);
+pub const GetBufferParameteri64v = @extern(
+    *const fn (target: @"enum", pname: @"enum", params: [*c]int64) callconv(APIENTRY) void,
+    .{ .name = "glGetBufferParameteri64v" },
+);
+pub const GetBufferPointerv = @extern(
+    *const fn (target: @"enum", pname: @"enum", params: [*c]?*anyopaque) callconv(APIENTRY) void,
+    .{ .name = "glGetBufferPointerv" },
+);
+pub const GetError = @extern(
+    *const fn () callconv(APIENTRY) @"enum",
+    .{ .name = "glGetError" },
+);
+pub const GetFloatv = @extern(
+    *const fn (pname: @"enum", data: [*]float) callconv(APIENTRY) void,
+    .{ .name = "glGetFloatv" },
+);
+pub const GetFragDataLocation = @extern(
+    *const fn (program: uint, name: [*c]const char) callconv(APIENTRY) int,
+    .{ .name = "glGetFragDataLocation" },
+);
+pub const GetFramebufferAttachmentParameteriv = @extern(
+    *const fn (target: @"enum", attachment: @"enum", pname: @"enum", params: [*c]int) callconv(APIENTRY) void,
+    .{ .name = "glGetFramebufferAttachmentParameteriv" },
+);
+pub const GetIntegerv = @extern(
+    *const fn (pname: @"enum", data: [*]int) callconv(APIENTRY) void,
+    .{ .name = "glGetIntegerv" },
+);
+pub const GetIntegeri_v = @extern(
+    *const fn (target: @"enum", index: uint, data: [*]int) callconv(APIENTRY) void,
+    .{ .name = "glGetIntegeri_v" },
+);
+pub const GetInteger64v = @extern(
+    *const fn (pname: @"enum", data: [*]int64) callconv(APIENTRY) void,
+    .{ .name = "glGetInteger64v" },
+);
+pub const GetInteger64i_v = @extern(
+    *const fn (target: @"enum", index: uint, data: [*]int64) callconv(APIENTRY) void,
+    .{ .name = "glGetInteger64i_v" },
+);
+pub const GetInternalformativ = @extern(
+    *const fn (target: @"enum", internalformat: @"enum", pname: @"enum", count: sizei, params: [*c]int) callconv(APIENTRY) void,
+    .{ .name = "glGetInternalformativ" },
+);
+pub const GetProgramiv = @extern(
+    *const fn (program: uint, pname: @"enum", param: *int) callconv(APIENTRY) void,
+    .{ .name = "glGetProgramiv" },
+);
+pub const GetProgramBinary = @extern(
+    *const fn (program: uint, bufSize: sizei, length: [*c]sizei, binaryFormat: [*c]@"enum", binary: ?*anyopaque) callconv(APIENTRY) void,
+    .{ .name = "glGetProgramBinary" },
+);
+pub const GetProgramInfoLog = @extern(
+    *const fn (program: uint, bufSize: sizei, length: ?*sizei, infoLog: [*]char) callconv(APIENTRY) void,
+    .{ .name = "glGetProgramInfoLog" },
+);
+pub const GetQueryiv = @extern(
+    *const fn (target: @"enum", pname: @"enum", params: [*c]int) callconv(APIENTRY) void,
+    .{ .name = "glGetQueryiv" },
+);
+pub const GetQueryObjectuiv = @extern(
+    *const fn (id: uint, pname: @"enum", params: [*c]uint) callconv(APIENTRY) void,
+    .{ .name = "glGetQueryObjectuiv" },
+);
+pub const GetRenderbufferParameteriv = @extern(
+    *const fn (target: @"enum", pname: @"enum", params: [*c]int) callconv(APIENTRY) void,
+    .{ .name = "glGetRenderbufferParameteriv" },
+);
+pub const GetSamplerParameterfv = @extern(
+    *const fn (sampler: uint, pname: @"enum", params: [*c]float) callconv(APIENTRY) void,
+    .{ .name = "glGetSamplerParameterfv" },
+);
+pub const GetSamplerParameteriv = @extern(
+    *const fn (sampler: uint, pname: @"enum", params: [*c]int) callconv(APIENTRY) void,
+    .{ .name = "glGetSamplerParameteriv" },
+);
+pub const GetShaderiv = @extern(
+    *const fn (shader: uint, pname: @"enum", param: *int) callconv(APIENTRY) void,
+    .{ .name = "glGetShaderiv" },
+);
+pub const GetShaderInfoLog = @extern(
+    *const fn (shader: uint, bufSize: sizei, length: ?*sizei, infoLog: [*]char) callconv(APIENTRY) void,
+    .{ .name = "glGetShaderInfoLog" },
+);
+pub const GetShaderPrecisionFormat = @extern(
+    *const fn (shadertype: @"enum", precisiontype: @"enum", range: *[2]int, precision: *int) callconv(APIENTRY) void,
+    .{ .name = "glGetShaderPrecisionFormat" },
+);
+pub const GetShaderSource = @extern(
+    *const fn (shader: uint, bufSize: sizei, length: ?*sizei, source: [*]char) callconv(APIENTRY) void,
+    .{ .name = "glGetShaderSource" },
+);
+pub const GetString = @extern(
+    *const fn (name: @"enum") callconv(APIENTRY) ?[*:0]const ubyte,
+    .{ .name = "glGetString" },
+);
+pub const GetStringi = @extern(
+    *const fn (name: @"enum", index: uint) callconv(APIENTRY) ?[*:0]const ubyte,
+    .{ .name = "glGetStringi" },
+);
+pub const GetSynciv = @extern(
+    *const fn (sync_: sync, pname: @"enum", count: sizei, length: [*c]sizei, values: [*c]int) callconv(APIENTRY) void,
+    .{ .name = "glGetSynciv" },
+);
+pub const GetTexParameterfv = @extern(
+    *const fn (target: @"enum", pname: @"enum", params: [*c]float) callconv(APIENTRY) void,
+    .{ .name = "glGetTexParameterfv" },
+);
+pub const GetTexParameteriv = @extern(
+    *const fn (target: @"enum", pname: @"enum", params: [*c]int) callconv(APIENTRY) void,
+    .{ .name = "glGetTexParameteriv" },
+);
+pub const GetTransformFeedbackVarying = @extern(
+    *const fn (program: uint, index: uint, bufSize: sizei, length: [*c]sizei, size: [*c]sizei, @"type": [*c]@"enum", name: [*c]char) callconv(APIENTRY) void,
+    .{ .name = "glGetTransformFeedbackVarying" },
+);
+pub const GetUniformfv = @extern(
+    *const fn (program: uint, location: int, params: [*c]float) callconv(APIENTRY) void,
+    .{ .name = "glGetUniformfv" },
+);
+pub const GetUniformiv = @extern(
+    *const fn (program: uint, location: int, params: [*c]int) callconv(APIENTRY) void,
+    .{ .name = "glGetUniformiv" },
+);
+pub const GetUniformuiv = @extern(
+    *const fn (program: uint, location: int, params: [*c]uint) callconv(APIENTRY) void,
+    .{ .name = "glGetUniformuiv" },
+);
+pub const GetUniformBlockIndex = @extern(
+    *const fn (program: uint, uniformBlockName: [*c]const char) callconv(APIENTRY) uint,
+    .{ .name = "glGetUniformBlockIndex" },
+);
+pub const GetUniformIndices = @extern(
+    *const fn (program: uint, uniformCount: sizei, uniformNames: [*c]const [*c]const char, uniformIndices: [*c]uint) callconv(APIENTRY) void,
+    .{ .name = "glGetUniformIndices" },
+);
+pub const GetUniformLocation = @extern(
+    *const fn (program: uint, name: [*:0]const char) callconv(APIENTRY) int,
+    .{ .name = "glGetUniformLocation" },
+);
+pub const GetVertexAttribfv = @extern(
+    *const fn (index: uint, pname: @"enum", params: [*c]float) callconv(APIENTRY) void,
+    .{ .name = "glGetVertexAttribfv" },
+);
+pub const GetVertexAttribiv = @extern(
+    *const fn (index: uint, pname: @"enum", params: [*c]int) callconv(APIENTRY) void,
+    .{ .name = "glGetVertexAttribiv" },
+);
+pub const GetVertexAttribIiv = @extern(
+    *const fn (index: uint, pname: @"enum", params: [*c]int) callconv(APIENTRY) void,
+    .{ .name = "glGetVertexAttribIiv" },
+);
+pub const GetVertexAttribIuiv = @extern(
+    *const fn (index: uint, pname: @"enum", params: [*c]uint) callconv(APIENTRY) void,
+    .{ .name = "glGetVertexAttribIuiv" },
+);
+pub const GetVertexAttribPointerv = @extern(
+    *const fn (index: uint, pname: @"enum", pointer: [*c]?*anyopaque) callconv(APIENTRY) void,
+    .{ .name = "glGetVertexAttribPointerv" },
+);
+pub const Hint = @extern(
+    *const fn (target: @"enum", mode: @"enum") callconv(APIENTRY) void,
+    .{ .name = "glHint" },
+);
+pub const InvalidateFramebuffer = @extern(
+    *const fn (target: @"enum", numAttachments: sizei, attachments: [*c]const @"enum") callconv(APIENTRY) void,
+    .{ .name = "glInvalidateFramebuffer" },
+);
+pub const InvalidateSubFramebuffer = @extern(
+    *const fn (target: @"enum", numAttachments: sizei, attachments: [*c]const @"enum", x: int, y: int, width: sizei, height: sizei) callconv(APIENTRY) void,
+    .{ .name = "glInvalidateSubFramebuffer" },
+);
+pub const IsBuffer = @extern(
+    *const fn (buffer: uint) callconv(APIENTRY) boolean,
+    .{ .name = "glIsBuffer" },
+);
+pub const IsEnabled = @extern(
+    *const fn (cap: @"enum") callconv(APIENTRY) boolean,
+    .{ .name = "glIsEnabled" },
+);
+pub const IsFramebuffer = @extern(
+    *const fn (framebuffer: uint) callconv(APIENTRY) boolean,
+    .{ .name = "glIsFramebuffer" },
+);
+pub const IsProgram = @extern(
+    *const fn (program: uint) callconv(APIENTRY) boolean,
+    .{ .name = "glIsProgram" },
+);
+pub const IsQuery = @extern(
+    *const fn (id: uint) callconv(APIENTRY) boolean,
+    .{ .name = "glIsQuery" },
+);
+pub const IsRenderbuffer = @extern(
+    *const fn (renderbuffer: uint) callconv(APIENTRY) boolean,
+    .{ .name = "glIsRenderbuffer" },
+);
+pub const IsSampler = @extern(
+    *const fn (sampler: uint) callconv(APIENTRY) boolean,
+    .{ .name = "glIsSampler" },
+);
+pub const IsShader = @extern(
+    *const fn (shader: uint) callconv(APIENTRY) boolean,
+    .{ .name = "glIsShader" },
+);
+pub const IsSync = @extern(
+    *const fn (sync_: ?sync) callconv(APIENTRY) boolean,
+    .{ .name = "glIsSync" },
+);
+pub const IsTexture = @extern(
+    *const fn (texture: uint) callconv(APIENTRY) boolean,
+    .{ .name = "glIsTexture" },
+);
+pub const IsTransformFeedback = @extern(
+    *const fn (id: uint) callconv(APIENTRY) boolean,
+    .{ .name = "glIsTransformFeedback" },
+);
+pub const IsVertexArray = @extern(
+    *const fn (array: uint) callconv(APIENTRY) boolean,
+    .{ .name = "glIsVertexArray" },
+);
+pub const LineWidth = @extern(
+    *const fn (width: float) callconv(APIENTRY) void,
+    .{ .name = "glLineWidth" },
+);
+pub const LinkProgram = @extern(
+    *const fn (program: uint) callconv(APIENTRY) void,
+    .{ .name = "glLinkProgram" },
+);
+pub const MapBufferRange = @extern(
+    *const fn (target: @"enum", offset: intptr, length: sizeiptr, access: bitfield) callconv(APIENTRY) ?*anyopaque,
+    .{ .name = "glMapBufferRange" },
+);
+pub const PauseTransformFeedback = @extern(
+    *const fn () callconv(APIENTRY) void,
+    .{ .name = "glPauseTransformFeedback" },
+);
+pub const PixelStorei = @extern(
+    *const fn (pname: @"enum", param: int) callconv(APIENTRY) void,
+    .{ .name = "glPixelStorei" },
+);
+pub const PolygonOffset = @extern(
+    *const fn (factor: float, units: float) callconv(APIENTRY) void,
+    .{ .name = "glPolygonOffset" },
+);
+pub const ProgramBinary = @extern(
+    *const fn (program: uint, binaryFormat: @"enum", binary: ?*const anyopaque, length: sizei) callconv(APIENTRY) void,
+    .{ .name = "glProgramBinary" },
+);
+pub const ProgramParameteri = @extern(
+    *const fn (program: uint, pname: @"enum", value: int) callconv(APIENTRY) void,
+    .{ .name = "glProgramParameteri" },
+);
+pub const ReadBuffer = @extern(
+    *const fn (src: @"enum") callconv(APIENTRY) void,
+    .{ .name = "glReadBuffer" },
+);
+pub const ReadPixels = @extern(
+    *const fn (x: int, y: int, width: sizei, height: sizei, format: @"enum", @"type": @"enum", pixels: ?*anyopaque) callconv(APIENTRY) void,
+    .{ .name = "glReadPixels" },
+);
+pub const ReleaseShaderCompiler = @extern(
+    *const fn () callconv(APIENTRY) void,
+    .{ .name = "glReleaseShaderCompiler" },
+);
+pub const RenderbufferStorage = @extern(
+    *const fn (target: @"enum", internalformat: @"enum", width: sizei, height: sizei) callconv(APIENTRY) void,
+    .{ .name = "glRenderbufferStorage" },
+);
+pub const RenderbufferStorageMultisample = @extern(
+    *const fn (target: @"enum", samples: sizei, internalformat: @"enum", width: sizei, height: sizei) callconv(APIENTRY) void,
+    .{ .name = "glRenderbufferStorageMultisample" },
+);
+pub const ResumeTransformFeedback = @extern(
+    *const fn () callconv(APIENTRY) void,
+    .{ .name = "glResumeTransformFeedback" },
+);
+pub const SampleCoverage = @extern(
+    *const fn (value: float, invert: boolean) callconv(APIENTRY) void,
+    .{ .name = "glSampleCoverage" },
+);
+pub const SamplerParameterf = @extern(
+    *const fn (sampler: uint, pname: @"enum", param: float) callconv(APIENTRY) void,
+    .{ .name = "glSamplerParameterf" },
+);
+pub const SamplerParameterfv = @extern(
+    *const fn (sampler: uint, pname: @"enum", param: [*c]const float) callconv(APIENTRY) void,
+    .{ .name = "glSamplerParameterfv" },
+);
+pub const SamplerParameteri = @extern(
+    *const fn (sampler: uint, pname: @"enum", param: int) callconv(APIENTRY) void,
+    .{ .name = "glSamplerParameteri" },
+);
+pub const SamplerParameteriv = @extern(
+    *const fn (sampler: uint, pname: @"enum", param: [*c]const int) callconv(APIENTRY) void,
+    .{ .name = "glSamplerParameteriv" },
+);
+pub const Scissor = @extern(
+    *const fn (x: int, y: int, width: sizei, height: sizei) callconv(APIENTRY) void,
+    .{ .name = "glScissor" },
+);
+pub const ShaderBinary = @extern(
+    *const fn (count: sizei, shaders: [*c]const uint, binaryFormat: @"enum", binary: ?*const anyopaque, length: sizei) callconv(APIENTRY) void,
+    .{ .name = "glShaderBinary" },
+);
+pub const ShaderSource = @extern(
+    *const fn (shader: uint, count: sizei, strings: [*]const [*]const char, lengths: ?[*]const int) callconv(APIENTRY) void,
+    .{ .name = "glShaderSource" },
+);
+pub const StencilFunc = @extern(
+    *const fn (func: @"enum", ref: int, mask: uint) callconv(APIENTRY) void,
+    .{ .name = "glStencilFunc" },
+);
+pub const StencilFuncSeparate = @extern(
+    *const fn (face: @"enum", func: @"enum", ref: int, mask: uint) callconv(APIENTRY) void,
+    .{ .name = "glStencilFuncSeparate" },
+);
+pub const StencilMask = @extern(
+    *const fn (mask: uint) callconv(APIENTRY) void,
+    .{ .name = "glStencilMask" },
+);
+pub const StencilMaskSeparate = @extern(
+    *const fn (face: @"enum", mask: uint) callconv(APIENTRY) void,
+    .{ .name = "glStencilMaskSeparate" },
+);
+pub const StencilOp = @extern(
+    *const fn (fail: @"enum", zfail: @"enum", zpass: @"enum") callconv(APIENTRY) void,
+    .{ .name = "glStencilOp" },
+);
+pub const StencilOpSeparate = @extern(
+    *const fn (face: @"enum", sfail: @"enum", dpfail: @"enum", dppass: @"enum") callconv(APIENTRY) void,
+    .{ .name = "glStencilOpSeparate" },
+);
+pub const TexImage2D = @extern(
+    *const fn (target: @"enum", level: int, internalformat: int, width: sizei, height: sizei, border: int, format: @"enum", @"type": @"enum", pixels: ?*const anyopaque) callconv(APIENTRY) void,
+    .{ .name = "glTexImage2D" },
+);
+pub const TexImage3D = @extern(
+    *const fn (target: @"enum", level: int, internalformat: int, width: sizei, height: sizei, depth: sizei, border: int, format: @"enum", @"type": @"enum", pixels: ?*const anyopaque) callconv(APIENTRY) void,
+    .{ .name = "glTexImage3D" },
+);
+pub const TexParameterf = @extern(
+    *const fn (target: @"enum", pname: @"enum", param: float) callconv(APIENTRY) void,
+    .{ .name = "glTexParameterf" },
+);
+pub const TexParameterfv = @extern(
+    *const fn (target: @"enum", pname: @"enum", params: [*c]const float) callconv(APIENTRY) void,
+    .{ .name = "glTexParameterfv" },
+);
+pub const TexParameteri = @extern(
+    *const fn (target: @"enum", pname: @"enum", param: int) callconv(APIENTRY) void,
+    .{ .name = "glTexParameteri" },
+);
+pub const TexParameteriv = @extern(
+    *const fn (target: @"enum", pname: @"enum", params: [*c]const int) callconv(APIENTRY) void,
+    .{ .name = "glTexParameteriv" },
+);
+pub const TexStorage2D = @extern(
+    *const fn (target: @"enum", levels: sizei, internalformat: @"enum", width: sizei, height: sizei) callconv(APIENTRY) void,
+    .{ .name = "glTexStorage2D" },
+);
+pub const TexStorage3D = @extern(
+    *const fn (target: @"enum", levels: sizei, internalformat: @"enum", width: sizei, height: sizei, depth: sizei) callconv(APIENTRY) void,
+    .{ .name = "glTexStorage3D" },
+);
+pub const TexSubImage2D = @extern(
+    *const fn (target: @"enum", level: int, xoffset: int, yoffset: int, width: sizei, height: sizei, format: @"enum", @"type": @"enum", pixels: ?*const anyopaque) callconv(APIENTRY) void,
+    .{ .name = "glTexSubImage2D" },
+);
+pub const TexSubImage3D = @extern(
+    *const fn (target: @"enum", level: int, xoffset: int, yoffset: int, zoffset: int, width: sizei, height: sizei, depth: sizei, format: @"enum", @"type": @"enum", pixels: ?*const anyopaque) callconv(APIENTRY) void,
+    .{ .name = "glTexSubImage3D" },
+);
+pub const TransformFeedbackVaryings = @extern(
+    *const fn (program: uint, count: sizei, varyings: [*c]const [*c]const char, bufferMode: @"enum") callconv(APIENTRY) void,
+    .{ .name = "glTransformFeedbackVaryings" },
+);
+pub const Uniform1f = @extern(
+    *const fn (location: int, v0: float) callconv(APIENTRY) void,
+    .{ .name = "glUniform1f" },
+);
+pub const Uniform1fv = @extern(
+    *const fn (location: int, count: sizei, value: [*c]const float) callconv(APIENTRY) void,
+    .{ .name = "glUniform1fv" },
+);
+pub const Uniform1i = @extern(
+    *const fn (location: int, v0: int) callconv(APIENTRY) void,
+    .{ .name = "glUniform1i" },
+);
+pub const Uniform1iv = @extern(
+    *const fn (location: int, count: sizei, value: [*c]const int) callconv(APIENTRY) void,
+    .{ .name = "glUniform1iv" },
+);
+pub const Uniform1ui = @extern(
+    *const fn (location: int, v0: uint) callconv(APIENTRY) void,
+    .{ .name = "glUniform1ui" },
+);
+pub const Uniform1uiv = @extern(
+    *const fn (location: int, count: sizei, value: [*c]const uint) callconv(APIENTRY) void,
+    .{ .name = "glUniform1uiv" },
+);
+pub const Uniform2f = @extern(
+    *const fn (location: int, v0: float, v1: float) callconv(APIENTRY) void,
+    .{ .name = "glUniform2f" },
+);
+pub const Uniform2fv = @extern(
+    *const fn (location: int, count: sizei, value: [*c]const float) callconv(APIENTRY) void,
+    .{ .name = "glUniform2fv" },
+);
+pub const Uniform2i = @extern(
+    *const fn (location: int, v0: int, v1: int) callconv(APIENTRY) void,
+    .{ .name = "glUniform2i" },
+);
+pub const Uniform2iv = @extern(
+    *const fn (location: int, count: sizei, value: [*c]const int) callconv(APIENTRY) void,
+    .{ .name = "glUniform2iv" },
+);
+pub const Uniform2ui = @extern(
+    *const fn (location: int, v0: uint, v1: uint) callconv(APIENTRY) void,
+    .{ .name = "glUniform2ui" },
+);
+pub const Uniform2uiv = @extern(
+    *const fn (location: int, count: sizei, value: [*c]const uint) callconv(APIENTRY) void,
+    .{ .name = "glUniform2uiv" },
+);
+pub const Uniform3f = @extern(
+    *const fn (location: int, v0: float, v1: float, v2: float) callconv(APIENTRY) void,
+    .{ .name = "glUniform3f" },
+);
+pub const Uniform3fv = @extern(
+    *const fn (location: int, count: sizei, value: [*c]const float) callconv(APIENTRY) void,
+    .{ .name = "glUniform3fv" },
+);
+pub const Uniform3i = @extern(
+    *const fn (location: int, v0: int, v1: int, v2: int) callconv(APIENTRY) void,
+    .{ .name = "glUniform3i" },
+);
+pub const Uniform3iv = @extern(
+    *const fn (location: int, count: sizei, value: [*c]const int) callconv(APIENTRY) void,
+    .{ .name = "glUniform3iv" },
+);
+pub const Uniform3ui = @extern(
+    *const fn (location: int, v0: uint, v1: uint, v2: uint) callconv(APIENTRY) void,
+    .{ .name = "glUniform3ui" },
+);
+pub const Uniform3uiv = @extern(
+    *const fn (location: int, count: sizei, value: [*c]const uint) callconv(APIENTRY) void,
+    .{ .name = "glUniform3uiv" },
+);
+pub const Uniform4f = @extern(
+    *const fn (location: int, v0: float, v1: float, v2: float, v3: float) callconv(APIENTRY) void,
+    .{ .name = "glUniform4f" },
+);
+pub const Uniform4fv = @extern(
+    *const fn (location: int, count: sizei, value: [*c]const float) callconv(APIENTRY) void,
+    .{ .name = "glUniform4fv" },
+);
+pub const Uniform4i = @extern(
+    *const fn (location: int, v0: int, v1: int, v2: int, v3: int) callconv(APIENTRY) void,
+    .{ .name = "glUniform4i" },
+);
+pub const Uniform4iv = @extern(
+    *const fn (location: int, count: sizei, value: [*c]const int) callconv(APIENTRY) void,
+    .{ .name = "glUniform4iv" },
+);
+pub const Uniform4ui = @extern(
+    *const fn (location: int, v0: uint, v1: uint, v2: uint, v3: uint) callconv(APIENTRY) void,
+    .{ .name = "glUniform4ui" },
+);
+pub const Uniform4uiv = @extern(
+    *const fn (location: int, count: sizei, value: [*c]const uint) callconv(APIENTRY) void,
+    .{ .name = "glUniform4uiv" },
+);
+pub const UniformBlockBinding = @extern(
+    *const fn (program: uint, uniformBlockIndex: uint, uniformBlockBinding: uint) callconv(APIENTRY) void,
+    .{ .name = "glUniformBlockBinding" },
+);
+pub const UniformMatrix2fv = @extern(
+    *const fn (location: int, count: sizei, transpose: boolean, value: [*c]const float) callconv(APIENTRY) void,
+    .{ .name = "glUniformMatrix2fv" },
+);
+pub const UniformMatrix2x3fv = @extern(
+    *const fn (location: int, count: sizei, transpose: boolean, value: [*c]const float) callconv(APIENTRY) void,
+    .{ .name = "glUniformMatrix2x3fv" },
+);
+pub const UniformMatrix2x4fv = @extern(
+    *const fn (location: int, count: sizei, transpose: boolean, value: [*c]const float) callconv(APIENTRY) void,
+    .{ .name = "glUniformMatrix2x4fv" },
+);
+pub const UniformMatrix3fv = @extern(
+    *const fn (location: int, count: sizei, transpose: boolean, value: [*c]const float) callconv(APIENTRY) void,
+    .{ .name = "glUniformMatrix3fv" },
+);
+pub const UniformMatrix3x2fv = @extern(
+    *const fn (location: int, count: sizei, transpose: boolean, value: [*c]const float) callconv(APIENTRY) void,
+    .{ .name = "glUniformMatrix3x2fv" },
+);
+pub const UniformMatrix3x4fv = @extern(
+    *const fn (location: int, count: sizei, transpose: boolean, value: [*c]const float) callconv(APIENTRY) void,
+    .{ .name = "glUniformMatrix3x4fv" },
+);
+pub const UniformMatrix4fv = @extern(
+    *const fn (location: int, count: sizei, transpose: boolean, value: [*c]const float) callconv(APIENTRY) void,
+    .{ .name = "glUniformMatrix4fv" },
+);
+pub const UniformMatrix4x2fv = @extern(
+    *const fn (location: int, count: sizei, transpose: boolean, value: [*c]const float) callconv(APIENTRY) void,
+    .{ .name = "glUniformMatrix4x2fv" },
+);
+pub const UniformMatrix4x3fv = @extern(
+    *const fn (location: int, count: sizei, transpose: boolean, value: [*c]const float) callconv(APIENTRY) void,
+    .{ .name = "glUniformMatrix4x3fv" },
+);
+pub const UnmapBuffer = @extern(
+    *const fn (target: @"enum") callconv(APIENTRY) boolean,
+    .{ .name = "glUnmapBuffer" },
+);
+pub const UseProgram = @extern(
+    *const fn (program: uint) callconv(APIENTRY) void,
+    .{ .name = "glUseProgram" },
+);
+pub const ValidateProgram = @extern(
+    *const fn (program: uint) callconv(APIENTRY) void,
+    .{ .name = "glValidateProgram" },
+);
+pub const VertexAttrib1f = @extern(
+    *const fn (index: uint, x: float) callconv(APIENTRY) void,
+    .{ .name = "glVertexAttrib1f" },
+);
+pub const VertexAttrib1fv = @extern(
+    *const fn (index: uint, v: [*c]const float) callconv(APIENTRY) void,
+    .{ .name = "glVertexAttrib1fv" },
+);
+pub const VertexAttrib2f = @extern(
+    *const fn (index: uint, x: float, y: float) callconv(APIENTRY) void,
+    .{ .name = "glVertexAttrib2f" },
+);
+pub const VertexAttrib2fv = @extern(
+    *const fn (index: uint, v: [*c]const float) callconv(APIENTRY) void,
+    .{ .name = "glVertexAttrib2fv" },
+);
+pub const VertexAttrib3f = @extern(
+    *const fn (index: uint, x: float, y: float, z: float) callconv(APIENTRY) void,
+    .{ .name = "glVertexAttrib3f" },
+);
+pub const VertexAttrib3fv = @extern(
+    *const fn (index: uint, v: [*c]const float) callconv(APIENTRY) void,
+    .{ .name = "glVertexAttrib3fv" },
+);
+pub const VertexAttrib4f = @extern(
+    *const fn (index: uint, x: float, y: float, z: float, w: float) callconv(APIENTRY) void,
+    .{ .name = "glVertexAttrib4f" },
+);
+pub const VertexAttrib4fv = @extern(
+    *const fn (index: uint, v: [*c]const float) callconv(APIENTRY) void,
+    .{ .name = "glVertexAttrib4fv" },
+);
+pub const VertexAttribDivisor = @extern(
+    *const fn (index: uint, divisor: uint) callconv(APIENTRY) void,
+    .{ .name = "glVertexAttribDivisor" },
+);
+pub const VertexAttribI4i = @extern(
+    *const fn (index: uint, x: int, y: int, z: int, w: int) callconv(APIENTRY) void,
+    .{ .name = "glVertexAttribI4i" },
+);
+pub const VertexAttribI4iv = @extern(
+    *const fn (index: uint, v: [*c]const int) callconv(APIENTRY) void,
+    .{ .name = "glVertexAttribI4iv" },
+);
+pub const VertexAttribI4ui = @extern(
+    *const fn (index: uint, x: uint, y: uint, z: uint, w: uint) callconv(APIENTRY) void,
+    .{ .name = "glVertexAttribI4ui" },
+);
+pub const VertexAttribI4uiv = @extern(
+    *const fn (index: uint, v: [*c]const uint) callconv(APIENTRY) void,
+    .{ .name = "glVertexAttribI4uiv" },
+);
+pub const VertexAttribIPointer = @extern(
+    *const fn (index: uint, size: int, @"type": @"enum", stride: sizei, pointer: usize) callconv(APIENTRY) void,
+    .{ .name = "glVertexAttribIPointer" },
+);
+pub const VertexAttribPointer = @extern(
+    *const fn (index: uint, size: int, @"type": @"enum", normalized: boolean, stride: sizei, pointer: usize) callconv(APIENTRY) void,
+    .{ .name = "glVertexAttribPointer" },
+);
+pub const Viewport = @extern(
+    *const fn (x: int, y: int, width: sizei, height: sizei) callconv(APIENTRY) void,
+    .{ .name = "glViewport" },
+);
+pub const WaitSync = @extern(
+    *const fn (sync_: sync, flags: bitfield, timeout: uint64) callconv(APIENTRY) void,
+    .{ .name = "glWaitSync" },
+);
 //#endregion Commands
 
 test {

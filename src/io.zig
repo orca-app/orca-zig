@@ -231,11 +231,10 @@ pub const Completion = extern struct {
 };
 
 /// Send a single I/O request and wait for its completion.
-pub const ioWaitSingleReq = oc_io_wait_single_req;
-extern fn oc_io_wait_single_req(
+pub const ioWaitSingleReq = @extern(*const fn (
     /// The I/O request to send.
     req: [*c]Request,
-) callconv(.c) Completion;
+) callconv(.c) Completion, .{ .name = "oc_io_wait_single_req" });
 
 //------------------------------------------------------------------------------------------
 // [Dialogs] API for obtaining file capabilities through open/save dialogs.
@@ -259,8 +258,7 @@ pub const FileOpenWithDialogResult = extern struct {
 
 // @Cleanup this could be moved into File. Not sure about the other structs (including those in app).
 /// Open files through a file dialog. This allows the user to select files outside the root directories currently accessible to the applications, giving them a way to provide new file capabilities to the application.
-pub const fileOpenWithDialog = oc_file_open_with_dialog;
-extern fn oc_file_open_with_dialog(
+pub const fileOpenWithDialog = @extern(*const fn (
     /// A memory arena on which to allocate elements of the result.
     arena: [*c]oc.mem.Arena,
     /// The access rights requested on the files to open.
@@ -269,4 +267,4 @@ extern fn oc_file_open_with_dialog(
     flags: File.OpenFlags,
     /// A structure controlling the options of the file dialog window.
     desc: [*c]oc.app.FileDialogDesc,
-) callconv(.c) FileOpenWithDialogResult;
+) callconv(.c) FileOpenWithDialogResult, .{ .name = "oc_file_open_with_dialog" });

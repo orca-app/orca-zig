@@ -3,42 +3,42 @@
 const oc = @import("../orca.zig");
 
 /// Get a string slice of the directory part of a path.
-pub const dirname = oc_path_slice_directory;
-extern fn oc_path_slice_directory(path: oc.strings.Str8) callconv(.c) oc.strings.Str8;
+pub const dirname = @extern(*const fn (
+    path: oc.strings.Str8,
+) callconv(.c) oc.strings.Str8, .{ .name = "oc_path_slice_directory" });
 
 /// Get a string slice of the file name part of a path.
-pub const filename = oc_path_slice_filename;
-extern fn oc_path_slice_filename(path: oc.strings.Str8) callconv(.c) oc.strings.Str8;
+pub const filename = @extern(*const fn (
+    path: oc.strings.Str8,
+) callconv(.c) oc.strings.Str8, .{ .name = "oc_path_slice_filename" });
 
 /// Split a path into path elements.
-pub const split = oc_path_split;
-extern fn oc_path_split(
+pub const split = @extern(*const fn (
     /// An arena on which to allocate string list elements.
     arena: [*c]oc.mem.Arena,
     /// The path to slice.
     path: oc.strings.Str8,
-) callconv(.c) oc.strings.Str8List;
+) callconv(.c) oc.strings.Str8List, .{ .name = "oc_path_split" });
 
 /// Join path elements to form a path.
-pub const join = oc_path_join;
-extern fn oc_path_join(
+pub const join = @extern(*const fn (
     /// An arena on which to allocate the resulting path.
     arena: [*c]oc.mem.Arena,
     /// A string list of path elements.
     elements: oc.strings.Str8List,
-) callconv(.c) oc.strings.Str8;
+) callconv(.c) oc.strings.Str8, .{ .name = "oc_path_join" });
 
 /// Append a path to another path.
-pub const append = oc_path_append;
-extern fn oc_path_append(
+pub const append = @extern(*const fn (
     /// An arena on which to allocate the resulting path.
     arena: [*c]oc.mem.Arena,
     /// The first part of the path.
     parent: oc.strings.Str8,
     /// The relative path to append.
     relPath: oc.strings.Str8,
-) callconv(.c) oc.strings.Str8;
+) callconv(.c) oc.strings.Str8, .{ .name = "oc_path_append" });
 
 /// Test wether a path is an absolute path.
-pub const isAbsolute = oc_path_is_absolute;
-extern fn oc_path_is_absolute(path: oc.strings.Str8) callconv(.c) bool;
+pub const isAbsolute = @extern(*const fn (
+    path: oc.strings.Str8,
+) callconv(.c) bool, .{ .name = "oc_path_is_absolute" });

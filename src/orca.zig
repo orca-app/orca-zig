@@ -42,8 +42,9 @@ pub const clock = struct {
         date,
     };
 
-    pub const time = oc_clock_time;
-    extern fn oc_clock_time(clock: Kind) f64;
+    pub const time = @extern(*const fn (
+        clock: Kind,
+    ) callconv(.c) f64, .{ .name = "oc_clock_time" });
 };
 
 //------------------------------------------------------------------------------------------

@@ -16,11 +16,10 @@ pub const log = struct {
     };
 
     /// Set the logging verbosity.
-    pub const setLevel = oc_log_set_level;
-    extern fn oc_log_set_level(
+    pub const setLevel = @extern(*const fn (
         /// The desired logging level. Messages whose level is below this threshold will not be logged.
         level: Level,
-    ) callconv(.c) void;
+    ) callconv(.c) void, .{ .name = "oc_log_set_level" });
 
     /// Log a informative message to the console.
     pub fn info(comptime fmt: []const u8, args: anytype, source: SourceLocation) void {
