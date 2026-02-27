@@ -56,7 +56,7 @@ pub const File = enum(u64) {
         /// Flags controlling various options for the open operation. See `oc_file_open_flags`.
         flags: OpenFlags,
     ) oc.io.Error!File {
-        const file = oc_file_open(oc.toStr8(path), rights, flags);
+        const file = oc_file_open(oc.str8(path), rights, flags);
         try file.lastError();
         return file;
     }
@@ -66,7 +66,7 @@ pub const File = enum(u64) {
         rights: AccessFlags,
         flags: OpenFlags,
     ) oc.io.Error!File {
-        const file = oc_file_open_with_request(oc.toStr8(path), rights, flags);
+        const file = oc_file_open_with_request(oc.str8(path), rights, flags);
         try file.lastError();
         return file;
     }
@@ -82,7 +82,7 @@ pub const File = enum(u64) {
         /// Flags controlling various options for the open operation. See `oc_file_open_flags`.
         flags: OpenFlags,
     ) oc.io.Error!File {
-        const file = oc_file_open_at(dir, oc.toStr8(path), rights, flags);
+        const file = oc_file_open_at(dir, oc.str8(path), rights, flags);
         try file.lastError();
         return file;
     }

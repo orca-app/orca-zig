@@ -11,7 +11,7 @@ pub const abort = debug.abort;
 /// **WARNING** Erases const type info! This function only accepts const
 /// pointers to avoid excessive casting when passing string literals.
 /// Be careful when passing the result to API's which may modify the buffer.
-pub fn toStr8(buf: []const u8) strings.Str8 {
+pub fn str8(buf: []const u8) strings.Str8 {
     return strings.Str8.fromSlice(@constCast(buf));
 }
 

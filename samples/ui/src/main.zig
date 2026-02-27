@@ -26,7 +26,7 @@ var log_lines: oc.strings.Str8List = undefined;
 var theme: enum { dark, light } = .dark;
 
 pub fn onInit() !void {
-    oc.app.windowSetTitle(oc.toStr8("Orca Zig UI Demo"));
+    oc.app.windowSetTitle(oc.str8("Orca Zig UI Demo"));
     oc.app.windowSetSize(frame_size);
 
     renderer = canvas.Renderer.create();
@@ -57,7 +57,7 @@ pub fn onInit() !void {
             .{ .firstCodePoint = 0xfff0, .count = 15 }, //  SPECIALS
         };
 
-        font.* = canvas.Font.createFromMemory(oc.toStr8(buffer), ranges.len, @constCast(&ranges)); // @Cleanup
+        font.* = canvas.Font.createFromMemory(oc.str8(buffer), ranges.len, @constCast(&ranges)); // @Cleanup
     }
 
     ui_ctx = ui.contextCreate(font_regular);
@@ -123,14 +123,14 @@ pub fn onFrameRefresh() !void {
         }
 
         {
-            _ = ui.boxBeginStr8(oc.toStr8("main panel"));
+            _ = ui.boxBeginStr8(oc.str8("main panel"));
             defer _ = ui.boxEnd();
 
             ui.styleSetSize(.width, .{ .kind = .parent, .value = 1 });
             ui.styleSetSize(.height, .{ .kind = .parent, .value = 1, .relax = 1 });
 
             {
-                _ = ui.boxBeginStr8(oc.toStr8("background"));
+                _ = ui.boxBeginStr8(oc.str8("background"));
                 defer _ = ui.boxEnd();
 
                 ui.styleSetSize(.width, .{ .kind = .parent, .value = 1 });
@@ -162,7 +162,7 @@ var radio_selected: i32 = 0;
 var h_slider_value: f32 = 0;
 var h_slider_logged_value: f32 = 0;
 var h_slider_log_time: f64 = 0;
-var text_info: ui.TextBoxInfo = .{ .defaultText = oc.toStr8("Type here") };
+var text_info: ui.TextBoxInfo = .{ .defaultText = oc.str8("Type here") };
 var selected: i32 = 0;
 
 fn widgets(arena: *oc.mem.Arena) !void {
@@ -170,7 +170,7 @@ fn widgets(arena: *oc.mem.Arena) !void {
     defer columnEnd();
 
     {
-        _ = ui.boxBeginStr8(oc.toStr8("top"));
+        _ = ui.boxBeginStr8(oc.str8("top"));
         defer _ = ui.boxEnd();
 
         ui.styleSetSize(.width, .{ .kind = .parent, .value = 1 });
@@ -178,7 +178,7 @@ fn widgets(arena: *oc.mem.Arena) !void {
         ui.styleSetF32(.spacing, 32);
 
         {
-            _ = ui.boxBeginStr8(oc.toStr8("top_left"));
+            _ = ui.boxBeginStr8(oc.str8("top_left"));
             defer _ = ui.boxEnd();
 
             ui.styleSetAxis(.y);
@@ -197,7 +197,7 @@ fn widgets(arena: *oc.mem.Arena) !void {
             }
 
             {
-                _ = ui.boxBeginStr8(oc.toStr8("checkbox"));
+                _ = ui.boxBeginStr8(oc.str8("checkbox"));
                 defer _ = ui.boxEnd();
 
                 ui.styleSetAxis(.x);
@@ -225,7 +225,7 @@ fn widgets(arena: *oc.mem.Arena) !void {
         //---------------------------------------------------------------------------------
 
         {
-            ui.styleRuleBegin(oc.toStr8("v_slider"));
+            ui.styleRuleBegin(oc.str8("v_slider"));
             defer ui.styleRuleEnd();
             ui.styleSetSize(.width, .{ .kind = .pixels, .value = 24 });
             ui.styleSetSize(.height, .{ .kind = .pixels, .value = 130 });
@@ -241,7 +241,7 @@ fn widgets(arena: *oc.mem.Arena) !void {
         }
 
         {
-            _ = ui.boxBeginStr8(oc.toStr8("top right"));
+            _ = ui.boxBeginStr8(oc.str8("top right"));
             defer _ = ui.boxEnd();
 
             ui.styleSetAxis(.y);
@@ -258,8 +258,8 @@ fn widgets(arena: *oc.mem.Arena) !void {
             // Radio group
             //-----------------------------------------------------------------------------
             var options = [_]oc.strings.Str8{
-                oc.toStr8("Radio 1"),
-                oc.toStr8("Radio 2"),
+                oc.str8("Radio 1"),
+                oc.str8("Radio 2"),
             };
             var radio_group_info = ui.RadioGroupInfo{
                 .selected_index = radio_selected,
@@ -277,7 +277,7 @@ fn widgets(arena: *oc.mem.Arena) !void {
             //-----------------------------------------------------------------------------
 
             {
-                ui.styleRuleBegin(oc.toStr8("h_slider"));
+                ui.styleRuleBegin(oc.str8("h_slider"));
                 defer ui.styleRuleEnd();
 
                 ui.styleSetSize(.width, .{ .kind = .pixels, .value = 130 });
@@ -298,12 +298,12 @@ fn widgets(arena: *oc.mem.Arena) !void {
     //-------------------------------------------------------------------------------------
     {
         {
-            ui.styleRuleBegin(oc.toStr8("text"));
+            ui.styleRuleBegin(oc.str8("text"));
             defer ui.styleRuleEnd();
             ui.styleSetSize(.width, .{ .kind = .pixels, .value = 305 });
         }
 
-        const result = ui.textBoxStr8(oc.toStr8("text"), arena, &text_info);
+        const result = ui.textBoxStr8(oc.str8("text"), arena, &text_info);
         if (result.changed) {
             text_arena.clear();
             if (result.text.len > 0)
@@ -321,14 +321,14 @@ fn widgets(arena: *oc.mem.Arena) !void {
     //-------------------------------------------------------------------------------------
     {
         var options = [_]oc.strings.Str8{
-            oc.toStr8("Option 1"),
-            oc.toStr8("Option 2"),
+            oc.str8("Option 1"),
+            oc.str8("Option 2"),
         };
         var info = ui.SelectPopupInfo{
             .selected_index = selected,
             .option_count = @intCast(options.len),
             .options = &options,
-            .placeholder = oc.toStr8("Select"),
+            .placeholder = oc.str8("Select"),
         };
         const result = ui.selectPopup("select", &info);
         if (result.selected_index != selected) {
@@ -341,7 +341,7 @@ fn widgets(arena: *oc.mem.Arena) !void {
     // Scrollable panel
     //-------------------------------------------------------------------------------------
     {
-        _ = ui.boxBeginStr8(oc.toStr8("log"));
+        _ = ui.boxBeginStr8(oc.str8("log"));
         defer _ = ui.boxEnd();
 
         ui.styleSetSize(.width, .{ .kind = .parent, .value = 1 });
@@ -354,7 +354,7 @@ fn widgets(arena: *oc.mem.Arena) !void {
         ui.styleSetOverflow(.y, .scroll);
 
         {
-            _ = ui.boxBeginStr8(oc.toStr8("contents"));
+            _ = ui.boxBeginStr8(oc.str8("contents"));
             defer _ = ui.boxEnd();
 
             ui.styleSetF32(.margin_x, 16);
@@ -363,7 +363,7 @@ fn widgets(arena: *oc.mem.Arena) !void {
 
             if (log_lines.list.isEmpty()) {
                 {
-                    ui.styleRuleBegin(oc.toStr8("label"));
+                    ui.styleRuleBegin(oc.str8("label"));
                     defer ui.styleRuleEnd();
                     ui.styleSetVar(.color, "text-2"); // @Api missing themes
                 }
@@ -375,7 +375,7 @@ fn widgets(arena: *oc.mem.Arena) !void {
             var iter = log_lines.iterate(.{});
             while (iter.next()) |log_line| : (i += 1) {
                 _ = ui.labelStr8(
-                    oc.toStr8(id[0..std.fmt.printInt(&id, i, 10, .lower, .{})]),
+                    oc.str8(id[0..std.fmt.printInt(&id, i, 10, .lower, .{})]),
                     log_line.string,
                 );
             }
@@ -390,14 +390,14 @@ var unselected_roundness: f32 = 8;
 var unselected_bg_color: canvas.Color = .rgba(0.086, 0.086, 0.102, 1);
 var unselected_border_color: canvas.Color = .rgba(0.976, 0.976, 0.976, 0.35);
 var unselected_border_size: f32 = 1;
-var unselected_when_status: oc.strings.Str8 = oc.toStr8("");
+var unselected_when_status: oc.strings.Str8 = oc.str8("");
 var unselected_status_index: i32 = 0;
 var selected_width: f32 = 16;
 var selected_height: f32 = 16;
 var selected_roundness: f32 = 8;
 var selected_center_color: canvas.Color = .rgba(1, 1, 1, 1);
 var selected_bg_color: canvas.Color = .rgba(0.33, 0.66, 1, 1);
-var selected_when_status: oc.strings.Str8 = oc.toStr8("");
+var selected_when_status: oc.strings.Str8 = oc.str8("");
 var selected_status_index: i32 = 0;
 var label_font_color: canvas.Color = .rgba(0.976, 0.976, 0.976, 1);
 var label_font_color_selected: i32 = 0;
@@ -410,7 +410,7 @@ fn styling(arena: *oc.mem.Arena) void {
     defer columnEnd();
 
     {
-        _ = ui.boxBeginStr8(oc.toStr8("styled_radios"));
+        _ = ui.boxBeginStr8(oc.str8("styled_radios"));
         defer _ = ui.boxEnd();
 
         ui.styleSetSize(.width, .{ .kind = .parent, .value = 1 });
@@ -423,9 +423,9 @@ fn styling(arena: *oc.mem.Arena) void {
 
         {
             var list: oc.strings.Str8List = .empty;
-            list.push(arena, oc.toStr8("radio_group .radio-row"));
+            list.push(arena, oc.str8("radio_group .radio-row"));
             list.push(arena, unselected_when_status);
-            list.push(arena, oc.toStr8(" .radio"));
+            list.push(arena, oc.str8(" .radio"));
             const unselected_pattern = list.join(arena);
 
             {
@@ -443,9 +443,9 @@ fn styling(arena: *oc.mem.Arena) void {
 
         {
             var list: oc.strings.Str8List = .empty;
-            list.push(arena, oc.toStr8("radio_group .radio-row"));
+            list.push(arena, oc.str8("radio_group .radio-row"));
             list.push(arena, selected_when_status);
-            list.push(arena, oc.toStr8(" .radio_selected"));
+            list.push(arena, oc.str8(" .radio_selected"));
             const selected_pattern = list.join(arena);
 
             {
@@ -461,7 +461,7 @@ fn styling(arena: *oc.mem.Arena) void {
         }
 
         {
-            ui.styleRuleBegin(oc.toStr8("radio_group label"));
+            ui.styleRuleBegin(oc.str8("radio_group label"));
             defer ui.styleRuleEnd();
 
             ui.styleSetColor(.color, label_font_color);
@@ -470,9 +470,9 @@ fn styling(arena: *oc.mem.Arena) void {
         }
 
         var options = [_]oc.strings.Str8{
-            oc.toStr8("I"),
-            oc.toStr8("Am"),
-            oc.toStr8("Stylish"),
+            oc.str8("I"),
+            oc.str8("Am"),
+            oc.str8("Stylish"),
         };
         var radio_group_info = ui.RadioGroupInfo{
             .selected_index = styling_selected_radio,
@@ -484,21 +484,21 @@ fn styling(arena: *oc.mem.Arena) void {
     }
 
     {
-        _ = ui.boxBeginStr8(oc.toStr8("controls"));
+        _ = ui.boxBeginStr8(oc.str8("controls"));
         defer _ = ui.boxEnd();
 
         ui.styleSetAxis(.x);
         ui.styleSetF32(.spacing, 32);
 
         {
-            _ = ui.boxBeginStr8(oc.toStr8("unselected"));
+            _ = ui.boxBeginStr8(oc.str8("unselected"));
             defer _ = ui.boxEnd();
 
             ui.styleSetAxis(.y);
             ui.styleSetF32(.spacing, 16);
 
             {
-                ui.styleRuleBegin(oc.toStr8("radio-label"));
+                ui.styleRuleBegin(oc.str8("radio-label"));
                 defer ui.styleRuleEnd();
 
                 ui.styleSetF32(.font_size, 16);
@@ -506,7 +506,7 @@ fn styling(arena: *oc.mem.Arena) void {
             _ = ui.label("radio-label", "Radio style");
 
             {
-                _ = ui.boxBeginStr8(oc.toStr8("size"));
+                _ = ui.boxBeginStr8(oc.str8("size"));
                 defer _ = ui.boxEnd();
 
                 ui.styleSetAxis(.y);
@@ -526,7 +526,7 @@ fn styling(arena: *oc.mem.Arena) void {
             }
 
             {
-                _ = ui.boxBeginStr8(oc.toStr8("background"));
+                _ = ui.boxBeginStr8(oc.str8("background"));
                 defer _ = ui.boxEnd();
 
                 ui.styleSetAxis(.y);
@@ -538,7 +538,7 @@ fn styling(arena: *oc.mem.Arena) void {
             }
 
             {
-                _ = ui.boxBeginStr8(oc.toStr8("border"));
+                _ = ui.boxBeginStr8(oc.str8("border"));
                 defer _ = ui.boxEnd();
 
                 ui.styleSetAxis(.y);
@@ -554,7 +554,7 @@ fn styling(arena: *oc.mem.Arena) void {
             unselected_border_size = border_size_slider * 5;
 
             {
-                _ = ui.boxBeginStr8(oc.toStr8("status_override"));
+                _ = ui.boxBeginStr8(oc.str8("status_override"));
                 defer _ = ui.boxEnd();
 
                 ui.styleSetAxis(.y);
@@ -562,9 +562,9 @@ fn styling(arena: *oc.mem.Arena) void {
                 _ = ui.label("label", "Override");
 
                 var status_options = [_]oc.strings.Str8{
-                    oc.toStr8("Always"),
-                    oc.toStr8("When hovering"),
-                    oc.toStr8("When active"),
+                    oc.str8("Always"),
+                    oc.str8("When hovering"),
+                    oc.str8("When active"),
                 };
                 var status_info = ui.RadioGroupInfo{
                     .selected_index = unselected_status_index,
@@ -574,23 +574,23 @@ fn styling(arena: *oc.mem.Arena) void {
                 const result = ui.radioGroup("status", &status_info);
                 unselected_status_index = result.selected_index;
                 unselected_when_status = switch (unselected_status_index) {
-                    0 => oc.toStr8(""),
-                    1 => oc.toStr8(".hover"),
-                    2 => oc.toStr8(".active"),
+                    0 => oc.str8(""),
+                    1 => oc.str8(".hover"),
+                    2 => oc.str8(".active"),
                     else => unreachable,
                 };
             }
         }
 
         {
-            _ = ui.boxBeginStr8(oc.toStr8("selected"));
+            _ = ui.boxBeginStr8(oc.str8("selected"));
             defer _ = ui.boxEnd();
 
             ui.styleSetAxis(.y);
             ui.styleSetF32(.spacing, 16);
 
             {
-                ui.styleRuleBegin(oc.toStr8("radio-label"));
+                ui.styleRuleBegin(oc.str8("radio-label"));
                 defer ui.styleRuleEnd();
 
                 ui.styleSetF32(.font_size, 16);
@@ -598,7 +598,7 @@ fn styling(arena: *oc.mem.Arena) void {
             _ = ui.label("radio-label", "Radio style");
 
             {
-                _ = ui.boxBeginStr8(oc.toStr8("size"));
+                _ = ui.boxBeginStr8(oc.str8("size"));
                 defer _ = ui.boxEnd();
 
                 ui.styleSetAxis(.y);
@@ -618,7 +618,7 @@ fn styling(arena: *oc.mem.Arena) void {
             }
 
             {
-                _ = ui.boxBeginStr8(oc.toStr8("background"));
+                _ = ui.boxBeginStr8(oc.str8("background"));
                 defer _ = ui.boxEnd();
 
                 ui.styleSetAxis(.y);
@@ -630,7 +630,7 @@ fn styling(arena: *oc.mem.Arena) void {
             }
 
             {
-                _ = ui.boxBeginStr8(oc.toStr8("center"));
+                _ = ui.boxBeginStr8(oc.str8("center"));
                 defer _ = ui.boxEnd();
 
                 ui.styleSetAxis(.y);
@@ -642,14 +642,14 @@ fn styling(arena: *oc.mem.Arena) void {
             }
 
             {
-                _ = ui.boxBeginStr8(oc.toStr8("spacer"));
+                _ = ui.boxBeginStr8(oc.str8("spacer"));
                 defer _ = ui.boxEnd();
 
                 ui.styleSetSize(.height, .{ .kind = .pixels, .value = 24 });
             }
 
             {
-                _ = ui.boxBeginStr8(oc.toStr8("status_override"));
+                _ = ui.boxBeginStr8(oc.str8("status_override"));
                 defer _ = ui.boxEnd();
 
                 ui.styleSetAxis(.y);
@@ -657,9 +657,9 @@ fn styling(arena: *oc.mem.Arena) void {
                 _ = ui.label("label", "Override");
 
                 var status_options = [_]oc.strings.Str8{
-                    oc.toStr8("Always"),
-                    oc.toStr8("When hovering"),
-                    oc.toStr8("When active"),
+                    oc.str8("Always"),
+                    oc.str8("When hovering"),
+                    oc.str8("When active"),
                 };
                 var status_info = ui.RadioGroupInfo{
                     .selected_index = selected_status_index,
@@ -669,23 +669,23 @@ fn styling(arena: *oc.mem.Arena) void {
                 const status_result = ui.radioGroup("status", &status_info);
                 selected_status_index = status_result.selected_index;
                 selected_when_status = switch (selected_status_index) {
-                    0 => oc.toStr8(""),
-                    1 => oc.toStr8(".hover"),
-                    2 => oc.toStr8(".active"),
+                    0 => oc.str8(""),
+                    1 => oc.str8(".hover"),
+                    2 => oc.str8(".active"),
                     else => unreachable,
                 };
             }
         }
 
         {
-            _ = ui.boxBeginStr8(oc.toStr8("label"));
+            _ = ui.boxBeginStr8(oc.str8("label"));
             defer _ = ui.boxEnd();
 
             ui.styleSetAxis(.y);
             ui.styleSetF32(.spacing, 16);
 
             {
-                ui.styleRuleBegin(oc.toStr8("label-style"));
+                ui.styleRuleBegin(oc.str8("label-style"));
                 defer ui.styleRuleEnd();
 
                 ui.styleSetF32(.font_size, 16);
@@ -693,13 +693,13 @@ fn styling(arena: *oc.mem.Arena) void {
             _ = ui.label("label-style", "Label style");
 
             {
-                _ = ui.boxBeginStr8(oc.toStr8("font_color"));
+                _ = ui.boxBeginStr8(oc.str8("font_color"));
                 defer _ = ui.boxEnd();
 
                 ui.styleSetF32(.spacing, 8);
 
                 {
-                    ui.styleRuleBegin(oc.toStr8("font-color"));
+                    ui.styleRuleBegin(oc.str8("font-color"));
                     defer ui.styleRuleEnd();
 
                     ui.styleSetSize(.width, .{ .kind = .pixels, .value = 100 });
@@ -707,14 +707,14 @@ fn styling(arena: *oc.mem.Arena) void {
                 _ = ui.label("font-color", "Font color");
 
                 var color_names = [_]oc.strings.Str8{
-                    oc.toStr8("Default"),
-                    oc.toStr8("Red"),
-                    oc.toStr8("Orange"),
-                    oc.toStr8("Amber"),
-                    oc.toStr8("Yellow"),
-                    oc.toStr8("Lime"),
-                    oc.toStr8("Light green"),
-                    oc.toStr8("Green"),
+                    oc.str8("Default"),
+                    oc.str8("Red"),
+                    oc.str8("Orange"),
+                    oc.str8("Amber"),
+                    oc.str8("Yellow"),
+                    oc.str8("Lime"),
+                    oc.str8("Light green"),
+                    oc.str8("Green"),
                 };
                 const colors = [_]canvas.Color{
                     .srgba(1, 1, 1, 1), // Default
@@ -737,13 +737,13 @@ fn styling(arena: *oc.mem.Arena) void {
             }
 
             {
-                _ = ui.boxBeginStr8(oc.toStr8("font"));
+                _ = ui.boxBeginStr8(oc.str8("font"));
                 defer _ = ui.boxEnd();
 
                 ui.styleSetF32(.spacing, 8);
 
                 {
-                    ui.styleRuleBegin(oc.toStr8("font-label"));
+                    ui.styleRuleBegin(oc.str8("font-label"));
                     defer ui.styleRuleEnd();
 
                     ui.styleSetSize(.width, .{ .kind = .pixels, .value = 100 });
@@ -751,8 +751,8 @@ fn styling(arena: *oc.mem.Arena) void {
                 _ = ui.label("font-label", "Font");
 
                 var font_names = [_]oc.strings.Str8{
-                    oc.toStr8("Regular"),
-                    oc.toStr8("Bold"),
+                    oc.str8("Regular"),
+                    oc.str8("Bold"),
                 };
                 const fonts = [_]*canvas.Font{
                     &font_regular,
@@ -776,7 +776,7 @@ fn styling(arena: *oc.mem.Arena) void {
 }
 
 fn columnBegin(header: []const u8, widthFraction: f32) void {
-    _ = ui.boxBeginStr8(oc.toStr8(header));
+    _ = ui.boxBeginStr8(oc.str8(header));
 
     ui.styleSetSize(.width, .{ .kind = .parent, .value = widthFraction, .relax = 1 });
     ui.styleSetSize(.height, .{ .kind = .parent, .value = 1 });
@@ -790,21 +790,21 @@ fn columnBegin(header: []const u8, widthFraction: f32) void {
     ui.styleSetI32(.constrain_y, 1);
 
     {
-        _ = ui.boxBeginStr8(oc.toStr8("header"));
+        _ = ui.boxBeginStr8(oc.str8("header"));
         defer _ = ui.boxEnd();
 
         ui.styleSetSize(.width, .{ .kind = .parent, .value = 1 });
         ui.styleSetAlign(.x, .center);
 
         {
-            ui.styleRuleBegin(oc.toStr8(".label"));
+            ui.styleRuleBegin(oc.str8(".label"));
             defer ui.styleRuleEnd();
             ui.styleSetF32(.font_size, 18);
         }
-        _ = ui.labelStr8(oc.toStr8("label"), oc.toStr8(header));
+        _ = ui.labelStr8(oc.str8("label"), oc.str8(header));
     }
 
-    _ = ui.boxBeginStr8(oc.toStr8("contents"));
+    _ = ui.boxBeginStr8(oc.str8("contents"));
     ui.styleSetSize(.width, .{ .kind = .parent, .value = 1 });
     ui.styleSetSize(.height, .{ .kind = .parent, .value = 1, .relax = 1 });
     ui.styleSetAxis(.y);
@@ -820,21 +820,21 @@ fn columnEnd() void {
 }
 
 fn labeledSlider(label: []const u8, value: *f32) void {
-    const s8_label = oc.toStr8(label);
+    const s8_label = oc.str8(label);
 
     _ = ui.boxBeginStr8(s8_label);
     defer _ = ui.boxEnd();
 
     {
-        ui.styleRuleBegin(oc.toStr8("label"));
+        ui.styleRuleBegin(oc.str8("label"));
         defer ui.styleRuleEnd();
 
         ui.styleSetSize(.width, .{ .kind = .pixels, .value = 100 });
     }
-    _ = ui.labelStr8(oc.toStr8("label"), s8_label);
+    _ = ui.labelStr8(oc.str8("label"), s8_label);
 
     {
-        ui.styleRuleBegin(oc.toStr8("slider"));
+        ui.styleRuleBegin(oc.str8("slider"));
         defer ui.styleRuleEnd();
 
         ui.styleSetSize(.width, .{ .kind = .pixels, .value = 100 });

@@ -15,7 +15,7 @@ var frameSize: oc.math.Vec2 = .{ .x = 100, .y = 100 };
 var lastSeconds: f64 = 0;
 
 pub fn onInit() void {
-    oc.app.windowSetTitle(oc.toStr8("clock"));
+    oc.app.windowSetTitle(oc.str8("clock"));
     oc.app.windowSetSize(.{ .x = 400, .y = 400 });
 
     renderer = canvas.Renderer.create();
@@ -30,7 +30,7 @@ pub fn onInit() void {
         .{ .firstCodePoint = 0xfff0, .count = 15 }, //  SPECIALS
     };
 
-    font = canvas.Font.createFromPath(oc.toStr8("/segoeui.ttf"), ranges.len, @constCast(&ranges));
+    font = canvas.Font.createFromPath(oc.str8("/segoeui.ttf"), ranges.len, @constCast(&ranges));
 }
 
 pub fn onResize(width: u32, height: u32) void {
@@ -79,18 +79,18 @@ pub fn onFrameRefresh() void {
 
     // clock face
     const numbers = comptime [_]oc.strings.Str8{
-        oc.toStr8("12"),
-        oc.toStr8("1"),
-        oc.toStr8("2"),
-        oc.toStr8("3"),
-        oc.toStr8("4"),
-        oc.toStr8("5"),
-        oc.toStr8("6"),
-        oc.toStr8("7"),
-        oc.toStr8("8"),
-        oc.toStr8("9"),
-        oc.toStr8("10"),
-        oc.toStr8("11"),
+        oc.str8("12"),
+        oc.str8("1"),
+        oc.str8("2"),
+        oc.str8("3"),
+        oc.str8("4"),
+        oc.str8("5"),
+        oc.str8("6"),
+        oc.str8("7"),
+        oc.str8("8"),
+        oc.str8("9"),
+        oc.str8("10"),
+        oc.str8("11"),
     };
     for (numbers, 0..) |num_txt, i| {
         const textRect = font.textMetrics(fontSize, num_txt).ink;

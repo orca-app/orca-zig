@@ -54,7 +54,7 @@ fn compileShader(shader: gl.uint, source: [:0]const u8) void {
 }
 
 pub fn onInit() void {
-    oc.app.windowSetTitle(oc.toStr8("triangle"));
+    oc.app.windowSetTitle(oc.str8("triangle"));
 
     surface = oc.graphics.glesSurfaceCreate();
     oc.graphics.glesSurfaceMakeCurrent(surface);

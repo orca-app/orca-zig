@@ -28,7 +28,7 @@ var frame_size: Vec2 = .{};
 var rotation_demo: f32 = 0;
 
 pub fn onInit() !void {
-    oc.app.windowSetTitle(oc.toStr8("general sample"));
+    oc.app.windowSetTitle(oc.str8("general sample"));
     oc.app.windowSetSize(.{ .x = 480, .y = 640 });
 
     renderer = canvas.Renderer.create();
@@ -50,11 +50,11 @@ pub fn onInit() !void {
         .{ .firstCodePoint = 0x0180, .count = 207 }, // LATIN_EXTENDED_B
         .{ .firstCodePoint = 0xfff0, .count = 15 }, //  SPECIALS
     };
-    font = canvas.Font.createFromPath(oc.toStr8("/zig.ttf"), ranges.len, @constCast(&ranges));
+    font = canvas.Font.createFromPath(oc.str8("/zig.ttf"), ranges.len, @constCast(&ranges));
     oc.assert(canvas.Font.nil().isNil(), "nil font should be nil", .{}, @src());
     oc.assert(!font.isNil(), "created font should not be nil", .{}, @src());
 
-    orca_image = canvas.Image.createFromPath(renderer, oc.toStr8("/orca_jumping.jpg"), false);
+    orca_image = canvas.Image.createFromPath(renderer, oc.str8("/orca_jumping.jpg"), false);
     oc.assert(canvas.Image.nil().isNil(), "nil image should be nil", .{}, @src());
     oc.assert(!orca_image.isNil(), "created image should not be nil", .{}, @src());
 
@@ -233,12 +233,12 @@ pub fn onFrameRefresh() !void {
 
         const scratch: *oc.mem.Arena = scratch_scope.arena;
 
-        const str1 = oc.toStr8(">> Hello from Zig! <<"); // @Incomplete collate with zig std
+        const str1 = oc.str8(">> Hello from Zig! <<"); // @Incomplete collate with zig std
 
         var str2_list: oc.strings.Str8List = .empty;
-        str2_list.push(scratch, oc.toStr8("All"));
+        str2_list.push(scratch, oc.str8("All"));
         try str2_list.pushf(scratch, "{s}", .{"your"});
-        str2_list.push(scratch, oc.toStr8("base!!"));
+        str2_list.push(scratch, oc.str8("base!!"));
 
         // @Incomplete oc.assert(str2_list.contains("All"), "str2_list should have the string we just pushed", .{}, @src());
 
@@ -259,9 +259,9 @@ pub fn onFrameRefresh() !void {
         const str2: Str8 = oc.strings.str8ListCollate(
             scratch,
             str2_list,
-            oc.toStr8("<< "),
-            oc.toStr8("-"),
-            oc.toStr8(" >>"),
+            oc.str8("<< "),
+            oc.str8("-"),
+            oc.str8(" >>"),
         );
 
         const font_size = 18;
