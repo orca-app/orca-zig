@@ -172,7 +172,7 @@ inline fn callHandler(
             if (eu.payload != void) @compileError(bad_return_type);
             @call(.auto, func, params) catch |err| {
                 // @Incomplete error return trace
-                // errorReturnTrace() is implemented using returnAddress(),
+                // '@errorReturnTrace()' is implemented using '@returnAddress()',
                 // which is not supported on wasm-freestanding.
                 // See https://github.com/orca-app/orca-zig/issues/9
                 debug.abort("Caught error: {}", .{err}, source);
@@ -182,7 +182,9 @@ inline fn callHandler(
     }
 }
 
+/// The default Orca panic handler
 pub const panic = std.debug.FullPanic(panicImpl);
+
 var panic_stage: u2 = 0;
 fn panicImpl(msg: []const u8, first_trace_addr: ?usize) noreturn {
     @branchHint(.cold);
@@ -198,7 +200,7 @@ fn panicImpl(msg: []const u8, first_trace_addr: ?usize) noreturn {
 
     _ = first_trace_addr;
     // @Incomplete stack trace
-    // returnAddress() is not supported on wasm-freestanding and will always return 0.
+    // '@returnAddress()' is not supported on wasm-freestanding and will always return 0.
     // See https://github.com/orca-app/orca-zig/issues/9
 
     // @Incomplete populate source location from stack trace

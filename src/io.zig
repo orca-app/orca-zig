@@ -89,7 +89,7 @@ pub const Request = extern struct {
 // have the one -- so maybe it should just be a direct mapping?
 pub const Error = error{
     /// An unexpected error happened.
-    Unknown,
+    UnknownError,
     /// The request had an invalid operation.
     InvalidOperation,
     /// The request had an invalid handle.
@@ -186,28 +186,28 @@ pub const ErrorEnum = enum(i32) {
     pub fn toError(err: ErrorEnum) ?Error {
         return switch (err) {
             .ok => null,
-            .unknown => Error.Unknown,
-            .op => Error.InvalidOperation,
-            .handle => Error.InvalidHandle,
-            .prev => Error.HadPreviousError,
-            .arg => Error.InvalidArg,
-            .perm => Error.PermissionDenied,
-            .space => Error.NoSpace,
-            .no_entry => Error.FileNotFound,
-            .exists => Error.PathAlreadyExists,
-            .not_dir => Error.NotDir,
-            .dir => Error.IsDir,
-            .max_files => Error.FdQuotaExceeded,
-            .max_links => Error.SymLinkLoop,
-            .path_length => Error.PathTooLong,
-            .file_size => Error.FileTooBig,
-            .overflow => Error.Overflow,
-            .not_ready => Error.NotReady,
-            .mem => Error.OutOfMemory,
-            .interrupt => Error.Interrupt,
-            .physical => Error.Physical,
-            .no_device => Error.NoDevice,
-            .walkout => Error.PathOutsideRoot,
+            .unknown => error.UnknownError,
+            .op => error.InvalidOperation,
+            .handle => error.InvalidHandle,
+            .prev => error.HadPreviousError,
+            .arg => error.InvalidArg,
+            .perm => error.PermissionDenied,
+            .space => error.NoSpace,
+            .no_entry => error.FileNotFound,
+            .exists => error.PathAlreadyExists,
+            .not_dir => error.NotDir,
+            .dir => error.IsDir,
+            .max_files => error.FdQuotaExceeded,
+            .max_links => error.SymLinkLoop,
+            .path_length => error.PathTooLong,
+            .file_size => error.FileTooBig,
+            .overflow => error.Overflow,
+            .not_ready => error.NotReady,
+            .mem => error.OutOfMemory,
+            .interrupt => error.Interrupt,
+            .physical => error.Physical,
+            .no_device => error.NoDevice,
+            .walkout => error.PathOutsideRoot,
         };
     }
 };
@@ -231,7 +231,7 @@ pub const Completion = extern struct {
 };
 
 /// Send a single I/O request and wait for its completion.
-pub const ioWaitSingleReq = oc_io_wait_single_req;
+pub const waitSingleReq = oc_io_wait_single_req;
 extern fn oc_io_wait_single_req(
     /// The I/O request to send.
     req: [*c]Request,

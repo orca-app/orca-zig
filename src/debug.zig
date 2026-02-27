@@ -38,7 +38,7 @@ pub const log = struct {
     }
 
     /// Log a message to the console.
-    pub fn ext(comptime level: Level, comptime fmt: []const u8, args: anytype, source: SourceLocation) void {
+    pub fn ext(level: Level, comptime fmt: []const u8, args: anytype, source: SourceLocation) void {
         var format_buf: [512:0]u8 = undefined;
         formatLog(&format_buf, fmt, args);
         oc_log_ext(
@@ -46,7 +46,7 @@ pub const log = struct {
             @constCast(source.fn_name),
             @constCast(source.file),
             @intCast(source.line),
-            format_buf[0..],
+            &format_buf,
         );
     }
     // @Api params should be const
@@ -68,7 +68,7 @@ pub const log = struct {
 
 /// Test a given condition, and abort the application if it is false.
 pub fn assert(condition: bool, comptime fmt: []const u8, args: anytype, source: SourceLocation) void {
-    if (builtin.mode == .Debug and !condition) {
+    if ((builtin.mode == .Debug or builtin.mode == .ReleaseSafe) and !condition) {
         var format_buf: [512:0]u8 = undefined;
         formatLog(&format_buf, fmt, args);
         oc_assert_fail(
@@ -79,7 +79,7 @@ pub fn assert(condition: bool, comptime fmt: []const u8, args: anytype, source: 
             // we can conditionally embed the source file and include the exact line here
             // since `source` is comptime known.
             @constCast(""),
-            format_buf[0..],
+            &format_buf,
         );
         unreachable;
     }
@@ -112,7 +112,7 @@ pub fn abort(comptime fmt: []const u8, args: anytype, source: SourceLocation) no
         @constCast(source.file),
         @constCast(source.fn_name),
         @intCast(source.line),
-        format_buf[0..],
+        &format_buf,
     );
     unreachable;
 }
@@ -133,10 +133,11 @@ extern fn oc_abort_ext(
     ...,
 ) callconv(.c) void;
 
-fn formatLog(format_buf: [:0]u8, comptime fmt: []const u8, args: anytype) void {
-    _ = std.fmt.bufPrintZ(format_buf, fmt, args) catch {
+fn formatLog(buf: [:0]u8, comptime fmt: []const u8, args: anytype) void {
+    _ = std.fmt.bufPrintZ(buf, fmt, args) catch {
         // No more space left in buffer, append a note to the truncated message
         const msg = "...(msg truncated)";
-        @memcpy(format_buf[format_buf.len - msg.len ..], msg);
+        std.debug.assert(buf.len >= msg.len);
+        @memcpy(buf[buf.len - msg.len ..], msg);
     };
 }
