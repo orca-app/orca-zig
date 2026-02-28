@@ -95,7 +95,7 @@ pub const Arena = extern struct {
         /// The size of the memory to allocate, in bytes.
         size: usize,
     ) Error![]u8 {
-        const ptr = oc_arena_push(arena, @intCast(size)) orelse return Error.OutOfMemory;
+        const ptr = oc_arena_push(arena, @intCast(size)) orelse return error.OutOfMemory;
         return @as([*]u8, @ptrCast(@alignCast(ptr)))[0..size];
     }
 
@@ -108,7 +108,7 @@ pub const Arena = extern struct {
         /// The desired alignment of the memory block, in bytes
         alignment: u32,
     ) Error![]u8 {
-        const ptr = oc_arena_push_aligned(arena, @intCast(size), alignment) orelse return Error.OutOfMemory;
+        const ptr = oc_arena_push_aligned(arena, @intCast(size), alignment) orelse return error.OutOfMemory;
         return @as([*]u8, @ptrCast(@alignCast(ptr)))[0..size];
     }
 

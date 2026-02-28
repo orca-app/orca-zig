@@ -145,8 +145,7 @@ fn StringList(comptime Str: type) type {
         ) oc.mem.Arena.Error!void {
             if (Str != Str8) @compileError("pushf only available for " ++ @typeName(Str8List));
 
-            const len: usize = @intCast(std.fmt.count(fmt, args));
-            const buf = try arena.push(len);
+            const buf = try arena.push(std.fmt.count(fmt, args));
             slist.push(
                 arena,
                 .fromSlice(std.fmt.bufPrint(buf, fmt, args) catch unreachable),
