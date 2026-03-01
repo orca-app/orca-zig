@@ -9,10 +9,10 @@ pub const assert = debug.assert;
 pub const abort = debug.abort;
 
 /// **WARNING** Erases const type info! This function only accepts const
-/// pointers to avoid excessive casting when passing string literals.
-/// Be careful when passing the result to API's which may modify the buffer.
+/// pointers to avoid excessive casting when handling string literals.
+/// Be careful when passing the result to APIs which may modify the buffer.
 pub fn str8(buf: []const u8) strings.Str8 {
-    return strings.Str8.fromSlice(@constCast(buf));
+    return .fromSlice(@constCast(buf));
 }
 
 //------------------------------------------------------------------------------------------
@@ -185,7 +185,7 @@ inline fn callHandler(
 /// The default Orca panic handler
 pub const panic = std.debug.FullPanic(panicImpl);
 
-var panic_stage: u2 = 0;
+threadlocal var panic_stage: u2 = 0;
 fn panicImpl(msg: []const u8, first_trace_addr: ?usize) noreturn {
     @branchHint(.cold);
 

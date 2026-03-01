@@ -51,8 +51,7 @@ pub fn OrcaSlice(comptime T: type) type {
                 .{ end, s.len },
                 @src(),
             );
-            const slice = s.ptr[start..end];
-            return .{ .ptr = slice.ptr, .len = slice.len };
+            return .fromSlice(s.toSlice()[start..end]);
         }
 
         /// Copy the contents of a string on an arena and make a new string referring to the copied bytes.
