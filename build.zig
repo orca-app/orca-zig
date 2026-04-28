@@ -4,8 +4,8 @@ const Build = std.Build;
 // These two should match the same orca version.
 // @Incomplete verify our api.json and sdk versions match
 // @Cleanup can we combine these?
-pub const sdk_version = "test-release-4f124dd346";
-pub const orca_api_commit = "4f124dd3461f48c444518ad48c6337de6bfeb72f";
+pub const sdk_version = "test-release-996c93e813";
+pub const orca_api_commit = "996c93e8132c913da878869e01c65e3f90be3dfb";
 
 pub fn build(b: *Build) !void {
     const wasm_target = target(b);
@@ -14,10 +14,9 @@ pub fn build(b: *Build) !void {
     const sdk: Build.LazyPath = .{
         // orca will report a nice error for us
         // if the target sdk version is missing.
-        .cwd_relative = b.run(&.{
-            "orca",      "sdk-path",
-            "--version", sdk_version,
-        }),
+        .cwd_relative = std.mem.trimEnd(u8, b.run(&.{
+            "orca", "sdk-path",
+        }), "\r\n"),
     };
     // escape hatch if the user needs access to the sdk for some reason.
     b.addNamedLazyPath("sdk_path", sdk);
@@ -29,8 +28,7 @@ pub fn build(b: *Build) !void {
         .link_libc = false,
         .single_threaded = true,
     });
-    orca.addObjectFile(sdk.path(b, "bin/liborca_wasm.a"));
-    orca.addObjectFile(sdk.path(b, "orca-libc/lib/libc.o"));
+    orca.addObjectFile(sdk.path(b, "lib/liborca_wasm.a"));
     orca.addObjectFile(sdk.path(b, "orca-libc/lib/libc.a"));
     orca.addObjectFile(sdk.path(b, "orca-libc/lib/crt1.o"));
 
@@ -157,9 +155,8 @@ pub const BundleOptions = struct {
 pub fn bundleApplication(b: *Build, options: BundleOptions) Build.LazyPath {
     const name = options.app.name;
     const run = b.addSystemCommand(&.{
-        "orca",      "bundle",
-        "--name",    name,
-        "--version", sdk_version,
+        "orca",   "bundle",
+        "--name", name,
     });
     run.setName(b.fmt("orca bundle {s}", .{name}));
     if (options.icon) |icon| {
@@ -172,9 +169,10 @@ pub fn bundleApplication(b: *Build, options: BundleOptions) Build.LazyPath {
     }
     run.addArg("--out-dir");
     const output = run.addOutputDirectoryArg(name);
-    run.addArtifactArg(options.app);
+    const renamed = b.addWriteFiles().addCopyFile(options.app.getEmittedBin(), "main.wasm");
+    run.addFileArg(renamed);
 
-    return output.path(b, name); // orca bundle creates a subdir with the app name
+    return output; // orca bundle writes <name>.orca into this directory
 }
 
 /// Bundle an application and install it to the output prefix.

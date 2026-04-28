@@ -8,7 +8,11 @@ pub const File = enum(u64) {
     _,
 
     /// Returns a `nil` file handle
-    pub const nil = oc_file_nil;
+    pub fn nil() File {
+        var out: File = undefined;
+        oc_file_nil(&out);
+        return out;
+    }
 
     /// Test if a file handle is `nil`.
     pub const isNil = oc_file_is_nil;
@@ -56,7 +60,8 @@ pub const File = enum(u64) {
         /// Flags controlling various options for the open operation. See `oc_file_open_flags`.
         flags: OpenFlags,
     ) oc.io.Error!File {
-        const file = oc_file_open(oc.toStr8(path), rights, flags);
+        var file: File = undefined;
+        oc_file_open(&file, oc.toStr8(path), rights, flags);
         try file.lastError();
         return file;
     }
@@ -66,7 +71,8 @@ pub const File = enum(u64) {
         rights: AccessFlags,
         flags: OpenFlags,
     ) oc.io.Error!File {
-        const file = oc_file_open_with_request(oc.toStr8(path), rights, flags);
+        var file: File = undefined;
+        oc_file_open_with_request(&file, oc.toStr8(path), rights, flags);
         try file.lastError();
         return file;
     }
@@ -82,7 +88,8 @@ pub const File = enum(u64) {
         /// Flags controlling various options for the open operation. See `oc_file_open_flags`.
         flags: OpenFlags,
     ) oc.io.Error!File {
-        const file = oc_file_open_at(dir, oc.toStr8(path), rights, flags);
+        var file: File = undefined;
+        oc_file_open_at(&file, dir, oc.toStr8(path), rights, flags);
         try file.lastError();
         return file;
     }
@@ -140,15 +147,99 @@ pub const File = enum(u64) {
         return @intCast(n);
     }
 
-    // @Todo: Writergate implementations
-    pub const Writer = std.io.GenericWriter(File, oc.io.Error, write);
-    pub const Reader = std.io.GenericReader(File, oc.io.Error, read);
+    /// Adapts a `File` to `std.Io.Writer`. The last orca error from a failed
+    /// write is preserved in `err` so callers can recover details after
+    /// `error.WriteFailed`.
+    pub const Writer = struct {
+        file: File,
+        err: ?oc.io.Error = null,
+        interface: std.Io.Writer,
 
-    pub fn writer(f: File) Writer {
-        return .{ .context = f };
+        pub fn init(file: File, buffer: []u8) Writer {
+            return .{
+                .file = file,
+                .interface = .{
+                    .vtable = &.{ .drain = drain },
+                    .buffer = buffer,
+                },
+            };
+        }
+
+        fn drain(io_w: *std.Io.Writer, data: []const []const u8, splat: usize) std.Io.Writer.Error!usize {
+            const w: *Writer = @alignCast(@fieldParentPtr("interface", io_w));
+            const buffered = io_w.buffered();
+            if (buffered.len > 0) {
+                const n = w.file.write(buffered) catch |err| {
+                    w.err = err;
+                    return error.WriteFailed;
+                };
+                return io_w.consume(n);
+            }
+            var total: usize = 0;
+            const last_idx = data.len - 1;
+            for (data[0..last_idx]) |slice| {
+                if (slice.len == 0) continue;
+                const n = w.file.write(slice) catch |err| {
+                    w.err = err;
+                    return error.WriteFailed;
+                };
+                total += n;
+                if (n < slice.len) return total;
+            }
+            const last = data[last_idx];
+            if (last.len == 0) return total;
+            var i: usize = 0;
+            while (i < splat) : (i += 1) {
+                const n = w.file.write(last) catch |err| {
+                    w.err = err;
+                    return error.WriteFailed;
+                };
+                total += n;
+                if (n < last.len) return total;
+            }
+            return total;
+        }
+    };
+
+    /// Adapts a `File` to `std.Io.Reader`. The last orca error from a failed
+    /// read is preserved in `err` so callers can recover details after
+    /// `error.ReadFailed`.
+    pub const Reader = struct {
+        file: File,
+        err: ?oc.io.Error = null,
+        interface: std.Io.Reader,
+
+        pub fn init(file: File, buffer: []u8) Reader {
+            return .{
+                .file = file,
+                .interface = .{
+                    .vtable = &.{ .stream = stream },
+                    .buffer = buffer,
+                    .seek = 0,
+                    .end = 0,
+                },
+            };
+        }
+
+        fn stream(io_r: *std.Io.Reader, w: *std.Io.Writer, limit: std.Io.Limit) std.Io.Reader.StreamError!usize {
+            const r: *Reader = @alignCast(@fieldParentPtr("interface", io_r));
+            const dest = limit.slice(try w.writableSliceGreedy(1));
+            const n = r.file.read(dest) catch |err| {
+                r.err = err;
+                return error.ReadFailed;
+            };
+            if (n == 0) return error.EndOfStream;
+            w.advance(n);
+            return n;
+        }
+    };
+
+    pub fn writer(file: File, buffer: []u8) Writer {
+        return Writer.init(file, buffer);
     }
-    pub fn reader(f: File) Reader {
-        return .{ .context = f };
+
+    pub fn reader(file: File, buffer: []u8) Reader {
+        return Reader.init(file, buffer);
     }
 
     /// An enum identifying the type of a file.
@@ -222,11 +313,15 @@ pub const File = enum(u64) {
         return handle.oc_file_last_error().toError() orelse {};
     }
 
-    extern fn oc_file_nil() callconv(.c) File;
+    // Functions that return `oc_file` (a C struct of one u64) use the wasm
+    // sret ABI on the orca SDK side: the return slot is passed as a pointer
+    // first parameter and the function returns void. Zig's `enum(u64)` would
+    // otherwise be returned as a scalar i64, which mismatches the C ABI.
+    extern fn oc_file_nil(out: *File) callconv(.c) void;
     extern fn oc_file_is_nil(handle: File) callconv(.c) bool;
-    extern fn oc_file_open(path: oc.strings.Str8, rights: AccessFlags, flags: OpenFlags) callconv(.c) File;
-    extern fn oc_file_open_with_request(path: oc.strings.Str8, rights: AccessFlags, flags: OpenFlags) callconv(.c) File;
-    extern fn oc_file_open_at(dir: File, path: oc.strings.Str8, rights: AccessFlags, flags: OpenFlags) callconv(.c) File;
+    extern fn oc_file_open(out: *File, path: oc.strings.Str8, rights: AccessFlags, flags: OpenFlags) callconv(.c) void;
+    extern fn oc_file_open_with_request(out: *File, path: oc.strings.Str8, rights: AccessFlags, flags: OpenFlags) callconv(.c) void;
+    extern fn oc_file_open_at(out: *File, dir: File, path: oc.strings.Str8, rights: AccessFlags, flags: OpenFlags) callconv(.c) void;
     extern fn oc_file_close(file: File) callconv(.c) void;
     extern fn oc_file_pos(file: File) callconv(.c) i64;
     extern fn oc_file_seek(file: File, offset: i64, whence: Whence) callconv(.c) i64;

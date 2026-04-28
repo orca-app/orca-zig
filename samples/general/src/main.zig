@@ -413,8 +413,7 @@ fn testFileApis() !void {
         oc.assert(!tmp_file.isNil(), "file should be valid", .{}, @src());
         oc.assert(try tmp_file.pos() == 0, "new file shouldn't have anything in it yet", .{}, @src());
 
-        var writer = tmp_file.writer();
-        const written = try writer.write(temp_file_contents);
+        const written = try tmp_file.write(temp_file_contents);
         oc.assert(written == temp_file_contents.len, "should have written some bytes.", .{}, @src());
     }
 
@@ -426,8 +425,7 @@ fn testFileApis() !void {
         oc.assert(try tmp_file.pos() == 0, "should be back at the beginning of the file", .{}, @src());
 
         var buffer: [temp_file_contents.len]u8 = undefined;
-        var reader = tmp_file.reader();
-        _ = try reader.read(&buffer);
+        _ = try tmp_file.read(&buffer);
         oc.assert(
             std.mem.eql(u8, temp_file_contents, &buffer),
             "should have read what was in the original buffer",
